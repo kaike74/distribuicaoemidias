@@ -89,11 +89,11 @@ exports.handler = async (event, context) => {
 
     // Mapear para o formato esperado (ajuste os nomes das propriedades conforme seu Notion)
     const mappedData = {
-      spots30: extractValue(properties['Spots 30"'] || properties['Spots 30'] || properties['spots30'], 0),
-      spots5: extractValue(properties['Spots 5"'] || properties['Spots 5'] || properties['spots5'], 0),
-      spots15: extractValue(properties['Spots 15"'] || properties['Spots 15'] || properties['spots15'], 0),
-      spots60: extractValue(properties['Spots 60"'] || properties['Spots 60'] || properties['spots60'], 0),
-      test60: extractValue(properties['Test. 60"'] || properties['Test 60'] || properties['test60'], 0),
+  spots30: extractValue(properties['Spots 30ʺ'] || properties['Spots 30'] || properties['spots30'], 0),
+  spots5: extractValue(properties['Spots 5ʺ'] || properties['Spots 5'] || properties['spots5'], 0),
+  spots15: extractValue(properties['Spots 15ʺ'] || properties['Spots 15'] || properties['spots15'], 0),
+  spots60: extractValue(properties['Spots 60ʺ'] || properties['Spots 60'] || properties['spots60'], 0),
+  test60: extractValue(properties['Test. 60ʺ'] || properties['Test 60'] || properties['test60'], 0),
       emissora: extractValue(properties['Emissora'] || properties['emissora'], 'Emissora'),
       inicio: extractValue(properties['Data inicio'] || properties['Data Início'] || properties['inicio'], '01/01/2025'),
       fim: extractValue(properties['Data fim'] || properties['Data Fim'] || properties['fim'], '31/01/2025'),
