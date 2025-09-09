@@ -27,7 +27,7 @@ exports.handler = async (event, context) => {
       };
     }
 
-    const notionToken = process.env.NOTION_TOKEN;
+    const notionToken = process.env.DistribuicaoHTML;
     if (!notionToken) {
       return {
         statusCode: 500,
