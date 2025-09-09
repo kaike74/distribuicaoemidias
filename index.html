@@ -483,6 +483,28 @@
             };
         }
 
+        // Função para buscar dados do Notion via API
+        async function fetchNotionData(uuid) {
+            console.log('Buscando dados do Notion para UUID:', uuid);
+            
+            try {
+                const response = await fetch(`/.netlify/functions/notion?id=${uuid}`);
+                console.log('Response status:', response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Dados recebidos:', data);
+                    return data;
+                } else {
+                    console.error('Erro na resposta:', response.status, response.statusText);
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+            } catch (error) {
+                console.error('Erro ao buscar dados do Notion:', error);
+                throw error;
+            }
+        }
+
         function getActiveProducts(params) {
             const products = {
                 spots30: params.spots30,
