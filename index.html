@@ -128,9 +128,9 @@
             text-align: center;
             border-bottom: 1px solid #f3f4f6;
             vertical-align: top;
-            height: 50px; /* Aumentado de 35px para 50px */
+            height: 50px;
             position: relative;
-            min-width: 45px; /* Largura mínima garantida */
+            min-width: 45px;
         }
         
         .date-cell {
@@ -167,13 +167,12 @@
             margin-bottom: 2px;
         }
 
-        /* NOVO SISTEMA DE BADGES ADAPTATIVO */
         .spots-container {
             position: absolute;
             top: 0;
             right: 0;
             left: 0;
-            bottom: 18px; /* Deixa espaço para o número do dia */
+            bottom: 18px;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
@@ -224,7 +223,6 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
 
-        /* Badge consolidado para muitos produtos */
         .consolidated-badge {
             background: linear-gradient(135deg, #1d4ed8, #7c3aed);
             font-size: 7px;
@@ -294,7 +292,6 @@
         .tag-spots60 { background: #7c3aed; }
         .tag-test60 { background: #ea580c; }
 
-        /* TOOLTIP MELHORADO */
         .tooltip {
             position: fixed;
             background: rgba(0, 0, 0, 0.95);
@@ -387,7 +384,6 @@
             }
         }
 
-        /* ANIMAÇÕES DE ENTRADA */
         .calendar-compact {
             animation: slideInUp 0.4s ease-out;
         }
@@ -460,17 +456,43 @@
         <div id="calendar-container"></div>
     </div>
 
-    <!-- Tooltip para informações detalhadas -->
     <div id="tooltip" class="tooltip"></div>
 
     <script>
-        console.log('🚀 Sistema iniciando com layout adaptativo melhorado...');
+        console.log('🚀 Sistema iniciando com detecção automática de UUID Notion...');
         
         let tooltip = null;
 
         function getURLParams() {
             const params = new URLSearchParams(window.location.search);
+            
+            // Detectar se há um UUID do Notion
+            const notionId = params.get('id');
+            const uuidRegex = /^[0-9a-f]{32}$/i;
+            
+            // Se há um ID válido do Notion, usar modo API
+            if (notionId && uuidRegex.test(notionId)) {
+                console.log('🔍 UUID Notion detectado:', notionId);
+                return {
+                    mode: 'notion-api',
+                    uuid: notionId,
+                    // Valores padrão que serão sobrescritos pelos dados do Notion
+                    spots30: 0,
+                    spots5: 0,
+                    spots15: 0,
+                    spots60: 0,
+                    test60: 0,
+                    emissora: 'Carregando...',
+                    inicio: '01/01/2025',
+                    fim: '31/01/2025',
+                    dias: 'Seg.,Ter.,Qua.,Qui.,Sex.'
+                };
+            }
+            
+            // Modo legado: usar parâmetros individuais da URL
+            console.log('📋 Usando modo legado com parâmetros da URL');
             return {
+                mode: 'legacy',
                 spots30: parseInt(params.get('spots30')) || 0,
                 spots5: parseInt(params.get('spots5')) || 0,
                 spots15: parseInt(params.get('spots15')) || 0,
@@ -483,24 +505,26 @@
             };
         }
 
-        // Função para buscar dados do Notion via API
         async function fetchNotionData(uuid) {
-            console.log('Buscando dados do Notion para UUID:', uuid);
+            console.log('🚀 Buscando dados do Notion para UUID:', uuid);
             
             try {
+                // Usar o endpoint correto da função Netlify
                 const response = await fetch(`/.netlify/functions/notion?id=${uuid}`);
-                console.log('Response status:', response.status);
+                console.log('📡 Response status:', response.status);
                 
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('Dados recebidos:', data);
-                    return data;
-                } else {
-                    console.error('Erro na resposta:', response.status, response.statusText);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('❌ Erro na resposta:', errorText);
                     throw new Error(`Erro HTTP: ${response.status}`);
                 }
+                
+                const data = await response.json();
+                console.log('✅ Dados recebidos do Notion:', data);
+                return data;
+                
             } catch (error) {
-                console.error('Erro ao buscar dados do Notion:', error);
+                console.error('❌ Erro ao buscar dados do Notion:', error);
                 throw error;
             }
         }
@@ -577,7 +601,6 @@
             return validDays;
         }
 
-        // ✅ FUNÇÃO CORRIGIDA - AGORA GARANTE QUE TODOS OS PRODUTOS APAREÇAM
         function distributeMultipleSpots(products, validDays) {
             const totalSpots = Object.values(products).reduce((sum, spots) => sum + spots, 0);
             
@@ -588,26 +611,19 @@
             const distribution = {};
             const productEntries = Object.entries(products);
             
-            // Inicializar distribuição para todos os dias
             validDays.forEach(day => {
                 const dateKey = day.toISOString().split('T')[0];
                 distribution[dateKey] = { total: 0, products: {} };
             });
             
-            // ESTRATÉGIA CORRIGIDA: Distribuir cada produto individualmente
-            // Isso garante que produtos minoritários sempre apareçam
             productEntries.forEach(([productType, totalSpotsForProduct]) => {
-                // Calcular em quantos dias este produto deve aparecer
-                // Produtos com poucos spots = poucos dias, mas GARANTIDO que aparecem
                 const daysForThisProduct = Math.min(totalSpotsForProduct, validDays.length);
                 const spotsPerDayForProduct = Math.floor(totalSpotsForProduct / daysForThisProduct);
                 let remainingSpotsForProduct = totalSpotsForProduct % daysForThisProduct;
                 
                 console.log(`📊 Produto ${productType}: ${totalSpotsForProduct} spots em ${daysForThisProduct} dias`);
                 
-                // Distribuir este produto específico ao longo dos dias escolhidos
                 for (let i = 0; i < daysForThisProduct; i++) {
-                    // Espalhar uniformemente ao longo do período
                     const dayIndex = Math.floor((i * validDays.length) / daysForThisProduct);
                     const dateKey = validDays[dayIndex].toISOString().split('T')[0];
                     
@@ -617,29 +633,11 @@
                     distribution[dateKey].products[productType] = 
                         (distribution[dateKey].products[productType] || 0) + spotsForThisDay;
                     distribution[dateKey].total += spotsForThisDay;
-                    
-                    console.log(`✅ ${productType}: +${spotsForThisDay} spots no dia ${dateKey}`);
                 }
             });
             
-            console.log('🎯 Distribuição CORRIGIDA calculada:', distribution);
+            console.log('🎯 Distribuição calculada:', distribution);
             return { distribution, totalSpots };
-        }
-
-        function distributeProductsForDay(activeProducts, totalSpotsForDay) {
-            const result = {};
-            const productEntries = Object.entries(activeProducts);
-            const totalProductSpots = Object.values(activeProducts).reduce((sum, spots) => sum + spots, 0);
-            
-            productEntries.forEach(([productType, productSpots]) => {
-                const ratio = productSpots / totalProductSpots;
-                const assignedSpots = Math.round(totalSpotsForDay * ratio);
-                if (assignedSpots > 0) {
-                    result[productType] = assignedSpots;
-                }
-            });
-            
-            return result;
         }
 
         function getMonthName(month, year) {
@@ -682,16 +680,13 @@
             
             console.log(`📍 Criando badges para ${productCount} produtos:`, dayData.products);
             
-            // Decidir layout baseado no número de produtos
             if (productCount > 3) {
-                // Usar badge consolidado para 4+ produtos
                 badgesContainer.className = 'spots-badges';
                 
                 const consolidatedBadge = document.createElement('div');
                 consolidatedBadge.className = 'consolidated-badge';
                 consolidatedBadge.textContent = dayData.total;
                 
-                // Tooltip detalhado para badge consolidado
                 const tooltipText = productEntries
                     .map(([type, count]) => `${getProductName(type)}: ${count}`)
                     .join('\n');
@@ -701,7 +696,6 @@
                 console.log('✨ Badge consolidado criado para', productCount, 'produtos');
                 
             } else {
-                // Layout normal para 1-3 produtos
                 badgesContainer.className = `spots-badges ${productCount <= 2 ? 'horizontal' : 'vertical'}`;
                 
                 productEntries.forEach(([productType, count]) => {
@@ -719,7 +713,6 @@
             spotsContainer.appendChild(badgesContainer);
             td.appendChild(spotsContainer);
             
-            // Adicionar event listeners para tooltips
             badgesContainer.addEventListener('mouseenter', (e) => showTooltip(e));
             badgesContainer.addEventListener('mouseleave', hideTooltip);
         }
@@ -732,14 +725,12 @@
             tooltip.innerHTML = target.getAttribute('data-tooltip').replace(/\n/g, '<br>');
             tooltip.classList.add('show');
             
-            // Posicionar tooltip
             const rect = target.getBoundingClientRect();
             const tooltipRect = tooltip.getBoundingClientRect();
             
             let left = rect.left + rect.width / 2 - tooltipRect.width / 2;
             let top = rect.top - tooltipRect.height - 10;
             
-            // Ajustar se sair da tela
             if (left < 5) left = 5;
             if (left + tooltipRect.width > window.innerWidth - 5) {
                 left = window.innerWidth - tooltipRect.width - 5;
@@ -756,7 +747,7 @@
         }
 
         function createCompactCalendar(startDate, endDate, distribution, selectedWeekdays) {
-            console.log('📅 Criando calendário melhorado com distribuição:', distribution);
+            console.log('📅 Criando calendário com distribuição:', distribution);
             const container = document.getElementById('calendar-container');
             container.innerHTML = '';
             
@@ -831,7 +822,6 @@
                         
                         td.appendChild(dateCell);
                         
-                        // Criar badges se houver spots
                         createBadges(dayData, td);
                         
                         row.appendChild(td);
@@ -856,7 +846,7 @@
                 tag.className = `product-tag tag-${type}`;
                 tag.textContent = `${getProductName(type)}: ${count}`;
                 activeProductsElement.appendChild(tag);
-                console.log(`🎨 Tag colorida criada: ${type}`);
+                console.log(`🎨 Tag criada: ${type}`);
             });
             
             document.getElementById('products-info').style.display = 'block';
@@ -879,7 +869,6 @@
             const endDate = parseDate(params.fim);
             const avgSpots = validDays.length > 0 ? (totalSpots / validDays.length).toFixed(1) : '0';
             
-            // PERÍODO NO FORMATO DATA-DATA
             const periodRange = `${startDate.getDate().toString().padStart(2, '0')}/${(startDate.getMonth() + 1).toString().padStart(2, '0')}-${endDate.getDate().toString().padStart(2, '0')}/${(endDate.getMonth() + 1).toString().padStart(2, '0')}`;
             
             document.getElementById('total-spots').textContent = totalSpots;
@@ -887,7 +876,7 @@
             document.getElementById('avg-spots').textContent = avgSpots;
             document.getElementById('period-range').textContent = periodRange;
             
-            console.log(`📊 Período formatado: ${periodRange}`);
+            console.log(`📊 Período: ${periodRange}`);
             document.getElementById('stats').style.display = 'grid';
         }
 
@@ -941,22 +930,26 @@
         async function init() {
             try {
                 const params = getURLParams();
-                console.log('Parâmetros detectados:', params);
+                console.log('🎯 Parâmetros detectados:', params);
+                console.log('🔄 Modo de operação:', params.mode);
                 
                 let campaignData;
                 
                 if (params.mode === 'notion-api') {
                     // Modo dinâmico: buscar dados via API Notion
-                    document.getElementById('subtitle').textContent = 'Carregando dados dinâmicos do Notion...';
+                    document.getElementById('subtitle').textContent = 'Conectando com Notion...';
                     
                     try {
                         campaignData = await fetchNotionData(params.uuid);
+                        console.log('📊 Dados da campanha carregados:', campaignData);
                     } catch (error) {
+                        console.error('❌ Erro ao carregar dados:', error);
                         throw new Error(`Erro ao carregar dados do Notion: ${error.message}`);
                     }
                 } else {
                     // Modo legado: usar parâmetros da URL
                     campaignData = params;
+                    console.log('📋 Usando dados dos parâmetros URL');
                 }
                 
                 const startDate = parseDate(campaignData.inicio);
@@ -965,9 +958,10 @@
                 const activeProducts = getActiveProducts(campaignData);
                 
                 const totalSpots = Object.values(activeProducts).reduce((sum, spots) => sum + spots, 0);
-                const hasParams = params.mode !== 'notion-api' && window.location.search.length > 0;
+                const hasParams = params.mode === 'notion-api' || window.location.search.length > 0;
                 
-                if (params.mode === 'legacy' && !hasParams) {
+                if (!hasParams) {
+                    console.log('🎭 Mostrando exemplo');
                     showExample();
                     return;
                 }
@@ -985,12 +979,13 @@
                 }
                 
                 if (totalSpots <= 0) {
+                    console.log('📭 Nenhum spot programado');
                     showEmptyCalendar(campaignData, startDate, endDate, selectedWeekdays);
                     return;
                 }
                 
                 // Indicar fonte dos dados no título
-                const sourceIndicator = params.mode === 'notion-api' ? ' (DINÂMICO)' : '';
+                const sourceIndicator = params.mode === 'notion-api' ? ' 📡' : '';
                 document.getElementById('title').textContent = campaignData.emissora.toUpperCase() + sourceIndicator;
                 document.getElementById('subtitle').textContent = 
                     `${formatDate(startDate)} a ${formatDate(endDate)} • ${totalSpots} spots`;
@@ -1009,7 +1004,10 @@
                 createCompactCalendar(startDate, endDate, distribution, selectedWeekdays);
                 updateStats(campaignData, validDays, totalSpots);
                 
+                console.log('✅ Sistema carregado com sucesso!');
+                
             } catch (error) {
+                console.error('💥 Erro no sistema:', error);
                 document.getElementById('error-message').textContent = error.message;
                 document.getElementById('error-message').style.display = 'block';
                 document.getElementById('subtitle').textContent = 'Erro ao processar dados da campanha';
