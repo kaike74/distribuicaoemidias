@@ -230,12 +230,23 @@
             cursor: pointer;
             transition: all 0.2s ease;
             box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
+            margin-left: 8px;
         }
 
         .export-btn:hover {
             background: linear-gradient(135deg, #047857, #059669);
             transform: translateY(-1px);
             box-shadow: 0 4px 8px rgba(5, 150, 105, 0.3);
+        }
+
+        .export-btn.calendar {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+            box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
+        }
+
+        .export-btn.calendar:hover {
+            background: linear-gradient(135deg, #b91c1c, #dc2626);
+            box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3);
         }
 
         .impact-stat {
@@ -289,40 +300,6 @@
         .tag-spots60 { background: #7c3aed; }
         .tag-test60 { background: #ea580c; }
 
-        .tooltip {
-            position: fixed;
-            background: rgba(0, 0, 0, 0.95);
-            color: white;
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 12px;
-            white-space: pre-line;
-            z-index: 9999;
-            pointer-events: none;
-            opacity: 0;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-            border: 1px solid rgba(255,255,255,0.1);
-            font-weight: 500;
-            max-width: 200px;
-        }
-
-        .tooltip.show {
-            opacity: 1;
-            transform: translateY(-15px);
-        }
-
-        .tooltip::after {
-            content: '';
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            border: 6px solid transparent;
-            border-top-color: rgba(0, 0, 0, 0.95);
-            transform: translateX(-50%);
-        }
-
         .rich-tooltip {
             position: fixed;
             background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(31, 41, 55, 0.95));
@@ -358,31 +335,6 @@
             transform: translateX(-50%);
         }
 
-        .tooltip-section {
-            margin-bottom: 8px;
-        }
-
-        .tooltip-section:last-child {
-            margin-bottom: 0;
-        }
-
-        .tooltip-title {
-            font-weight: 700;
-            color: #60a5fa;
-            margin-bottom: 4px;
-        }
-
-        .tooltip-item {
-            display: flex;
-            justify-content: space-between;
-            margin: 2px 0;
-            font-size: 11px;
-        }
-
-        .tooltip-emoji {
-            margin-right: 6px;
-        }
-
         .actions-bar {
             display: flex;
             justify-content: space-between;
@@ -398,6 +350,11 @@
             font-size: 14px;
             font-weight: 600;
             color: #374151;
+        }
+
+        .actions-right {
+            display: flex;
+            gap: 8px;
         }
         
         @media (max-width: 768px) {
@@ -430,6 +387,17 @@
             .product-tag {
                 font-size: 10px;
                 padding: 3px 8px;
+            }
+
+            .actions-right {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .export-btn {
+                font-size: 10px;
+                padding: 6px 12px;
+                margin-left: 0;
             }
         }
 
@@ -500,15 +468,20 @@
             <div class="actions-left">
                 <span id="campaign-title">Campanha Ativa</span>
             </div>
-            <button class="export-btn" onclick="exportToExcel()">
-                📊 Exportar Excel
-            </button>
+            <div class="actions-right">
+                <button class="export-btn" onclick="exportToExcel()">
+                    📊 Exportar Dados
+                </button>
+                <button class="export-btn calendar" onclick="exportCalendarToExcel()">
+                    📅 Exportar Calendário
+                </button>
+            </div>
         </div>
         
         <div class="stats-grid" id="stats" style="display: none;">
             <div class="stat-card">
                 <span class="stat-number" id="total-spots">0</span>
-                <div class="stat-label">Total Spots</div>
+                <div class="stat-label">Total Inserções</div>
             </div>
             <div class="stat-card">
                 <span class="stat-number" id="total-days">0</span>
@@ -516,7 +489,7 @@
             </div>
             <div class="stat-card">
                 <span class="stat-number" id="avg-spots">0</span>
-                <div class="stat-label">Média/Dia</div>
+                <div class="stat-label">Média Inserções/Dia</div>
             </div>
             <div class="stat-card">
                 <span class="stat-number" id="period-range">-</span>
@@ -524,7 +497,7 @@
             </div>
             <div class="stat-card impact-stat">
                 <span class="stat-number pmm-value" id="total-impact">0</span>
-                <div class="stat-label">Impacto Total</div>
+                <div class="stat-label">Impactos Total</div>
             </div>
             <div class="stat-card impact-stat">
                 <span class="stat-number pmm-value" id="pmm-used">0</span>
@@ -535,7 +508,8 @@
         <div id="calendar-container"></div>
     </div>
 
-    <div id="tooltip" class="tooltip"></div>
+    <!-- Carregar biblioteca XLSX para exportação -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <script>
         console.log('🚀 Sistema iniciando com detecção automática de UUID Notion...');
@@ -763,45 +737,78 @@
             consolidatedBadge.className = 'consolidated-badge';
             consolidatedBadge.textContent = dayData.total;
             
-            // Criar tooltip rico com informações detalhadas
-            const tooltipData = createRichTooltipData(dayData);
-            consolidatedBadge.setAttribute('data-rich-tooltip', tooltipData);
+            // Armazenar dados do dia no badge para o tooltip
+            consolidatedBadge.tooltipData = dayData;
             
             badgesContainer.appendChild(consolidatedBadge);
             spotsContainer.appendChild(badgesContainer);
             td.appendChild(spotsContainer);
             
-            badgesContainer.addEventListener('mouseenter', (e) => showRichTooltip(e));
-            badgesContainer.addEventListener('mouseleave', hideRichTooltip);
+            // Adicionar event listeners diretamente ao badge
+            consolidatedBadge.addEventListener('mouseenter', showRichTooltip);
+            consolidatedBadge.addEventListener('mouseleave', hideRichTooltip);
+            consolidatedBadge.addEventListener('mousemove', updateTooltipPosition);
         }
 
-        function showTooltip(e) {
-            const target = e.target.closest('.spot-badge, .consolidated-badge');
-            if (!target || !target.getAttribute('data-tooltip')) return;
+        function showRichTooltip(e) {
+            const badge = e.target;
+            const dayData = badge.tooltipData;
             
-            const tooltip = document.getElementById('tooltip');
-            tooltip.innerHTML = target.getAttribute('data-tooltip').replace(/\n/g, '<br>');
+            if (!dayData) return;
+            
+            const params = window.currentCampaignData || { pmm: 1000 };
+            const pmm = params.pmm || 1000;
+            
+            // Criar tooltip se não existir
+            let tooltip = document.querySelector('.rich-tooltip');
+            if (!tooltip) {
+                tooltip = document.createElement('div');
+                tooltip.className = 'rich-tooltip';
+                document.body.appendChild(tooltip);
+            }
+            
+            // Gerar conteúdo do tooltip CORRIGIDO
+            let tooltipContent = `📺 Total de inserções: ${dayData.total}\n`;
+            tooltipContent += `📊 Impactos total: ${calculateDayImpact(dayData.products, pmm).toLocaleString()}\n\n`;
+            tooltipContent += `📋 Detalhamento:\n`;
+            
+            Object.entries(dayData.products).forEach(([type, count]) => {
+                const productName = getProductName(type);
+                tooltipContent += `• ${productName}: ${count}\n`;
+            });
+            
+            tooltip.innerHTML = tooltipContent.replace(/\n/g, '<br>');
             tooltip.classList.add('show');
             
-            const rect = target.getBoundingClientRect();
+            updateTooltipPosition(e);
+        }
+
+        function hideRichTooltip() {
+            const tooltip = document.querySelector('.rich-tooltip');
+            if (tooltip) {
+                tooltip.classList.remove('show');
+            }
+        }
+
+        function updateTooltipPosition(e) {
+            const tooltip = document.querySelector('.rich-tooltip');
+            if (!tooltip || !tooltip.classList.contains('show')) return;
+            
+            const rect = e.target.getBoundingClientRect();
             const tooltipRect = tooltip.getBoundingClientRect();
             
             let left = rect.left + rect.width / 2 - tooltipRect.width / 2;
-            let top = rect.top - tooltipRect.height - 10;
+            let top = rect.top - tooltipRect.height - 15;
             
-            if (left < 5) left = 5;
-            if (left + tooltipRect.width > window.innerWidth - 5) {
-                left = window.innerWidth - tooltipRect.width - 5;
+            // Ajustar posição se sair da tela
+            if (left < 10) left = 10;
+            if (left + tooltipRect.width > window.innerWidth - 10) {
+                left = window.innerWidth - tooltipRect.width - 10;
             }
-            if (top < 5) top = rect.bottom + 10;
+            if (top < 10) top = rect.bottom + 15;
             
             tooltip.style.left = left + 'px';
             tooltip.style.top = top + 'px';
-        }
-
-        function hideTooltip() {
-            const tooltip = document.getElementById('tooltip');
-            tooltip.classList.remove('show');
         }
 
         function createCompactCalendar(startDate, endDate, distribution, selectedWeekdays) {
@@ -966,7 +973,7 @@
             
             document.getElementById('title').textContent = exampleParams.emissora + ' (EXEMPLO)';
             document.getElementById('subtitle').textContent = 
-                `${formatDate(startDate)} a ${formatDate(endDate)} • ${totalSpots} spots • Demonstração`;
+                `${formatDate(startDate)} a ${formatDate(endDate)} • ${totalSpots} inserções • Demonstração`;
             
             updateProductsInfo(activeProducts);
             updateWeekdaysInfo(exampleParams.dias);
@@ -981,7 +988,7 @@
         function showEmptyCalendar(params, startDate, endDate, selectedWeekdays) {
             document.getElementById('title').textContent = params.emissora.toUpperCase();
             document.getElementById('subtitle').textContent = 
-                `${formatDate(startDate)} a ${formatDate(endDate)} • Nenhum spot programado`;
+                `${formatDate(startDate)} a ${formatDate(endDate)} • Nenhuma inserção programada`;
             
             updateWeekdaysInfo(params.dias);
             
@@ -1008,62 +1015,10 @@
             return calculateImpact(dayProducts, pmm);
         }
 
-        function createRichTooltipData(dayData) {
-            const params = window.currentCampaignData || { pmm: 1000 };
-            const pmm = params.pmm || 1000;
-            
-            let tooltip = `📺 Total de spots: ${dayData.total}\n`;
-            tooltip += `📊 Impacto total: ${calculateDayImpact(dayData.products, pmm).toLocaleString()}\n`;
-            tooltip += `💰 PMM usado: ${pmm.toLocaleString()}\n\n`;
-            tooltip += `📋 Detalhamento:\n`;
-            
-            Object.entries(dayData.products).forEach(([type, count]) => {
-                const productName = getProductName(type);
-                const individualImpact = calculateImpact({[type]: count}, pmm);
-                tooltip += `• ${productName}: ${count} (${individualImpact.toLocaleString()})\n`;
-            });
-            
-            return tooltip;
-        }
-
-        function showRichTooltip(e) {
-            const target = e.target.closest('.consolidated-badge');
-            if (!target || !target.getAttribute('data-rich-tooltip')) return;
-            
-            let tooltip = document.querySelector('.rich-tooltip');
-            if (!tooltip) {
-                tooltip = document.createElement('div');
-                tooltip.className = 'rich-tooltip';
-                document.body.appendChild(tooltip);
-            }
-            
-            tooltip.innerHTML = target.getAttribute('data-rich-tooltip').replace(/\n/g, '<br>');
-            tooltip.classList.add('show');
-            
-            const rect = target.getBoundingClientRect();
-            const tooltipRect = tooltip.getBoundingClientRect();
-            
-            let left = rect.left + rect.width / 2 - tooltipRect.width / 2;
-            let top = rect.top - tooltipRect.height - 15;
-            
-            if (left < 10) left = 10;
-            if (left + tooltipRect.width > window.innerWidth - 10) {
-                left = window.innerWidth - tooltipRect.width - 10;
-            }
-            if (top < 10) top = rect.bottom + 15;
-            
-            tooltip.style.left = left + 'px';
-            tooltip.style.top = top + 'px';
-        }
-
-        function hideRichTooltip() {
-            const tooltip = document.querySelector('.rich-tooltip');
-            if (tooltip) {
-                tooltip.classList.remove('show');
-            }
-        }
-
+        // Exportação de dados (função corrigida)
         function exportToExcel() {
+            console.log('📊 Iniciando exportação de dados...');
+            
             const params = window.currentCampaignData || {};
             const startDate = parseDate(params.inicio || '01/01/2025');
             const endDate = parseDate(params.fim || '31/01/2025');
@@ -1074,7 +1029,7 @@
             const pmm = params.pmm || 1000;
             
             let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "Data,Dia Semana,Spots 30s,Spots 5s,Spots 15s,Spots 60s,Test 60s,Total Spots,Impacto PMM\n";
+            csvContent += "Data,Dia Semana,Spots 30s,Spots 5s,Spots 15s,Spots 60s,Test 60s,Total Inserções,Impactos PMM\n";
             
             validDays.forEach(day => {
                 const dateKey = day.toISOString().split('T')[0];
@@ -1112,7 +1067,198 @@
             link.click();
             document.body.removeChild(link);
             
-            console.log('📊 Exportação Excel concluída');
+            console.log('📊 Exportação de dados concluída');
+        }
+
+        // Nova função para exportar calendário visual (com melhorias e debug)
+        function exportCalendarToExcel() {
+            console.log('📅 Iniciando exportação de calendário visual...');
+            
+            try {
+                // Verificar se a biblioteca XLSX está carregada
+                if (typeof XLSX === 'undefined') {
+                    console.error('❌ Biblioteca XLSX não carregada!');
+                    alert('Erro: Biblioteca XLSX não disponível. Verifique a conexão com a internet.');
+                    return;
+                }
+                
+                const params = window.currentCampaignData || {};
+                const startDate = parseDate(params.inicio || '01/01/2025');
+                const endDate = parseDate(params.fim || '31/01/2025');
+                const selectedWeekdays = parseSelectedWeekdays(params.dias || 'Seg.,Ter.,Qua.,Qui.,Sex.');
+                const activeProducts = getActiveProducts(params);
+                const validDays = getValidDays(startDate, endDate, selectedWeekdays);
+                const { distribution } = distributeMultipleSpots(activeProducts, validDays);
+                const pmm = params.pmm || 1000;
+                
+                console.log('📊 Dados preparados para exportação:', {
+                    startDate, endDate, activeProducts, validDays: validDays.length
+                });
+                
+                // Criar workbook
+                const wb = XLSX.utils.book_new();
+                console.log('📚 Workbook criado');
+                
+                // Obter meses únicos
+                const months = new Set();
+                const current = new Date(startDate);
+                
+                while (current <= endDate) {
+                    months.add(`${current.getFullYear()}-${current.getMonth()}`);
+                    current.setMonth(current.getMonth() + 1);
+                    current.setDate(1);
+                }
+                
+                console.log(`📅 Processando ${months.size} meses:`, Array.from(months));
+                
+                // Criar uma aba para cada mês
+                months.forEach((monthKey, index) => {
+                    console.log(`📅 Processando mês ${index + 1}/${months.size}: ${monthKey}`);
+                    
+                    const [year, month] = monthKey.split('-').map(Number);
+                    const monthName = getMonthName(month, year);
+                    const days = getMonthCalendar(year, month);
+                    
+                    // Criar matriz do calendário
+                    const calendarData = [];
+                    
+                    // Cabeçalho do mês
+                    calendarData.push([monthName, '', '', '', '', '', '']);
+                    calendarData.push(['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB']);
+                    
+                    // Processar dias em semanas
+                    for (let i = 0; i < days.length; i += 7) {
+                        const weekDays = days.slice(i, i + 7);
+                        const weekRow = [];
+                        
+                        weekDays.forEach(day => {
+                            const isCurrentMonth = day.getMonth() === month;
+                            const dateKey = day.toISOString().split('T')[0];
+                            const dayData = distribution[dateKey];
+                            
+                            if (!isCurrentMonth) {
+                                weekRow.push('');
+                            } else if (dayData && dayData.total > 0) {
+                                // Formato: "15 (5 inserções)"
+                                weekRow.push(`${day.getDate()} (${dayData.total})`);
+                            } else if (isDaySelected(day, selectedWeekdays)) {
+                                // Dia selecionado mas sem inserções
+                                weekRow.push(`${day.getDate()}`);
+                            } else {
+                                // Dia não selecionado
+                                weekRow.push(day.getDate().toString());
+                            }
+                        });
+                        
+                        calendarData.push(weekRow);
+                        
+                        // Se já temos uma semana completa do próximo mês, parar
+                        if (weekDays.length > 0 && weekDays[weekDays.length - 1].getMonth() !== month) {
+                            break;
+                        }
+                    }
+                    
+                    // Adicionar informações de resumo
+                    calendarData.push(['']);
+                    calendarData.push(['RESUMO DO MÊS:']);
+                    
+                    // Calcular estatísticas do mês
+                    let monthSpots = 0;
+                    let monthDays = 0;
+                    let monthImpact = 0;
+                    
+                    days.forEach(day => {
+                        if (day.getMonth() === month) {
+                            const dateKey = day.toISOString().split('T')[0];
+                            const dayData = distribution[dateKey];
+                            if (dayData && dayData.total > 0) {
+                                monthSpots += dayData.total;
+                                monthDays++;
+                                monthImpact += calculateDayImpact(dayData.products, pmm);
+                            }
+                        }
+                    });
+                    
+                    calendarData.push([`Total de inserções: ${monthSpots}`]);
+                    calendarData.push([`Dias ativos: ${monthDays}`]);
+                    calendarData.push([`Impactos PMM: ${monthImpact.toLocaleString()}`]);
+                    
+                    // Detalhamento por produto
+                    calendarData.push(['']);
+                    calendarData.push(['PRODUTOS:']);
+                    Object.entries(activeProducts).forEach(([type, count]) => {
+                        calendarData.push([`${getProductName(type)}: ${count}`]);
+                    });
+                    
+                    // Criar worksheet
+                    const ws = XLSX.utils.aoa_to_sheet(calendarData);
+                    
+                    // Definir larguras das colunas
+                    const colWidths = [
+                        { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 },
+                        { wch: 12 }, { wch: 12 }, { wch: 12 }
+                    ];
+                    ws['!cols'] = colWidths;
+                    
+                    // Adicionar worksheet ao workbook
+                    const sheetName = monthName.replace(' ', '_');
+                    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+                    console.log(`✅ Aba criada: ${sheetName}`);
+                });
+                
+                // Criar aba de resumo geral
+                console.log('📋 Criando aba de resumo...');
+                const summaryData = [];
+                summaryData.push(['RESUMO GERAL DA CAMPANHA']);
+                summaryData.push(['']);
+                summaryData.push(['Emissora:', params.emissora || 'N/A']);
+                summaryData.push(['Período:', `${formatDate(startDate)} a ${formatDate(endDate)}`]);
+                summaryData.push(['PMM Usado:', pmm.toLocaleString()]);
+                summaryData.push(['']);
+                
+                summaryData.push(['PRODUTOS ATIVOS:']);
+                Object.entries(activeProducts).forEach(([type, count]) => {
+                    const impact = calculateImpact({[type]: count}, pmm);
+                    summaryData.push([getProductName(type), count, impact.toLocaleString()]);
+                });
+                
+                summaryData.push(['']);
+                summaryData.push(['TOTAIS:']);
+                const totalSpots = Object.values(activeProducts).reduce((sum, spots) => sum + spots, 0);
+                const totalImpact = calculateImpact(activeProducts, pmm);
+                summaryData.push(['Total de inserções:', totalSpots]);
+                summaryData.push(['Dias ativos:', validDays.length]);
+                summaryData.push(['Impactos total:', totalImpact.toLocaleString()]);
+                summaryData.push(['Média inserções/dia:', validDays.length > 0 ? (totalSpots / validDays.length).toFixed(1) : '0']);
+                
+                summaryData.push(['']);
+                summaryData.push(['DIAS SELECIONADOS:']);
+                const weekdayNames = {
+                    'Dom.': 'Domingo', 'Seg.': 'Segunda', 'Ter.': 'Terça', 'Qua.': 'Quarta',
+                    'Qui.': 'Quinta', 'Sex.': 'Sexta', 'Sáb.': 'Sábado'
+                };
+                const selectedNames = params.dias.split(',').map(day => weekdayNames[day.trim()]).filter(Boolean);
+                selectedNames.forEach(day => {
+                    summaryData.push([day]);
+                });
+                
+                const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
+                summaryWs['!cols'] = [{ wch: 20 }, { wch: 15 }, { wch: 15 }];
+                XLSX.utils.book_append_sheet(wb, summaryWs, 'Resumo', 0);
+                console.log('✅ Aba de resumo criada');
+                
+                // Salvar arquivo
+                const fileName = `calendario_${params.emissora||'campanha'}_${formatDate(new Date()).replace(/\//g, '-')}.xlsx`;
+                console.log(`💾 Salvando arquivo: ${fileName}`);
+                
+                XLSX.writeFile(wb, fileName);
+                
+                console.log('✅ Exportação de calendário concluída com sucesso!');
+                
+            } catch (error) {
+                console.error('❌ Erro na exportação de calendário:', error);
+                alert(`Erro ao exportar calendário: ${error.message}`);
+            }
         }
 
         async function init() {
@@ -1171,7 +1317,7 @@
                 }
                 
                 if (totalSpots <= 0) {
-                    console.log('📭 Nenhum spot programado');
+                    console.log('📭 Nenhuma inserção programada');
                     showEmptyCalendar(campaignData, startDate, endDate, selectedWeekdays);
                     return;
                 }
@@ -1180,7 +1326,7 @@
                 const sourceIndicator = params.mode === 'notion-api' ? ' 📡' : '';
                 document.getElementById('title').textContent = campaignData.emissora.toUpperCase() + sourceIndicator;
                 document.getElementById('subtitle').textContent = 
-                    `${formatDate(startDate)} a ${formatDate(endDate)} • ${totalSpots} spots`;
+                    `${formatDate(startDate)} a ${formatDate(endDate)} • ${totalSpots} inserções`;
                 
                 updateProductsInfo(activeProducts);
                 updateWeekdaysInfo(campaignData.dias);
@@ -1197,7 +1343,7 @@
                 
                 const { distribution } = distributeMultipleSpots(activeProducts, validDays);
                 
-                createCompactCalendar(startDate, endDate, distribution, selectedWeekdays);
+                createCompactCalendar(startDate, endDate, distribution, selectedWeekdays, campaignData);
                 updateStats(campaignData, validDays, totalSpots);
                 
                 console.log('✅ Sistema carregado com sucesso!');
