@@ -123,6 +123,7 @@ exports.handler = async (event, context) => {
       spots15: extractValue(properties['Spots 15ʺ'] || properties['Spots 15'] || properties['spots15'], 0),
       spots60: extractValue(properties['Spots 60ʺ'] || properties['Spots 60'] || properties['spots60'], 0),
       test60: extractValue(properties['Test. 60ʺ'] || properties['Test 60'] || properties['test60'], 0),
+      pmm: extractValue(properties['PMM'] || properties['pmm'], 0),
       emissora: extractValue(properties['Emissora'] || properties['emissora'], 'Emissora'),
       inicio: extractValue(properties['Data inicio'] || properties['Data Início'] || properties['inicio'], '01/01/2025'),
       fim: extractValue(properties['Data fim'] || properties['Data Fim'] || properties['fim'], '31/01/2025'),
