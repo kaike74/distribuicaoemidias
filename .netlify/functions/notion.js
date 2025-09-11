@@ -97,8 +97,9 @@ exports.handler = async (event, context) => {
       
       switch (prop.type) {
         case 'number':
-          const numberValue = prop.number || defaultValue;
-          console.log(`📊 Valor numérico para "${propName}":`, numberValue);
+          // Se o valor é null/undefined, retornar 0 para números (não o defaultValue)
+          const numberValue = prop.number !== null && prop.number !== undefined ? prop.number : 0;
+          console.log(`📊 Valor numérico para "${propName}": ${numberValue} (original: ${prop.number})`);
           return numberValue;
         case 'title':
           return prop.title?.[0]?.text?.content || defaultValue;
