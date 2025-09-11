@@ -39,11 +39,6 @@ exports.handler = async (event, context) => {
     console.log('Buscando página:', id);
     console.log('Token (primeiros 10 chars):', notionToken ? notionToken.substring(0, 10) + '...' : 'TOKEN_NAO_ENCONTRADO');
     console.log('URL da requisição:', `https://api.notion.com/v1/pages/${id}`);
-    console.log('Headers da requisição:', {
-      'Authorization': `Bearer ${notionToken.substring(0, 10)}...`,
-      'Notion-Version': '2022-06-28',
-      'Content-Type': 'application/json'
-    });
 
     // Buscar dados da página no Notion
     const response = await fetch(`https://api.notion.com/v1/pages/${id}`, {
@@ -92,14 +87,19 @@ exports.handler = async (event, context) => {
     const properties = notionData.properties || {};
     
     // Função helper para extrair valores de diferentes tipos de propriedade
-    const extractValue = (prop, defaultValue = '') => {
-      if (!prop) return defaultValue;
+    const extractValue = (prop, defaultValue = '', propName = '') => {
+      if (!prop) {
+        console.log(`❌ Propriedade "${propName}" não encontrada`);
+        return defaultValue;
+      }
       
-      console.log(`Extraindo propriedade tipo: ${prop.type}`, prop);
+      console.log(`✅ Extraindo propriedade "${propName}" tipo: ${prop.type}`, prop);
       
       switch (prop.type) {
         case 'number':
-          return prop.number || 0;
+          const numberValue = prop.number || defaultValue;
+          console.log(`📊 Valor numérico para "${propName}":`, numberValue);
+          return numberValue;
         case 'title':
           return prop.title?.[0]?.text?.content || defaultValue;
         case 'rich_text':
@@ -111,24 +111,56 @@ exports.handler = async (event, context) => {
         case 'select':
           return prop.select?.name || defaultValue;
         default:
-          console.log(`Tipo de propriedade não reconhecido: ${prop.type}`);
+          console.log(`⚠️ Tipo de propriedade não reconhecido para "${propName}": ${prop.type}`);
           return defaultValue;
       }
     };
 
-    // Mapear para o formato esperado (ajuste os nomes das propriedades conforme seu Notion)
+    // Debug específico para PMM
+    console.log('🔍 DEBUG PMM - Buscando propriedades PMM...');
+    console.log('Propriedades disponíveis:', Object.keys(properties));
+    
+    const pmmVariations = ['PMM', 'pmm', 'Pmm', 'PMM ', ' PMM', 'PMM_', 'pmm_value'];
+    let pmmProperty = null;
+    let pmmKey = null;
+    
+    for (const variation of pmmVariations) {
+      if (properties[variation]) {
+        pmmProperty = properties[variation];
+        pmmKey = variation;
+        console.log(`✅ PMM encontrado com chave: "${variation}"`);
+        break;
+      }
+    }
+    
+    if (!pmmProperty) {
+      console.log('❌ PMM não encontrado, tentando busca case-insensitive...');
+      for (const [key, value] of Object.entries(properties)) {
+        if (key.toLowerCase().includes('pmm')) {
+          pmmProperty = value;
+          pmmKey = key;
+          console.log(`✅ PMM encontrado case-insensitive com chave: "${key}"`);
+          break;
+        }
+      }
+    }
+
+    // Mapear para o formato esperado
     const mappedData = {
-      spots30: extractValue(properties['Spots 30ʺ'] || properties['Spots 30'] || properties['spots30'], 0),
-      spots5: extractValue(properties['Spots 5ʺ'] || properties['Spots 5'] || properties['spots5'], 0),
-      spots15: extractValue(properties['Spots 15ʺ'] || properties['Spots 15'] || properties['spots15'], 0),
-      spots60: extractValue(properties['Spots 60ʺ'] || properties['Spots 60'] || properties['spots60'], 0),
-      test60: extractValue(properties['Test. 60ʺ'] || properties['Test 60'] || properties['test60'], 0),
-      pmm: extractValue(properties['PMM'] || properties['pmm'], 0),
-      emissora: extractValue(properties['Emissora'] || properties['emissora'], 'Emissora'),
-      inicio: extractValue(properties['Data inicio'] || properties['Data Início'] || properties['inicio'], '01/01/2025'),
-      fim: extractValue(properties['Data fim'] || properties['Data Fim'] || properties['fim'], '31/01/2025'),
-      dias: extractValue(properties['Dias da semana'] || properties['Dias'] || properties['dias'], 'Seg.,Ter.,Qua.,Qui.,Sex.')
+      spots30: extractValue(properties['Spots 30ʺ'] || properties['Spots 30'] || properties['spots30'], 0, 'Spots 30'),
+      spots5: extractValue(properties['Spots 5ʺ'] || properties['Spots 5'] || properties['spots5'], 0, 'Spots 5'),
+      spots15: extractValue(properties['Spots 15ʺ'] || properties['Spots 15'] || properties['spots15'], 0, 'Spots 15'),
+      spots60: extractValue(properties['Spots 60ʺ'] || properties['Spots 60'] || properties['spots60'], 0, 'Spots 60'),
+      test60: extractValue(properties['Test. 60ʺ'] || properties['Test 60'] || properties['test60'], 0, 'Test 60'),
+      pmm: pmmProperty ? extractValue(pmmProperty, 1000, pmmKey) : 1000,
+      emissora: extractValue(properties['Emissora'] || properties['emissora'], 'Emissora', 'Emissora'),
+      inicio: extractValue(properties['Data inicio'] || properties['Data Início'] || properties['inicio'], '01/01/2025', 'Data Início'),
+      fim: extractValue(properties['Data fim'] || properties['Data Fim'] || properties['fim'], '31/01/2025', 'Data Fim'),
+      dias: extractValue(properties['Dias da semana'] || properties['Dias'] || properties['dias'], 'Seg.,Ter.,Qua.,Qui.,Sex.', 'Dias da Semana')
     };
+
+    // Log específico do PMM final
+    console.log(`🎯 PMM FINAL: ${mappedData.pmm} (encontrado via chave: "${pmmKey}")`);
 
     // Converter datas do formato ISO para DD/MM/YYYY se necessário
     if (mappedData.inicio && mappedData.inicio.includes('-')) {
@@ -141,7 +173,7 @@ exports.handler = async (event, context) => {
       mappedData.fim = endDate.toLocaleDateString('pt-BR');
     }
 
-    console.log('Dados mapeados finais:', mappedData);
+    console.log('📋 Dados mapeados finais:', mappedData);
 
     return {
       statusCode: 200,
@@ -150,7 +182,7 @@ exports.handler = async (event, context) => {
     };
 
   } catch (error) {
-    console.error('Erro na função (catch geral):', error);
+    console.error('💥 Erro na função (catch geral):', error);
     console.error('Stack trace:', error.stack);
     return {
       statusCode: 500,
