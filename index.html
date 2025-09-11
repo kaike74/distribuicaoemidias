@@ -94,6 +94,7 @@
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             margin-bottom: 20px;
+            transition: border-color 0.3s ease;
         }
         
         .month-header {
@@ -105,6 +106,7 @@
             text-align: center;
             text-transform: uppercase;
             letter-spacing: 1px;
+            transition: background-color 0.3s ease;
         }
         
         .calendar-table {
@@ -207,6 +209,7 @@
             animation: pulse 2s infinite;
             box-shadow: 0 2px 6px rgba(29, 78, 216, 0.3);
             border: 2px solid rgba(255,255,255,0.2);
+            transition: all 0.2s ease;
         }
 
         .consolidated-badge:hover {
@@ -357,6 +360,106 @@
             gap: 8px;
         }
         
+        /* NOVOS ESTILOS PARA EDIÇÃO */
+        .edit-btn {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
+        }
+
+        .edit-btn:hover {
+            background: linear-gradient(135deg, #d97706, #b45309);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, #059669, #10b981);
+            box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
+        }
+
+        .save-btn:hover {
+            background: linear-gradient(135deg, #047857, #059669);
+            box-shadow: 0 4px 8px rgba(5, 150, 105, 0.3);
+        }
+
+        .cancel-btn {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+            box-shadow: 0 2px 4px rgba(107, 114, 128, 0.2);
+        }
+
+        .cancel-btn:hover {
+            background: linear-gradient(135deg, #4b5563, #374151);
+            box-shadow: 0 4px 8px rgba(107, 114, 128, 0.3);
+        }
+
+        .auto-btn {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+        }
+
+        .auto-btn:hover {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .edit-mode .calendar-compact {
+            border: 2px solid #059669;
+        }
+
+        .edit-mode .month-header {
+            background: #059669;
+        }
+
+        .consolidated-badge.editable {
+            cursor: pointer;
+            background: linear-gradient(135deg, #059669, #10b981);
+        }
+
+        .edit-input {
+            background: transparent;
+            border: none;
+            color: white;
+            font-weight: 700;
+            font-size: 8px;
+            width: 14px;
+            text-align: center;
+            outline: none;
+        }
+
+        .edit-validation {
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            margin: 10px 0;
+            font-size: 12px;
+        }
+
+        .edit-validation.success {
+            background: #dcfce7;
+            border: 1px solid #059669;
+            color: #059669;
+        }
+
+        .edit-validation.warning {
+            background: #fef3c7;
+            border: 1px solid #d97706;
+            color: #d97706;
+        }
+
+        .edit-validation.error {
+            background: #fee2e2;
+            border: 1px solid #dc2626;
+            color: #dc2626;
+        }
+        
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -394,7 +497,7 @@
                 gap: 4px;
             }
 
-            .export-btn {
+            .export-btn, .edit-btn {
                 font-size: 10px;
                 padding: 6px 12px;
                 margin-left: 0;
@@ -464,13 +567,35 @@
             <div class="weekdays-list" id="selected-weekdays"></div>
         </div>
         
+        <div id="edit-validation" class="edit-validation" style="display: none;"></div>
+        
         <div class="actions-bar" id="actions-bar" style="display: none;">
             <div class="actions-left">
                 <span id="campaign-title">Campanha Ativa</span>
             </div>
             <div class="actions-right">
+                <button class="edit-btn" id="edit-btn" onclick="toggleEditMode()">
+                    ✏️ Editar Distribuição
+                </button>
                 <button class="export-btn calendar" onclick="exportCalendarToExcel()">
                     📅 Exportar Calendário
+                </button>
+            </div>
+        </div>
+        
+        <div class="actions-bar" id="edit-actions-bar" style="display: none;">
+            <div class="actions-left">
+                <span id="edit-status">Modo de Edição</span>
+            </div>
+            <div class="actions-right">
+                <button class="edit-btn save-btn" onclick="saveEditedDistribution()">
+                    💾 Salvar
+                </button>
+                <button class="edit-btn cancel-btn" onclick="cancelEdit()">
+                    ❌ Cancelar
+                </button>
+                <button class="edit-btn auto-btn" onclick="resetToAuto()">
+                    🔄 Auto
                 </button>
             </div>
         </div>
@@ -511,7 +636,13 @@
     <script>
         console.log('🚀 Sistema iniciando com detecção automática de UUID Notion...');
         
-        let tooltip = null;
+        // Variáveis globais para o sistema de edição
+        let isEditMode = false;
+        let originalDistribution = {};
+        let editedDistribution = {};
+        let validDaysGlobal = [];
+        let totalSpotsGlobal = 0;
+        let activeProductsGlobal = {};
 
         function getURLParams() {
             const params = new URLSearchParams(window.location.search);
@@ -1258,6 +1389,270 @@
             }
         }
 
+        // ============================================
+        // SISTEMA DE EDIÇÃO - FUNÇÕES IMPLEMENTADAS
+        // ============================================
+
+        // Alternar modo de edição
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            
+            if (isEditMode) {
+                // Entrar no modo de edição
+                document.body.classList.add('edit-mode');
+                document.getElementById('actions-bar').style.display = 'none';
+                document.getElementById('edit-actions-bar').style.display = 'flex';
+                
+                // Salvar distribuição original
+                originalDistribution = JSON.parse(JSON.stringify(window.currentDistribution));
+                editedDistribution = JSON.parse(JSON.stringify(window.currentDistribution));
+                
+                // Tornar calendário editável
+                makeCalendarEditable();
+                
+                // Atualizar status
+                document.getElementById('edit-status').textContent = 'Modo de Edição - Edite os valores clicando nas bolinhas';
+                validateDistribution();
+                
+            } else {
+                // Sair do modo de edição
+                document.body.classList.remove('edit-mode');
+                document.getElementById('actions-bar').style.display = 'flex';
+                document.getElementById('edit-actions-bar').style.display = 'none';
+                
+                // Tornar calendário somente leitura
+                makeCalendarReadOnly();
+                
+                // Esconder mensagem de validação
+                document.getElementById('edit-validation').style.display = 'none';
+            }
+        }
+
+        // Tornar calendário editável
+        function makeCalendarEditable() {
+            const badges = document.querySelectorAll('.consolidated-badge');
+            
+            badges.forEach(badge => {
+                badge.classList.add('editable');
+                
+                // Remover event listeners antigos
+                badge.removeEventListener('click', handleBadgeClick);
+                
+                // Adicionar novo event listener para edição
+                badge.addEventListener('click', handleBadgeClick);
+            });
+        }
+
+        // Tornar calendário somente leitura
+        function makeCalendarReadOnly() {
+            const badges = document.querySelectorAll('.consolidated-badge');
+            
+            badges.forEach(badge => {
+                badge.classList.remove('editable');
+                
+                // Remover event listeners de edição
+                badge.removeEventListener('click', handleBadgeClick);
+                
+                // Restaurar event listeners originais
+                badge.addEventListener('mouseenter', showRichTooltip);
+                badge.addEventListener('mouseleave', hideRichTooltip);
+                badge.addEventListener('mousemove', updateTooltipPosition);
+            });
+        }
+
+        // Manipular clique nas bolinhas
+        function handleBadgeClick(e) {
+            const badge = e.target;
+            const dateCell = badge.closest('td');
+            const dateNumber = dateCell.querySelector('.date-number').textContent;
+            
+            // Encontrar a data correspondente
+            let dateKey = null;
+            for (const key in editedDistribution) {
+                const date = new Date(key);
+                if (date.getDate().toString() === dateNumber) {
+                    dateKey = key;
+                    break;
+                }
+            }
+            
+            if (!dateKey) return;
+            
+            // Substituir badge por input
+            const currentValue = editedDistribution[dateKey].total;
+            badge.style.display = 'none';
+            
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.className = 'edit-input';
+            input.value = currentValue;
+            input.min = 0;
+            input.style.width = '20px';
+            input.style.height = '18px';
+            input.style.fontSize = '10px';
+            
+            badge.parentNode.appendChild(input);
+            input.focus();
+            input.select();
+            
+            // Quando o input perder foco
+            input.addEventListener('blur', function() {
+                const newValue = parseInt(this.value) || 0;
+                
+                // Validar valor
+                if (newValue < 0) {
+                    alert('Valor não pode ser negativo');
+                    this.value = currentValue;
+                }
+                
+                // Atualizar distribuição
+                editedDistribution[dateKey].total = newValue;
+                
+                // Atualizar badge
+                badge.textContent = newValue;
+                badge.style.display = 'flex';
+                
+                // Remover input
+                this.remove();
+                
+                // Validar distribuição
+                validateDistribution();
+            });
+            
+            // Tecla Enter confirma a edição
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    this.blur();
+                }
+            });
+        }
+
+        // Validar distribuição em tempo real
+        function validateDistribution() {
+            let totalUsed = 0;
+            
+            // Calcular total usado
+            for (const dateKey in editedDistribution) {
+                totalUsed += editedDistribution[dateKey].total;
+            }
+            
+            const validationElement = document.getElementById('edit-validation');
+            validationElement.style.display = 'block';
+            
+            if (totalUsed === totalSpotsGlobal) {
+                // Distribuição perfeita
+                validationElement.className = 'edit-validation success';
+                validationElement.innerHTML = `✅ Distribuição válida! Total: ${totalUsed}/${totalSpotsGlobal}`;
+            } else if (totalUsed < totalSpotsGlobal) {
+                // Distribuição com sobra
+                const remaining = totalSpotsGlobal - totalUsed;
+                validationElement.className = 'edit-validation warning';
+                validationElement.innerHTML = `⚠️ Distribuição incompleta! Faltam ${remaining} inserções (${totalUsed}/${totalSpotsGlobal})`;
+            } else {
+                // Distribuição com excesso
+                const excess = totalUsed - totalSpotsGlobal;
+                validationElement.className = 'edit-validation error';
+                validationElement.innerHTML = `❌ Distribuição excedida! ${excess} inserções a mais (${totalUsed}/${totalSpotsGlobal})`;
+            }
+        }
+
+        // Salvar distribuição editada
+        function saveEditedDistribution() {
+            // Validar antes de salvar
+            let totalUsed = 0;
+            
+            for (const dateKey in editedDistribution) {
+                totalUsed += editedDistribution[dateKey].total;
+            }
+            
+            if (totalUsed !== totalSpotsGlobal) {
+                if (!confirm(`A distribuição atual tem ${totalUsed} inserções, mas o total necessário é ${totalSpotsGlobal}. Deseja continuar mesmo assim?`)) {
+                    return;
+                }
+            }
+            
+            // Atualizar distribuição atual
+            window.currentDistribution = JSON.parse(JSON.stringify(editedDistribution));
+            
+            // Sair do modo de edição
+            isEditMode = false;
+            document.body.classList.remove('edit-mode');
+            document.getElementById('actions-bar').style.display = 'flex';
+            document.getElementById('edit-actions-bar').style.display = 'none';
+            document.getElementById('edit-validation').style.display = 'none';
+            
+            // Atualizar calendário visualmente
+            makeCalendarReadOnly();
+            
+            alert('Distribuição salva com sucesso!');
+        }
+
+        // Cancelar edição
+        function cancelEdit() {
+            // Restaurar distribuição original
+            editedDistribution = JSON.parse(JSON.stringify(originalDistribution));
+            
+            // Atualizar badges visualmente
+            const badges = document.querySelectorAll('.consolidated-badge');
+            badges.forEach(badge => {
+                const dateCell = badge.closest('td');
+                const dateNumber = dateCell.querySelector('.date-number').textContent;
+                
+                // Encontrar a data correspondente
+                for (const key in originalDistribution) {
+                    const date = new Date(key);
+                    if (date.getDate().toString() === dateNumber) {
+                        badge.textContent = originalDistribution[key].total;
+                        break;
+                    }
+                }
+            });
+            
+            // Sair do modo de edição
+            isEditMode = false;
+            document.body.classList.remove('edit-mode');
+            document.getElementById('actions-bar').style.display = 'flex';
+            document.getElementById('edit-actions-bar').style.display = 'none';
+            document.getElementById('edit-validation').style.display = 'none';
+            
+            makeCalendarReadOnly();
+        }
+
+        // Resetar para distribuição automática
+        function resetToAuto() {
+            const params = window.currentCampaignData || {};
+            const startDate = parseDate(params.inicio);
+            const endDate = parseDate(params.fim);
+            const selectedWeekdays = parseSelectedWeekdays(params.dias);
+            const activeProducts = getActiveProducts(params);
+            const validDays = getValidDays(startDate, endDate, selectedWeekdays);
+            
+            // Gerar nova distribuição automática
+            const { distribution } = distributeMultipleSpots(activeProducts, validDays);
+            
+            // Atualizar distribuição editada
+            editedDistribution = JSON.parse(JSON.stringify(distribution));
+            
+            // Atualizar badges visualmente
+            const badges = document.querySelectorAll('.consolidated-badge');
+            badges.forEach(badge => {
+                const dateCell = badge.closest('td');
+                const dateNumber = dateCell.querySelector('.date-number').textContent;
+                
+                // Encontrar a data correspondente
+                for (const key in distribution) {
+                    const date = new Date(key);
+                    if (date.getDate().toString() === dateNumber && distribution[key]) {
+                        badge.textContent = distribution[key].total;
+                        break;
+                    }
+                }
+            });
+            
+            // Validar nova distribuição
+            validateDistribution();
+        }
+
         async function init() {
             try {
                 const params = getURLParams();
@@ -1291,8 +1686,10 @@
                 const endDate = parseDate(campaignData.fim);
                 const selectedWeekdays = parseSelectedWeekdays(campaignData.dias);
                 const activeProducts = getActiveProducts(campaignData);
+                activeProductsGlobal = activeProducts;
                 
                 const totalSpots = Object.values(activeProducts).reduce((sum, spots) => sum + spots, 0);
+                totalSpotsGlobal = totalSpots;
                 const hasParams = params.mode === 'notion-api' || window.location.search.length > 0;
                 
                 if (!hasParams) {
@@ -1333,16 +1730,14 @@
                 document.getElementById('campaign-title').textContent = `${campaignData.emissora} • PMM: ${(campaignData.pmm || 1000).toLocaleString()}`;
                 
                 const validDays = getValidDays(startDate, endDate, selectedWeekdays);
-                
-                // Salvar dados globais para o sistema de edição
                 validDaysGlobal = validDays;
-                totalSpotsGlobal = totalSpots;
                 
                 if (validDays.length === 0) {
                     throw new Error('Não há dias válidos no período com os dias da semana selecionados');
                 }
                 
                 const { distribution } = distributeMultipleSpots(activeProducts, validDays);
+                window.currentDistribution = distribution;
                 
                 createCompactCalendar(startDate, endDate, distribution, selectedWeekdays, campaignData);
                 updateStats(campaignData, validDays, totalSpots);
