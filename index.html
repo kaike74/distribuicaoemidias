@@ -1334,6 +1334,10 @@
                 
                 const validDays = getValidDays(startDate, endDate, selectedWeekdays);
                 
+                // Salvar dados globais para o sistema de edição
+                validDaysGlobal = validDays;
+                totalSpotsGlobal = totalSpots;
+                
                 if (validDays.length === 0) {
                     throw new Error('Não há dias válidos no período com os dias da semana selecionados');
                 }
