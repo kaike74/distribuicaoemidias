@@ -191,43 +191,11 @@
             pointer-events: auto;
         }
 
-        .spots-badges.horizontal {
-            flex-direction: row;
-            max-height: 16px;
-        }
-
-        .spots-badges.vertical {
-            flex-direction: column;
-            max-height: 28px;
-        }
-
-        .spot-badge {
-            color: white;
-            border-radius: 50%;
-            width: 14px;
-            height: 14px;
-            font-size: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            border: 1px solid rgba(255,255,255,0.4);
-            cursor: help;
-            transition: all 0.2s ease;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-        }
-
-        .spot-badge:hover {
-            transform: scale(1.2);
-            z-index: 10;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
-
         .consolidated-badge {
             background: linear-gradient(135deg, #1d4ed8, #7c3aed);
-            font-size: 7px;
-            width: 16px;
-            height: 16px;
+            font-size: 8px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -237,6 +205,13 @@
             cursor: help;
             position: relative;
             animation: pulse 2s infinite;
+            box-shadow: 0 2px 6px rgba(29, 78, 216, 0.3);
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .consolidated-badge:hover {
+            transform: scale(1.15);
+            box-shadow: 0 4px 12px rgba(29, 78, 216, 0.4);
         }
 
         @keyframes pulse {
@@ -244,11 +219,33 @@
             50% { box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.1); }
         }
 
-        .badge-spots30 { background: #1d4ed8; }
-        .badge-spots5 { background: #059669; }
-        .badge-spots15 { background: #dc2626; }
-        .badge-spots60 { background: #7c3aed; }
-        .badge-test60 { background: #ea580c; }
+        .export-btn {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
+        }
+
+        .export-btn:hover {
+            background: linear-gradient(135deg, #047857, #059669);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(5, 150, 105, 0.3);
+        }
+
+        .impact-stat {
+            border-left: 3px solid #10b981;
+        }
+
+        .pmm-value {
+            color: #059669;
+            font-weight: 700;
+        }
         
         .weekdays-info {
             background: #f8fafc;
@@ -325,6 +322,83 @@
             border-top-color: rgba(0, 0, 0, 0.95);
             transform: translateX(-50%);
         }
+
+        .rich-tooltip {
+            position: fixed;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(31, 41, 55, 0.95));
+            color: white;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 12px;
+            white-space: pre-line;
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.15);
+            font-family: 'Arial', sans-serif;
+            max-width: 280px;
+            line-height: 1.4;
+        }
+
+        .rich-tooltip.show {
+            opacity: 1;
+            transform: translateY(-15px);
+        }
+
+        .rich-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            border: 8px solid transparent;
+            border-top-color: rgba(0, 0, 0, 0.95);
+            transform: translateX(-50%);
+        }
+
+        .tooltip-section {
+            margin-bottom: 8px;
+        }
+
+        .tooltip-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .tooltip-title {
+            font-weight: 700;
+            color: #60a5fa;
+            margin-bottom: 4px;
+        }
+
+        .tooltip-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 2px 0;
+            font-size: 11px;
+        }
+
+        .tooltip-emoji {
+            margin-right: 6px;
+        }
+
+        .actions-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .actions-left {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+        }
         
         @media (max-width: 768px) {
             .container {
@@ -341,12 +415,6 @@
                 font-size: 10px;
                 height: 45px;
                 min-width: 35px;
-            }
-            
-            .spot-badge {
-                width: 12px;
-                height: 12px;
-                font-size: 7px;
             }
 
             .consolidated-badge {
@@ -369,12 +437,6 @@
             .calendar-table td {
                 height: 40px;
                 min-width: 30px;
-            }
-
-            .spot-badge {
-                width: 10px;
-                height: 10px;
-                font-size: 6px;
             }
 
             .consolidated-badge {
@@ -434,6 +496,15 @@
             <div class="weekdays-list" id="selected-weekdays"></div>
         </div>
         
+        <div class="actions-bar" id="actions-bar" style="display: none;">
+            <div class="actions-left">
+                <span id="campaign-title">Campanha Ativa</span>
+            </div>
+            <button class="export-btn" onclick="exportToExcel()">
+                📊 Exportar Excel
+            </button>
+        </div>
+        
         <div class="stats-grid" id="stats" style="display: none;">
             <div class="stat-card">
                 <span class="stat-number" id="total-spots">0</span>
@@ -450,6 +521,14 @@
             <div class="stat-card">
                 <span class="stat-number" id="period-range">-</span>
                 <div class="stat-label">Período</div>
+            </div>
+            <div class="stat-card impact-stat">
+                <span class="stat-number pmm-value" id="total-impact">0</span>
+                <div class="stat-label">Impacto Total</div>
+            </div>
+            <div class="stat-card impact-stat">
+                <span class="stat-number pmm-value" id="pmm-used">0</span>
+                <div class="stat-label">PMM Utilizado</div>
             </div>
         </div>
         
@@ -485,7 +564,8 @@
                     emissora: 'Carregando...',
                     inicio: '01/01/2025',
                     fim: '31/01/2025',
-                    dias: 'Seg.,Ter.,Qua.,Qui.,Sex.'
+                    dias: 'Seg.,Ter.,Qua.,Qui.,Sex.',
+                    pmm: 1000
                 };
             }
             
@@ -501,7 +581,8 @@
                 emissora: params.get('emissora') || 'Emissora',
                 inicio: params.get('inicio') || '01/10/2025',
                 fim: params.get('fim') || '31/10/2025',
-                dias: params.get('dias') || 'Seg.,Ter.,Qua.,Qui.,Sex.'
+                dias: params.get('dias') || 'Seg.,Ter.,Qua.,Qui.,Sex.',
+                pmm: parseInt(params.get('pmm')) || 1000
             };
         }
 
@@ -675,46 +756,23 @@
             spotsContainer.className = 'spots-container';
             
             const badgesContainer = document.createElement('div');
-            const productEntries = Object.entries(dayData.products);
-            const productCount = productEntries.length;
+            badgesContainer.className = 'spots-badges';
             
-            console.log(`📍 Criando badges para ${productCount} produtos:`, dayData.products);
+            // Sempre usar badge consolidado único
+            const consolidatedBadge = document.createElement('div');
+            consolidatedBadge.className = 'consolidated-badge';
+            consolidatedBadge.textContent = dayData.total;
             
-            if (productCount > 3) {
-                badgesContainer.className = 'spots-badges';
-                
-                const consolidatedBadge = document.createElement('div');
-                consolidatedBadge.className = 'consolidated-badge';
-                consolidatedBadge.textContent = dayData.total;
-                
-                const tooltipText = productEntries
-                    .map(([type, count]) => `${getProductName(type)}: ${count}`)
-                    .join('\n');
-                consolidatedBadge.setAttribute('data-tooltip', `Total: ${dayData.total} spots\n\n${tooltipText}`);
-                
-                badgesContainer.appendChild(consolidatedBadge);
-                console.log('✨ Badge consolidado criado para', productCount, 'produtos');
-                
-            } else {
-                badgesContainer.className = `spots-badges ${productCount <= 2 ? 'horizontal' : 'vertical'}`;
-                
-                productEntries.forEach(([productType, count]) => {
-                    if (count > 0) {
-                        const badge = document.createElement('div');
-                        badge.className = `spot-badge badge-${productType}`;
-                        badge.textContent = count;
-                        badge.setAttribute('data-tooltip', `${getProductName(productType)}: ${count} spot${count > 1 ? 's' : ''}`);
-                        badgesContainer.appendChild(badge);
-                        console.log(`✨ Badge individual: ${productType} = ${count}`);
-                    }
-                });
-            }
+            // Criar tooltip rico com informações detalhadas
+            const tooltipData = createRichTooltipData(dayData);
+            consolidatedBadge.setAttribute('data-rich-tooltip', tooltipData);
             
+            badgesContainer.appendChild(consolidatedBadge);
             spotsContainer.appendChild(badgesContainer);
             td.appendChild(spotsContainer);
             
-            badgesContainer.addEventListener('mouseenter', (e) => showTooltip(e));
-            badgesContainer.addEventListener('mouseleave', hideTooltip);
+            badgesContainer.addEventListener('mouseenter', (e) => showRichTooltip(e));
+            badgesContainer.addEventListener('mouseleave', hideRichTooltip);
         }
 
         function showTooltip(e) {
@@ -871,10 +929,16 @@
             
             const periodRange = `${startDate.getDate().toString().padStart(2, '0')}/${(startDate.getMonth() + 1).toString().padStart(2, '0')}-${endDate.getDate().toString().padStart(2, '0')}/${(endDate.getMonth() + 1).toString().padStart(2, '0')}`;
             
+            const activeProducts = getActiveProducts(params);
+            const pmm = params.pmm || 1000;
+            const totalImpact = calculateImpact(activeProducts, pmm);
+            
             document.getElementById('total-spots').textContent = totalSpots;
             document.getElementById('total-days').textContent = validDays.length;
             document.getElementById('avg-spots').textContent = avgSpots;
             document.getElementById('period-range').textContent = periodRange;
+            document.getElementById('total-impact').textContent = totalImpact.toLocaleString();
+            document.getElementById('pmm-used').textContent = pmm.toLocaleString();
             
             console.log(`📊 Período: ${periodRange}`);
             document.getElementById('stats').style.display = 'grid';
@@ -890,7 +954,8 @@
                 emissora: 'EXEMPLO RADIO',
                 inicio: '01/11/2025',
                 fim: '30/11/2025',
-                dias: 'Seg.,Qua.,Sex.'
+                dias: 'Seg.,Qua.,Sex.',
+                pmm: 1000
             };
             
             const startDate = parseDate(exampleParams.inicio);
@@ -927,6 +992,129 @@
             updateStats(params, validDays, 0);
         }
 
+        function calculateImpact(products, pmm) {
+            let totalImpact = 0;
+            
+            totalImpact += (products.spots30 || 0) * pmm;
+            totalImpact += (products.test60 || 0) * (pmm * 2);
+            totalImpact += (products.spots60 || 0) * (pmm * 2);
+            totalImpact += (products.spots15 || 0) * (pmm / 2);
+            totalImpact += (products.spots5 || 0) * (pmm / 6);
+            
+            return Math.round(totalImpact);
+        }
+
+        function calculateDayImpact(dayProducts, pmm) {
+            return calculateImpact(dayProducts, pmm);
+        }
+
+        function createRichTooltipData(dayData) {
+            const params = window.currentCampaignData || { pmm: 1000 };
+            const pmm = params.pmm || 1000;
+            
+            let tooltip = `📺 Total de spots: ${dayData.total}\n`;
+            tooltip += `📊 Impacto total: ${calculateDayImpact(dayData.products, pmm).toLocaleString()}\n`;
+            tooltip += `💰 PMM usado: ${pmm.toLocaleString()}\n\n`;
+            tooltip += `📋 Detalhamento:\n`;
+            
+            Object.entries(dayData.products).forEach(([type, count]) => {
+                const productName = getProductName(type);
+                const individualImpact = calculateImpact({[type]: count}, pmm);
+                tooltip += `• ${productName}: ${count} (${individualImpact.toLocaleString()})\n`;
+            });
+            
+            return tooltip;
+        }
+
+        function showRichTooltip(e) {
+            const target = e.target.closest('.consolidated-badge');
+            if (!target || !target.getAttribute('data-rich-tooltip')) return;
+            
+            let tooltip = document.querySelector('.rich-tooltip');
+            if (!tooltip) {
+                tooltip = document.createElement('div');
+                tooltip.className = 'rich-tooltip';
+                document.body.appendChild(tooltip);
+            }
+            
+            tooltip.innerHTML = target.getAttribute('data-rich-tooltip').replace(/\n/g, '<br>');
+            tooltip.classList.add('show');
+            
+            const rect = target.getBoundingClientRect();
+            const tooltipRect = tooltip.getBoundingClientRect();
+            
+            let left = rect.left + rect.width / 2 - tooltipRect.width / 2;
+            let top = rect.top - tooltipRect.height - 15;
+            
+            if (left < 10) left = 10;
+            if (left + tooltipRect.width > window.innerWidth - 10) {
+                left = window.innerWidth - tooltipRect.width - 10;
+            }
+            if (top < 10) top = rect.bottom + 15;
+            
+            tooltip.style.left = left + 'px';
+            tooltip.style.top = top + 'px';
+        }
+
+        function hideRichTooltip() {
+            const tooltip = document.querySelector('.rich-tooltip');
+            if (tooltip) {
+                tooltip.classList.remove('show');
+            }
+        }
+
+        function exportToExcel() {
+            const params = window.currentCampaignData || {};
+            const startDate = parseDate(params.inicio || '01/01/2025');
+            const endDate = parseDate(params.fim || '31/01/2025');
+            const selectedWeekdays = parseSelectedWeekdays(params.dias || 'Seg.,Ter.,Qua.,Qui.,Sex.');
+            const activeProducts = getActiveProducts(params);
+            const validDays = getValidDays(startDate, endDate, selectedWeekdays);
+            const { distribution } = distributeMultipleSpots(activeProducts, validDays);
+            const pmm = params.pmm || 1000;
+            
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Data,Dia Semana,Spots 30s,Spots 5s,Spots 15s,Spots 60s,Test 60s,Total Spots,Impacto PMM\n";
+            
+            validDays.forEach(day => {
+                const dateKey = day.toISOString().split('T')[0];
+                const dayData = distribution[dateKey] || { total: 0, products: {} };
+                const weekdayName = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'][day.getDay()];
+                const dayImpact = calculateDayImpact(dayData.products, pmm);
+                
+                const row = [
+                    formatDate(day),
+                    weekdayName,
+                    dayData.products.spots30 || 0,
+                    dayData.products.spots5 || 0,
+                    dayData.products.spots15 || 0,
+                    dayData.products.spots60 || 0,
+                    dayData.products.test60 || 0,
+                    dayData.total,
+                    dayImpact
+                ];
+                
+                csvContent += row.join(",") + "\n";
+            });
+            
+            // Adicionar linha de totais
+            const totalSpots = Object.values(activeProducts).reduce((sum, spots) => sum + spots, 0);
+            const totalImpact = calculateImpact(activeProducts, pmm);
+            csvContent += `\nTOTAL,,${activeProducts.spots30||0},${activeProducts.spots5||0},${activeProducts.spots15||0},${activeProducts.spots60||0},${activeProducts.test60||0},${totalSpots},${totalImpact}\n`;
+            csvContent += `PMM Usado,,,,,,,,${pmm}\n`;
+            csvContent += `Emissora,,,,,,,,${params.emissora||'N/A'}\n`;
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `distribuicao_midias_${params.emissora||'campanha'}_${formatDate(new Date()).replace(/\//g, '-')}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            console.log('📊 Exportação Excel concluída');
+        }
+
         async function init() {
             try {
                 const params = getURLParams();
@@ -934,6 +1122,7 @@
                 console.log('🔄 Modo de operação:', params.mode);
                 
                 let campaignData;
+                window.currentCampaignData = null;
                 
                 if (params.mode === 'notion-api') {
                     // Modo dinâmico: buscar dados via API Notion
@@ -951,6 +1140,9 @@
                     campaignData = params;
                     console.log('📋 Usando dados dos parâmetros URL');
                 }
+                
+                // Salvar dados globalmente para funções auxiliares
+                window.currentCampaignData = campaignData;
                 
                 const startDate = parseDate(campaignData.inicio);
                 const endDate = parseDate(campaignData.fim);
@@ -992,6 +1184,10 @@
                 
                 updateProductsInfo(activeProducts);
                 updateWeekdaysInfo(campaignData.dias);
+                
+                // Mostrar barra de ações
+                document.getElementById('actions-bar').style.display = 'flex';
+                document.getElementById('campaign-title').textContent = `${campaignData.emissora} • PMM: ${(campaignData.pmm || 1000).toLocaleString()}`;
                 
                 const validDays = getValidDays(startDate, endDate, selectedWeekdays);
                 
