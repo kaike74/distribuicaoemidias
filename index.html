@@ -460,6 +460,47 @@
             color: #dc2626;
         }
         
+        /* Estilos para edição em tela cheia */
+        .edit-mode .date-cell.has-spots.editing {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        
+        .edit-mode .date-cell.has-spots .date-number {
+            display: none;
+        }
+        
+        .edit-mode .date-cell.has-spots.editing .big-number {
+            display: flex;
+        }
+        
+        .big-number {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 4px;
+            z-index: 10;
+        }
+        
+        .big-number-input {
+            background: transparent;
+            border: none;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+            width: 30px;
+            text-align: center;
+            outline: none;
+        }
+        
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -502,6 +543,15 @@
                 padding: 6px 12px;
                 margin-left: 0;
             }
+            
+            .big-number {
+                font-size: 16px;
+            }
+            
+            .big-number-input {
+                font-size: 16px;
+                width: 25px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -514,6 +564,15 @@
                 width: 12px;
                 height: 12px;
                 font-size: 5px;
+            }
+            
+            .big-number {
+                font-size: 14px;
+            }
+            
+            .big-number-input {
+                font-size: 14px;
+                width: 20px;
             }
         }
 
@@ -1006,6 +1065,12 @@
                         
                         if (dayData && dayData.total > 0) {
                             dateCell.classList.add('has-spots');
+                            
+                            // Adicionar número grande para modo de edição
+                            const bigNumber = document.createElement('div');
+                            bigNumber.className = 'big-number';
+                            bigNumber.textContent = dayData.total;
+                            dateCell.appendChild(bigNumber);
                         }
                         
                         const dateNumber = document.createElement('div');
@@ -1143,252 +1208,6 @@
             return calculateImpact(dayProducts, pmm);
         }
 
-        // Exportação de dados (função corrigida)
-        function exportToExcel() {
-            console.log('📊 Iniciando exportação de dados...');
-            
-            const params = window.currentCampaignData || {};
-            const startDate = parseDate(params.inicio || '01/01/2025');
-            const endDate = parseDate(params.fim || '31/01/2025');
-            const selectedWeekdays = parseSelectedWeekdays(params.dias || 'Seg.,Ter.,Qua.,Qui.,Sex.');
-            const activeProducts = getActiveProducts(params);
-            const validDays = getValidDays(startDate, endDate, selectedWeekdays);
-            const { distribution } = distributeMultipleSpots(activeProducts, validDays);
-            const pmm = params.pmm || 1000;
-            
-            let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "Data,Dia Semana,Spots 30s,Spots 5s,Spots 15s,Spots 60s,Test 60s,Total Inserções,Impactos PMM\n";
-            
-            validDays.forEach(day => {
-                const dateKey = day.toISOString().split('T')[0];
-                const dayData = distribution[dateKey] || { total: 0, products: {} };
-                const weekdayName = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'][day.getDay()];
-                const dayImpact = calculateDayImpact(dayData.products, pmm);
-                
-                const row = [
-                    formatDate(day),
-                    weekdayName,
-                    dayData.products.spots30 || 0,
-                    dayData.products.spots5 || 0,
-                    dayData.products.spots15 || 0,
-                    dayData.products.spots60 || 0,
-                    dayData.products.test60 || 0,
-                    dayData.total,
-                    dayImpact
-                ];
-                
-                csvContent += row.join(",") + "\n";
-            });
-            
-            // Adicionar linha de totais
-            const totalSpots = Object.values(activeProducts).reduce((sum, spots) => sum + spots, 0);
-            const totalImpact = calculateImpact(activeProducts, pmm);
-            csvContent += `\nTOTAL,,${activeProducts.spots30||0},${activeProducts.spots5||0},${activeProducts.spots15||0},${activeProducts.spots60||0},${activeProducts.test60||0},${totalSpots},${totalImpact}\n`;
-            csvContent += `PMM Usado,,,,,,,,${pmm}\n`;
-            csvContent += `Emissora,,,,,,,,${params.emissora||'N/A'}\n`;
-            
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `distribuicao_midias_${params.emissora||'campanha'}_${formatDate(new Date()).replace(/\//g, '-')}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            console.log('📊 Exportação de dados concluída');
-        }
-
-        // Nova função para exportar calendário visual (com melhorias e debug)
-        function exportCalendarToExcel() {
-            console.log('📅 Iniciando exportação de calendário visual...');
-            
-            try {
-                // Verificar se a biblioteca XLSX está carregada
-                if (typeof XLSX === 'undefined') {
-                    console.error('❌ Biblioteca XLSX não carregada!');
-                    alert('Erro: Biblioteca XLSX não disponível. Verifique a conexão com a internet.');
-                    return;
-                }
-                
-                const params = window.currentCampaignData || {};
-                const startDate = parseDate(params.inicio || '01/01/2025');
-                const endDate = parseDate(params.fim || '31/01/2025');
-                const selectedWeekdays = parseSelectedWeekdays(params.dias || 'Seg.,Ter.,Qua.,Qui.,Sex.');
-                const activeProducts = getActiveProducts(params);
-                const validDays = getValidDays(startDate, endDate, selectedWeekdays);
-                const { distribution } = distributeMultipleSpots(activeProducts, validDays);
-                const pmm = params.pmm || 1000;
-                
-                console.log('📊 Dados preparados para exportação:', {
-                    startDate, endDate, activeProducts, validDays: validDays.length
-                });
-                
-                // Criar workbook
-                const wb = XLSX.utils.book_new();
-                console.log('📚 Workbook criado');
-                
-                // Obter meses únicos
-                const months = new Set();
-                const current = new Date(startDate);
-                
-                while (current <= endDate) {
-                    months.add(`${current.getFullYear()}-${current.getMonth()}`);
-                    current.setMonth(current.getMonth() + 1);
-                    current.setDate(1);
-                }
-                
-                console.log(`📅 Processando ${months.size} meses:`, Array.from(months));
-                
-                // Criar uma aba para cada mês
-                months.forEach((monthKey, index) => {
-                    console.log(`📅 Processando mês ${index + 1}/${months.size}: ${monthKey}`);
-                    
-                    const [year, month] = monthKey.split('-').map(Number);
-                    const monthName = getMonthName(month, year);
-                    const days = getMonthCalendar(year, month);
-                    
-                    // Criar matriz do calendário
-                    const calendarData = [];
-                    
-                    // Cabeçalho do mês
-                    calendarData.push([monthName, '', '', '', '', '', '']);
-                    calendarData.push(['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB']);
-                    
-                    // Processar dias em semanas
-                    for (let i = 0; i < days.length; i += 7) {
-                        const weekDays = days.slice(i, i + 7);
-                        const weekRow = [];
-                        
-                        weekDays.forEach(day => {
-                            const isCurrentMonth = day.getMonth() === month;
-                            const dateKey = day.toISOString().split('T')[0];
-                            const dayData = distribution[dateKey];
-                            
-                            if (!isCurrentMonth) {
-                                weekRow.push('');
-                            } else if (dayData && dayData.total > 0) {
-                                // Formato: "15 (5 inserções)"
-                                weekRow.push(`${day.getDate()} (${dayData.total})`);
-                            } else if (isDaySelected(day, selectedWeekdays)) {
-                                // Dia selecionado mas sem inserções
-                                weekRow.push(`${day.getDate()}`);
-                            } else {
-                                // Dia não selecionado
-                                weekRow.push(day.getDate().toString());
-                            }
-                        });
-                        
-                        calendarData.push(weekRow);
-                        
-                        // Se já temos uma semana completa do próximo mês, parar
-                        if (weekDays.length > 0 && weekDays[weekDays.length - 1].getMonth() !== month) {
-                            break;
-                        }
-                    }
-                    
-                    // Adicionar informações de resumo
-                    calendarData.push(['']);
-                    calendarData.push(['RESUMO DO MÊS:']);
-                    
-                    // Calcular estatísticas do mês
-                    let monthSpots = 0;
-                    let monthDays = 0;
-                    let monthImpact = 0;
-                    
-                    days.forEach(day => {
-                        if (day.getMonth() === month) {
-                            const dateKey = day.toISOString().split('T')[0];
-                            const dayData = distribution[dateKey];
-                            if (dayData && dayData.total > 0) {
-                                monthSpots += dayData.total;
-                                monthDays++;
-                                monthImpact += calculateDayImpact(dayData.products, pmm);
-                            }
-                        }
-                    });
-                    
-                    calendarData.push([`Total de inserções: ${monthSpots}`]);
-                    calendarData.push([`Dias ativos: ${monthDays}`]);
-                    calendarData.push([`Impactos PMM: ${monthImpact.toLocaleString()}`]);
-                    
-                    // Detalhamento por produto
-                    calendarData.push(['']);
-                    calendarData.push(['PRODUTOS:']);
-                    Object.entries(activeProducts).forEach(([type, count]) => {
-                        calendarData.push([`${getProductName(type)}: ${count}`]);
-                    });
-                    
-                    // Criar worksheet
-                    const ws = XLSX.utils.aoa_to_sheet(calendarData);
-                    
-                    // Definir larguras das colunas
-                    const colWidths = [
-                        { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 },
-                        { wch: 12 }, { wch: 12 }, { wch: 12 }
-                    ];
-                    ws['!cols'] = colWidths;
-                    
-                    // Adicionar worksheet ao workbook
-                    const sheetName = monthName.replace(' ', '_');
-                    XLSX.utils.book_append_sheet(wb, ws, sheetName);
-                    console.log(`✅ Aba criada: ${sheetName}`);
-                });
-                
-                // Criar aba de resumo geral
-                console.log('📋 Criando aba de resumo...');
-                const summaryData = [];
-                summaryData.push(['RESUMO GERAL DA CAMPANHA']);
-                summaryData.push(['']);
-                summaryData.push(['Emissora:', params.emissora || 'N/A']);
-                summaryData.push(['Período:', `${formatDate(startDate)} a ${formatDate(endDate)}`]);
-                summaryData.push(['PMM Usado:', pmm.toLocaleString()]);
-                summaryData.push(['']);
-                
-                summaryData.push(['PRODUTOS ATIVOS:']);
-                Object.entries(activeProducts).forEach(([type, count]) => {
-                    const impact = calculateImpact({[type]: count}, pmm);
-                    summaryData.push([getProductName(type), count, impact.toLocaleString()]);
-                });
-                
-                summaryData.push(['']);
-                summaryData.push(['TOTAIS:']);
-                const totalSpots = Object.values(activeProducts).reduce((sum, spots) => sum + spots, 0);
-                const totalImpact = calculateImpact(activeProducts, pmm);
-                summaryData.push(['Total de inserções:', totalSpots]);
-                summaryData.push(['Dias ativos:', validDays.length]);
-                summaryData.push(['Impactos total:', totalImpact.toLocaleString()]);
-                summaryData.push(['Média inserções/dia:', validDays.length > 0 ? (totalSpots / validDays.length).toFixed(1) : '0']);
-                
-                summaryData.push(['']);
-                summaryData.push(['DIAS SELECIONADOS:']);
-                const weekdayNames = {
-                    'Dom.': 'Domingo', 'Seg.': 'Segunda', 'Ter.': 'Terça', 'Qua.': 'Quarta',
-                    'Qui.': 'Quinta', 'Sex.': 'Sexta', 'Sáb.': 'Sábado'
-                };
-                const selectedNames = params.dias.split(',').map(day => weekdayNames[day.trim()]).filter(Boolean);
-                selectedNames.forEach(day => {
-                    summaryData.push([day]);
-                });
-                
-                const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
-                summaryWs['!cols'] = [{ wch: 20 }, { wch: 15 }, { wch: 15 }];
-                XLSX.utils.book_append_sheet(wb, summaryWs, 'Resumo', 0);
-                console.log('✅ Aba de resumo criada');
-                
-                // Salvar arquivo
-                const fileName = `calendario_${params.emissora||'campanha'}_${formatDate(new Date()).replace(/\//g, '-')}.xlsx`;
-                console.log(`💾 Salvando arquivo: ${fileName}`);
-                
-                XLSX.writeFile(wb, fileName);
-                
-                console.log('✅ Exportação de calendário concluída com sucesso!');
-                
-            } catch (error) {
-                console.error('❌ Erro na exportação de calendário:', error);
-                alert(`Erro ao exportar calendário: ${error.message}`);
-            }
-        }
-
         // ============================================
         // SISTEMA DE EDIÇÃO - FUNÇÕES IMPLEMENTADAS
         // ============================================
@@ -1411,7 +1230,7 @@
                 makeCalendarEditable();
                 
                 // Atualizar status
-                document.getElementById('edit-status').textContent = 'Modo de Edição - Edite os valores clicando nas bolinhas';
+                document.getElementById('edit-status').textContent = 'Modo de Edição - Clique nos números para editar';
                 validateDistribution();
                 
             } else {
@@ -1430,41 +1249,38 @@
 
         // Tornar calendário editável
         function makeCalendarEditable() {
-            const badges = document.querySelectorAll('.consolidated-badge');
+            const dateCells = document.querySelectorAll('.date-cell.has-spots');
             
-            badges.forEach(badge => {
-                badge.classList.add('editable');
+            dateCells.forEach(cell => {
+                cell.classList.add('editable');
+                cell.style.cursor = 'pointer';
                 
                 // Remover event listeners antigos
-                badge.removeEventListener('click', handleBadgeClick);
+                cell.removeEventListener('click', handleCellClick);
                 
                 // Adicionar novo event listener para edição
-                badge.addEventListener('click', handleBadgeClick);
+                cell.addEventListener('click', handleCellClick);
             });
         }
 
         // Tornar calendário somente leitura
         function makeCalendarReadOnly() {
-            const badges = document.querySelectorAll('.consolidated-badge');
+            const dateCells = document.querySelectorAll('.date-cell.has-spots');
             
-            badges.forEach(badge => {
-                badge.classList.remove('editable');
+            dateCells.forEach(cell => {
+                cell.classList.remove('editable');
+                cell.style.cursor = 'default';
                 
                 // Remover event listeners de edição
-                badge.removeEventListener('click', handleBadgeClick);
-                
-                // Restaurar event listeners originais
-                badge.addEventListener('mouseenter', showRichTooltip);
-                badge.addEventListener('mouseleave', hideRichTooltip);
-                badge.addEventListener('mousemove', updateTooltipPosition);
+                cell.removeEventListener('click', handleCellClick);
             });
         }
 
-        // Manipular clique nas bolinhas
-        function handleBadgeClick(e) {
-            const badge = e.target;
-            const dateCell = badge.closest('td');
-            const dateNumber = dateCell.querySelector('.date-number').textContent;
+        // Manipular clique nas células
+        function handleCellClick(e) {
+            const cell = e.currentTarget;
+            const dateNumber = cell.querySelector('.date-number').textContent;
+            const bigNumber = cell.querySelector('.big-number');
             
             // Encontrar a data correspondente
             let dateKey = null;
@@ -1478,22 +1294,29 @@
             
             if (!dateKey) return;
             
-            // Substituir badge por input
+            // Adicionar classe de edição
+            cell.classList.add('editing');
+            
             const currentValue = editedDistribution[dateKey].total;
-            badge.style.display = 'none';
+            
+            // Substituir texto por input
+            bigNumber.innerHTML = '';
             
             const input = document.createElement('input');
             input.type = 'number';
-            input.className = 'edit-input';
+            input.className = 'big-number-input';
             input.value = currentValue;
             input.min = 0;
-            input.style.width = '20px';
-            input.style.height = '18px';
-            input.style.fontSize = '10px';
+            input.style.width = (currentValue.toString().length * 12) + 'px';
             
-            badge.parentNode.appendChild(input);
+            bigNumber.appendChild(input);
             input.focus();
             input.select();
+            
+            // Ajustar largura conforme o valor
+            input.addEventListener('input', function() {
+                this.style.width = (this.value.length * 12) + 'px';
+            });
             
             // Quando o input perder foco
             input.addEventListener('blur', function() {
@@ -1508,12 +1331,15 @@
                 // Atualizar distribuição
                 editedDistribution[dateKey].total = newValue;
                 
-                // Atualizar badge
-                badge.textContent = newValue;
-                badge.style.display = 'flex';
+                // Atualizar badge e número grande
+                const badge = cell.querySelector('.consolidated-badge');
+                if (badge) {
+                    badge.textContent = newValue;
+                }
+                bigNumber.textContent = newValue;
                 
-                // Remover input
-                this.remove();
+                // Remover classe de edição
+                cell.classList.remove('editing');
                 
                 // Validar distribuição
                 validateDistribution();
@@ -1592,20 +1418,30 @@
             // Restaurar distribuição original
             editedDistribution = JSON.parse(JSON.stringify(originalDistribution));
             
-            // Atualizar badges visualmente
-            const badges = document.querySelectorAll('.consolidated-badge');
-            badges.forEach(badge => {
-                const dateCell = badge.closest('td');
-                const dateNumber = dateCell.querySelector('.date-number').textContent;
+            // Atualizar visualmente
+            const dateCells = document.querySelectorAll('.date-cell.has-spots');
+            dateCells.forEach(cell => {
+                const dateNumber = cell.querySelector('.date-number').textContent;
+                const bigNumber = cell.querySelector('.big-number');
                 
                 // Encontrar a data correspondente
                 for (const key in originalDistribution) {
                     const date = new Date(key);
                     if (date.getDate().toString() === dateNumber) {
-                        badge.textContent = originalDistribution[key].total;
+                        const value = originalDistribution[key].total;
+                        
+                        // Atualizar badge e número grande
+                        const badge = cell.querySelector('.consolidated-badge');
+                        if (badge) {
+                            badge.textContent = value;
+                        }
+                        bigNumber.textContent = value;
                         break;
                     }
                 }
+                
+                // Remover classe de edição
+                cell.classList.remove('editing');
             });
             
             // Sair do modo de edição
@@ -1633,24 +1469,151 @@
             // Atualizar distribuição editada
             editedDistribution = JSON.parse(JSON.stringify(distribution));
             
-            // Atualizar badges visualmente
-            const badges = document.querySelectorAll('.consolidated-badge');
-            badges.forEach(badge => {
-                const dateCell = badge.closest('td');
-                const dateNumber = dateCell.querySelector('.date-number').textContent;
+            // Atualizar visualmente
+            const dateCells = document.querySelectorAll('.date-cell.has-spots');
+            dateCells.forEach(cell => {
+                const dateNumber = cell.querySelector('.date-number').textContent;
+                const bigNumber = cell.querySelector('.big-number');
                 
                 // Encontrar a data correspondente
                 for (const key in distribution) {
                     const date = new Date(key);
                     if (date.getDate().toString() === dateNumber && distribution[key]) {
-                        badge.textContent = distribution[key].total;
+                        const value = distribution[key].total;
+                        
+                        // Atualizar badge e número grande
+                        const badge = cell.querySelector('.consolidated-badge');
+                        if (badge) {
+                            badge.textContent = value;
+                        }
+                        bigNumber.textContent = value;
                         break;
                     }
                 }
+                
+                // Remover classe de edição
+                cell.classList.remove('editing');
             });
             
             // Validar nova distribuição
             validateDistribution();
+        }
+
+        // Nova função para exportar calendário visual (formato da imagem)
+        function exportCalendarToExcel() {
+            console.log('📅 Iniciando exportação de calendário visual...');
+            
+            try {
+                // Verificar se a biblioteca XLSX está carregada
+                if (typeof XLSX === 'undefined') {
+                    console.error('❌ Biblioteca XLSX não carregada!');
+                    alert('Erro: Biblioteca XLSX não disponível. Verifique a conexão com a internet.');
+                    return;
+                }
+                
+                const params = window.currentCampaignData || {};
+                const startDate = parseDate(params.inicio || '01/01/2025');
+                const endDate = parseDate(params.fim || '31/01/2025');
+                const selectedWeekdays = parseSelectedWeekdays(params.dias || 'Seg.,Ter.,Qua.,Qui.,Sex.');
+                const activeProducts = getActiveProducts(params);
+                const validDays = getValidDays(startDate, endDate, selectedWeekdays);
+                
+                // Usar a distribuição atual (editada ou original)
+                const distribution = window.currentDistribution || distributeMultipleSpots(activeProducts, validDays).distribution;
+                const pmm = params.pmm || 1000;
+                
+                console.log('📊 Dados preparados para exportação:', {
+                    startDate, endDate, activeProducts, validDays: validDays.length
+                });
+                
+                // Criar workbook
+                const wb = XLSX.utils.book_new();
+                console.log('📚 Workbook criado');
+                
+                // Formatar dados conforme a imagem de exemplo
+                const excelData = [];
+                
+                // Cabeçalho
+                excelData.push(['PROGRAMA E FAIXA HORÁRIA', 'Spots 30"', 'Testemunais 60"', 'Total de spots por dia']);
+                
+                // Adicionar dias válidos com distribuição
+                validDays.forEach(day => {
+                    const dateKey = day.toISOString().split('T')[0];
+                    const dayData = distribution[dateKey] || { total: 0, products: {} };
+                    const dayName = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'][day.getDay()];
+                    const dateFormatted = formatDate(day);
+                    
+                    excelData.push([
+                        `${dayName} - ${dateFormatted}`,
+                        dayData.products.spots30 || 0,
+                        dayData.products.test60 || 0,
+                        dayData.total
+                    ]);
+                });
+                
+                // Adicionar totais
+                const totalSpots30 = Object.values(activeProducts).reduce((sum, spots, idx) => 
+                    idx === 0 ? sum + spots : sum, 0);
+                const totalTest60 = Object.values(activeProducts).reduce((sum, spots, idx) => 
+                    idx === 4 ? sum + spots : sum, 0);
+                const totalGeral = Object.values(activeProducts).reduce((sum, spots) => sum + spots, 0);
+                
+                excelData.push(['TOTAL', totalSpots30, totalTest60, totalGeral]);
+                
+                // Criar worksheet
+                const ws = XLSX.utils.aoa_to_sheet(excelData);
+                
+                // Definir larguras das colunas
+                const colWidths = [
+                    { wch: 25 }, // Programa e Faixa Horária
+                    { wch: 10 }, // Spots 30"
+                    { wch: 15 }, // Testemunais 60"
+                    { wch: 18 }  // Total de spots por dia
+                ];
+                ws['!cols'] = colWidths;
+                
+                // Adicionar worksheet ao workbook
+                XLSX.utils.book_append_sheet(wb, ws, 'Distribuição');
+                
+                // Criar segunda aba com informações gerais
+                const infoData = [
+                    ['INFORMAÇÕES GERAIS'],
+                    [''],
+                    ['Emissora:', params.emissora || 'N/A'],
+                    ['Período:', `${formatDate(startDate)} a ${formatDate(endDate)}`],
+                    ['PMM Usado:', pmm.toLocaleString()],
+                    ['Dias de veiculação:', params.dias],
+                    [''],
+                    ['PRODUTOS ATIVOS:']
+                ];
+                
+                Object.entries(activeProducts).forEach(([type, count]) => {
+                    infoData.push([getProductName(type), count]);
+                });
+                
+                infoData.push(['']);
+                infoData.push(['TOTAIS:']);
+                infoData.push(['Total de inserções:', totalGeral]);
+                infoData.push(['Dias ativos:', validDays.length]);
+                infoData.push(['Impactos total:', calculateImpact(activeProducts, pmm).toLocaleString()]);
+                infoData.push(['Média inserções/dia:', validDays.length > 0 ? (totalGeral / validDays.length).toFixed(1) : '0']);
+                
+                const infoWs = XLSX.utils.aoa_to_sheet(infoData);
+                infoWs['!cols'] = [{ wch: 20 }, { wch: 15 }];
+                XLSX.utils.book_append_sheet(wb, infoWs, 'Informações');
+                
+                // Salvar arquivo
+                const fileName = `distribuicao_${params.emissora||'campanha'}_${formatDate(new Date()).replace(/\//g, '-')}.xlsx`;
+                console.log(`💾 Salvando arquivo: ${fileName}`);
+                
+                XLSX.writeFile(wb, fileName);
+                
+                console.log('✅ Exportação de calendário concluída com sucesso!');
+                
+            } catch (error) {
+                console.error('❌ Erro na exportação de calendário:', error);
+                alert(`Erro ao exportar calendário: ${error.message}`);
+            }
         }
 
         async function init() {
