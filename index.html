@@ -13,7 +13,7 @@
         
         body {
             font-family: 'Arial', sans-serif;
-            background: #f5f5f5;
+            background: #f8fafc;
             color: #333;
             line-height: 1.4;
         }
@@ -24,89 +24,204 @@
             padding: 20px;
         }
         
+        /* CABEÇALHO SIMPLIFICADO */
         .header {
             background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
             color: white;
-            padding: 20px;
-            border-radius: 8px;
+            padding: 24px;
+            border-radius: 12px;
             margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(29, 78, 216, 0.15);
             text-align: center;
-            box-shadow: 0 2px 10px rgba(29, 78, 216, 0.2);
         }
         
-        .header h1 {
-            font-size: 24px;
+        .header-title {
+            font-size: 28px;
             font-weight: 700;
-            margin-bottom: 5px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.2px;
         }
         
-        .header p {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-        
-        .error {
-            background: #fee2e2;
-            border: 1px solid #fecaca;
-            color: #dc2626;
-            padding: 15px;
-            border-radius: 6px;
-            text-align: center;
-            margin: 15px 0;
-        }
-        
+        /* CARDS DE MÉTRICAS - REORGANIZADAS */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 10px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
         }
         
         .stat-card {
             background: white;
-            padding: 15px;
-            border-radius: 6px;
+            padding: 18px;
+            border-radius: 10px;
             text-align: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border-left: 3px solid #1d4ed8;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-left: 4px solid #1d4ed8;
+            transition: transform 0.2s ease;
         }
         
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card.primary { border-left-color: #1d4ed8; }
+        .stat-card.orange { border-left-color: #f59e0b; }
+        .stat-card.success { border-left-color: #10b981; }
+        .stat-card.purple { border-left-color: #8b5cf6; }
+        
         .stat-number {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 700;
             color: #1e3a8a;
             display: block;
+            margin-bottom: 4px;
         }
         
         .stat-label {
             font-size: 11px;
-            color: #666;
+            color: #6b7280;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-top: 3px;
+            letter-spacing: 0.8px;
+            font-weight: 600;
         }
         
-        .calendar-compact {
+        /* PRODUTOS */
+        .info-section {
             background: white;
+            padding: 12px 16px;
             border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+            border-left: 4px solid #1d4ed8;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        
+        .info-title {
+            color: #1e3a8a;
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        
+        .product-tag {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 600;
+            color: white;
+            margin-right: 8px;
+            margin-bottom: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tag-spots30 { background: linear-gradient(135deg, #1d4ed8, #3b82f6); }
+        .tag-spots5 { background: linear-gradient(135deg, #059669, #10b981); }
+        .tag-spots15 { background: linear-gradient(135deg, #dc2626, #ef4444); }
+        .tag-spots60 { background: linear-gradient(135deg, #7c3aed, #a855f7); }
+        .tag-test60 { background: linear-gradient(135deg, #ea580c, #f97316); }
+        
+        /* AÇÕES */
+        .actions-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
-            transition: border-color 0.3s ease;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        
+        .actions-left {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-badge {
+            background: #dcfce7;
+            color: #166534;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .actions-right {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn {
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .btn-edit {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+        
+        .btn-export {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: white;
+        }
+        
+        .btn-save {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        
+        .btn-cancel {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+            color: white;
+        }
+        
+        .btn-auto {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+        
+        /* CALENDÁRIO */
+        .calendar-container {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .calendar-month {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
         }
         
         .month-header {
-            background: #1e3a8a;
+            background: linear-gradient(135deg, #1e3a8a, #1d4ed8);
             color: white;
-            padding: 12px;
-            font-size: 16px;
+            padding: 16px;
+            font-size: 18px;
             font-weight: 600;
             text-align: center;
             text-transform: uppercase;
             letter-spacing: 1px;
-            transition: background-color 0.3s ease;
         }
         
         .calendar-table {
@@ -115,698 +230,391 @@
         }
         
         .calendar-table th {
-            background: #e5e7eb;
-            padding: 8px 4px;
+            background: #f8fafc;
+            padding: 12px 8px;
             text-align: center;
             font-size: 11px;
-            font-weight: 600;
-            color: #374151;
+            font-weight: 700;
+            color: #4b5563;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.8px;
+            border-bottom: 2px solid #e5e7eb;
         }
         
         .calendar-table td {
-            padding: 6px 4px;
+            padding: 4px;
             text-align: center;
-            border-bottom: 1px solid #f3f4f6;
-            vertical-align: top;
-            height: 50px;
+            height: 80px;
             position: relative;
-            min-width: 45px;
+            min-width: 50px;
+            border-bottom: 1px solid #f3f4f6;
         }
         
+        /* NOVA ESTRUTURA DE CÉLULAS - DIVISÃO HORIZONTAL */
         .date-cell {
-            font-size: 12px;
-            color: #6b7280;
-            position: relative;
             height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            padding-top: 2px;
+            border-radius: 8px;
+            margin: 2px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            overflow: hidden;
         }
         
         .date-cell.current-month {
-            color: #374151;
-            font-weight: 500;
-        }
-        
-        .date-cell.has-spots {
-            background: #dbeafe;
-            color: #1e40af;
-            font-weight: 700;
-            border-radius: 4px;
+            border: 1px solid #e2e8f0;
         }
         
         .date-cell.selected-weekday {
-            background: #f3f4f6;
+            background: #f1f5f9;
         }
         
+        /* PARTE SUPERIOR - DATA (33%) */
         .date-number {
-            font-size: 12px;
-            line-height: 1;
-            margin-bottom: 2px;
-        }
-
-        .spots-container {
-            position: absolute;
-            top: 0;
-            right: 0;
-            left: 0;
-            bottom: 18px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: flex-end;
-            padding: 2px;
-            pointer-events: none;
-        }
-
-        .spots-badges {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 2px;
-            max-width: 100%;
-            justify-content: flex-end;
-            align-content: flex-start;
-            pointer-events: auto;
-        }
-
-        .consolidated-badge {
-            background: linear-gradient(135deg, #1d4ed8, #7c3aed);
-            font-size: 8px;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
+            height: 33%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-weight: 700;
-            cursor: help;
-            position: relative;
-            animation: pulse 2s infinite;
-            box-shadow: 0 2px 6px rgba(29, 78, 216, 0.3);
-            border: 2px solid rgba(255,255,255,0.2);
-            transition: all 0.2s ease;
-        }
-
-        .consolidated-badge:hover {
-            transform: scale(1.15);
-            box-shadow: 0 4px 12px rgba(29, 78, 216, 0.4);
-        }
-
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(29, 78, 216, 0.4); }
-            50% { box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.1); }
-        }
-
-        .export-btn {
-            background: linear-gradient(135deg, #059669, #10b981);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
             font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
-            margin-left: 8px;
-        }
-
-        .export-btn:hover {
-            background: linear-gradient(135deg, #047857, #059669);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(5, 150, 105, 0.3);
-        }
-
-        .export-btn.calendar {
-            background: linear-gradient(135deg, #dc2626, #ef4444);
-            box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
-        }
-
-        .export-btn.calendar:hover {
-            background: linear-gradient(135deg, #b91c1c, #dc2626);
-            box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3);
-        }
-
-        .impact-stat {
-            border-left: 3px solid #10b981;
-        }
-
-        .pmm-value {
-            color: #059669;
-            font-weight: 700;
-        }
-        
-        .weekdays-info {
+            font-weight: 500;
+            color: #9ca3af;
             background: #f8fafc;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 15px;
-            border-left: 3px solid #1d4ed8;
+            border-bottom: 1px solid #e5e7eb;
         }
         
-        .weekdays-info strong {
-            color: #1e3a8a;
-            font-size: 12px;
-            text-transform: uppercase;
-        }
-        
-        .weekdays-list {
-            color: #6b7280;
-            font-size: 11px;
-            margin-top: 3px;
-        }
-
-        .product-tag {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-            color: white;
-            margin-right: 8px;
-            margin-bottom: 4px;
-            transition: transform 0.2s ease;
-        }
-
-        .product-tag:hover {
-            transform: translateY(-1px);
-        }
-
-        .tag-spots30 { background: #1d4ed8; }
-        .tag-spots5 { background: #059669; }
-        .tag-spots15 { background: #dc2626; }
-        .tag-spots60 { background: #7c3aed; }
-        .tag-test60 { background: #ea580c; }
-
-        .rich-tooltip {
-            position: fixed;
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(31, 41, 55, 0.95));
-            color: white;
-            padding: 12px 16px;
-            border-radius: 10px;
-            font-size: 12px;
-            white-space: pre-line;
-            z-index: 9999;
-            pointer-events: none;
-            opacity: 0;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,255,255,0.15);
-            font-family: 'Arial', sans-serif;
-            max-width: 280px;
-            line-height: 1.4;
-        }
-
-        .rich-tooltip.show {
-            opacity: 1;
-            transform: translateY(-15px);
-        }
-
-        .rich-tooltip::after {
-            content: '';
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            border: 8px solid transparent;
-            border-top-color: rgba(0, 0, 0, 0.95);
-            transform: translateX(-50%);
-        }
-
-        .actions-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 10px;
-            background: white;
-            border-radius: 6px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .actions-left {
-            font-size: 14px;
-            font-weight: 600;
+        .date-cell.current-month .date-number {
             color: #374151;
-        }
-
-        .actions-right {
-            display: flex;
-            gap: 8px;
+            font-weight: 600;
         }
         
-        /* NOVOS ESTILOS PARA EDIÇÃO */
-        .edit-btn {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
-        }
-
-        .edit-btn:hover {
-            background: linear-gradient(135deg, #d97706, #b45309);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
-        }
-
-        .save-btn {
-            background: linear-gradient(135deg, #059669, #10b981);
-            box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
-        }
-
-        .save-btn:hover {
-            background: linear-gradient(135deg, #047857, #059669);
-            box-shadow: 0 4px 8px rgba(5, 150, 105, 0.3);
-        }
-
-        .cancel-btn {
-            background: linear-gradient(135deg, #6b7280, #4b5563);
-            box-shadow: 0 2px 4px rgba(107, 114, 128, 0.2);
-        }
-
-        .cancel-btn:hover {
-            background: linear-gradient(135deg, #4b5563, #374151);
-            box-shadow: 0 4px 8px rgba(107, 114, 128, 0.3);
-        }
-
-        .auto-btn {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
-        }
-
-        .auto-btn:hover {
-            background: linear-gradient(135deg, #1d4ed8, #1e40af);
-            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
-        }
-
-        .edit-mode .calendar-compact {
-            border: 2px solid #059669;
-        }
-
-        .edit-mode .month-header {
-            background: #059669;
-        }
-
-        .consolidated-badge.editable {
-            cursor: pointer;
-            background: linear-gradient(135deg, #059669, #10b981);
-        }
-
-        .edit-input {
-            background: transparent;
-            border: none;
-            color: white;
+        /* PARTE INFERIOR - INSERÇÕES (67%) */
+        .spots-section {
+            height: 67%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
             font-weight: 700;
-            font-size: 8px;
-            width: 14px;
-            text-align: center;
-            outline: none;
+            color: white;
+            position: relative;
         }
-
-        .edit-validation {
-            padding: 10px;
-            border-radius: 6px;
-            text-align: center;
-            margin: 10px 0;
-            font-size: 12px;
+        
+        /* HEATMAP - APLICADO APENAS NA SEÇÃO DE INSERÇÕES */
+        .spots-section.intensity-1 { background: linear-gradient(135deg, #dbeafe, #93c5fd); }
+        .spots-section.intensity-2 { background: linear-gradient(135deg, #93c5fd, #60a5fa); }
+        .spots-section.intensity-3 { background: linear-gradient(135deg, #60a5fa, #3b82f6); }
+        .spots-section.intensity-4 { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .spots-section.intensity-5 { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+        .spots-section.intensity-max { background: linear-gradient(135deg, #1d4ed8, #1e40af); }
+        
+        .date-cell:hover {
+            transform: scale(1.02);
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
-
-        .edit-validation.success {
+        
+        .spots-section:not(:empty) {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        
+        /* MODO EDIÇÃO */
+        .edit-mode .calendar-month {
+            border: 3px solid #10b981;
+        }
+        
+        .edit-mode .month-header {
+            background: linear-gradient(135deg, #059669, #10b981);
+        }
+        
+        .edit-mode .date-cell {
+            cursor: pointer;
+        }
+        
+        .edit-mode .date-cell:hover .spots-section {
+            border: 2px solid #10b981;
+        }
+        
+        /* VALIDAÇÃO */
+        .validation {
+            padding: 12px 16px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 12px 0;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .validation.success {
             background: #dcfce7;
             border: 1px solid #059669;
             color: #059669;
         }
-
-        .edit-validation.warning {
+        
+        .validation.warning {
             background: #fef3c7;
             border: 1px solid #d97706;
             color: #d97706;
         }
-
-        .edit-validation.error {
+        
+        .validation.error {
             background: #fee2e2;
             border: 1px solid #dc2626;
             color: #dc2626;
         }
         
-        /* Estilos para edição em tela cheia */
-        .edit-mode .date-cell.has-spots.editing {
-            background: linear-gradient(135deg, #10b981, #059669);
+        /* TOOLTIP */
+        .tooltip {
+            position: fixed;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+            color: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 13px;
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(16px);
+            max-width: 300px;
+            line-height: 1.5;
         }
         
-        .edit-mode .date-cell.has-spots .date-number {
-            display: none;
+        .tooltip.show {
+            opacity: 1;
+            transform: translateY(-15px);
         }
         
-        .edit-mode .date-cell.has-spots.editing .big-number {
-            display: flex;
-        }
-        
-        .big-number {
-            display: none;
+        .tooltip::after {
+            content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            font-weight: bold;
-            color: white;
-            background: linear-gradient(135deg, #10b981, #059669);
-            border-radius: 4px;
-            z-index: 10;
+            top: 100%;
+            left: 50%;
+            border: 10px solid transparent;
+            border-top-color: rgba(15, 23, 42, 0.95);
+            transform: translateX(-50%);
         }
         
-        .big-number-input {
-            background: transparent;
-            border: none;
-            color: white;
-            font-weight: bold;
-            font-size: 20px;
-            width: 30px;
-            text-align: center;
-            outline: none;
-        }
-        
+        /* RESPONSIVIDADE */
         @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .calendar-table th,
-            .calendar-table td {
-                padding: 3px 2px;
-                font-size: 10px;
-                height: 45px;
-                min-width: 35px;
-            }
-
-            .consolidated-badge {
-                width: 14px;
-                height: 14px;
-                font-size: 6px;
-            }
-
-            .date-number {
-                font-size: 10px;
-            }
-
-            .product-tag {
-                font-size: 10px;
-                padding: 3px 8px;
-            }
-
-            .actions-right {
-                flex-direction: column;
-                gap: 4px;
-            }
-
-            .export-btn, .edit-btn {
-                font-size: 10px;
-                padding: 6px 12px;
-                margin-left: 0;
-            }
-            
-            .big-number {
-                font-size: 16px;
-            }
-            
-            .big-number-input {
-                font-size: 16px;
-                width: 25px;
-            }
+            .container { padding: 12px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .actions-bar { flex-direction: column; gap: 12px; }
+            .calendar-table td { height: 70px; min-width: 40px; }
+            .spots-section { font-size: 14px; }
+            .date-number { font-size: 10px; }
         }
-
-        @media (max-width: 480px) {
-            .calendar-table td {
-                height: 40px;
-                min-width: 30px;
-            }
-
-            .consolidated-badge {
-                width: 12px;
-                height: 12px;
-                font-size: 5px;
-            }
-            
-            .big-number {
-                font-size: 14px;
-            }
-            
-            .big-number-input {
-                font-size: 14px;
-                width: 20px;
-            }
+        
+        /* ANIMAÇÕES */
+        .calendar-month { animation: slideIn 0.5s ease-out; }
+        .stat-card { animation: fadeIn 0.4s ease-out; }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-
-        .calendar-compact {
-            animation: slideInUp 0.4s ease-out;
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
         }
-
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .stat-card {
-            animation: fadeInScale 0.3s ease-out;
-        }
-
-        @keyframes fadeInScale {
-            from {
-                opacity: 0;
-                transform: scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+        
+        .error {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 15px 0;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- CABEÇALHO SIMPLIFICADO -->
         <div class="header">
-            <h1 id="title">Distribuição de Mídias</h1>
-            <p id="subtitle">Carregando informações da campanha...</p>
+            <h1 class="header-title" id="title">Distribuição de Mídias</h1>
         </div>
         
+        <!-- ERRO -->
         <div id="error-message" class="error" style="display: none;"></div>
         
-        <div id="products-info" class="weekdays-info" style="display: none;">
-            <div><strong>Produtos Ativos:</strong></div>
-            <div class="weekdays-list" id="active-products"></div>
+        <!-- PRODUTOS -->
+        <div id="products-section" class="info-section" style="display: none;">
+            <div class="info-title">🎯 Produtos Ativos</div>
+            <div id="products-list"></div>
         </div>
         
-        <div id="weekdays-info" class="weekdays-info" style="display: none;">
-            <div><strong>Dias Selecionados:</strong></div>
-            <div class="weekdays-list" id="selected-weekdays"></div>
+        <!-- VALIDAÇÃO -->
+        <div id="validation" class="validation" style="display: none;"></div>
+        
+        <!-- MÉTRICAS REORGANIZADAS -->
+        <div class="stats-grid" id="stats" style="display: none;">
+            <div class="stat-card primary">
+                <span class="stat-number" id="stat-period">-</span>
+                <div class="stat-label">Período</div>
+            </div>
+            <div class="stat-card orange">
+                <span class="stat-number" id="stat-spots">0</span>
+                <div class="stat-label">Total Inserções</div>
+            </div>
+            <div class="stat-card success">
+                <span class="stat-number" id="stat-impact">0</span>
+                <div class="stat-label">Impactos Total</div>
+            </div>
+            <div class="stat-card purple">
+                <span class="stat-number" id="stat-avg">0</span>
+                <div class="stat-label">Média/Dia</div>
+            </div>
         </div>
         
-        <div id="edit-validation" class="edit-validation" style="display: none;"></div>
-        
-        <div class="actions-bar" id="actions-bar" style="display: none;">
+        <!-- AÇÕES NORMAIS -->
+        <div class="actions-bar" id="actions-normal" style="display: none;">
             <div class="actions-left">
-                <span id="campaign-title">Campanha Ativa</span>
+                <span id="campaign-name">Campanha</span>
+                <span class="status-badge">🟢 Ativa</span>
             </div>
             <div class="actions-right">
-                <button class="edit-btn" id="edit-btn" onclick="toggleEditMode()">
-                    ✏️ Editar Distribuição (Beta)
+                <button class="btn btn-edit" onclick="startEdit()">
+                    ✏️ Editar
                 </button>
-                <button class="export-btn calendar" onclick="exportCalendarToExcel()">
-                    📅 Exportar Calendário
+                <button class="btn btn-export" onclick="exportExcel()">
+                    📊 Exportar
                 </button>
             </div>
         </div>
         
-        <div class="actions-bar" id="edit-actions-bar" style="display: none;">
+        <!-- AÇÕES EDIÇÃO -->
+        <div class="actions-bar" id="actions-edit" style="display: none;">
             <div class="actions-left">
-                <span id="edit-status">Modo de Edição</span>
+                <span>Modo de Edição</span>
             </div>
             <div class="actions-right">
-                <button class="edit-btn save-btn" onclick="saveEditedDistribution()">
+                <button class="btn btn-save" onclick="saveEdit()">
                     💾 Salvar
                 </button>
-                <button class="edit-btn cancel-btn" onclick="cancelEdit()">
+                <button class="btn btn-cancel" onclick="cancelEdit()">
                     ❌ Cancelar
                 </button>
-                <button class="edit-btn auto-btn" onclick="resetToAuto()">
+                <button class="btn btn-auto" onclick="resetAuto()">
                     🔄 Auto
                 </button>
             </div>
         </div>
         
-        <div class="stats-grid" id="stats" style="display: none;">
-            <div class="stat-card">
-                <span class="stat-number" id="total-spots">0</span>
-                <div class="stat-label">Total Inserções</div>
-            </div>
-            <div class="stat-card">
-                <span class="stat-number" id="total-days">0</span>
-                <div class="stat-label">Dias Ativos</div>
-            </div>
-            <div class="stat-card">
-                <span class="stat-number" id="avg-spots">0</span>
-                <div class="stat-label">Média Inserções/Dia</div>
-            </div>
-            <div class="stat-card">
-                <span class="stat-number" id="period-range">-</span>
-                <div class="stat-label">Período</div>
-            </div>
-            <div class="stat-card impact-stat">
-                <span class="stat-number pmm-value" id="total-impact">0</span>
-                <div class="stat-label">Impactos Total</div>
-            </div>
-            <div class="stat-card impact-stat">
-                <span class="stat-number pmm-value" id="pmm-used">0</span>
-                <div class="stat-label">PMM Utilizado</div>
-            </div>
-        </div>
-        
-        <div id="calendar-container"></div>
+        <!-- CALENDÁRIO -->
+        <div class="calendar-container" id="calendar"></div>
     </div>
 
-    <!-- Carregar biblioteca XLSX para exportação -->
+    <!-- XLSX Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <script>
-        console.log('🚀 Sistema iniciando com detecção automática de UUID Notion...');
-        
-        // Variáveis globais para o sistema de edição
+        // VARIÁVEIS GLOBAIS
         let isEditMode = false;
+        let campaignData = {};
         let originalDistribution = {};
-        let editedDistribution = {};
-        let validDaysGlobal = [];
-        let totalSpotsGlobal = 0;
-        let activeProductsGlobal = {};
+        let currentDistribution = {};
+        let validDays = [];
+        let totalSpots = 0;
 
-        function getURLParams() {
+        // INICIALIZAÇÃO
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🚀 Iniciando sistema...');
+            try {
+                await loadCampaignData();
+                renderInterface();
+                console.log('✅ Sistema carregado com sucesso!');
+            } catch (error) {
+                console.error('❌ Erro ao carregar:', error);
+                showError(error.message);
+            }
+        });
+
+        // CARREGAR DADOS
+        async function loadCampaignData() {
             const params = new URLSearchParams(window.location.search);
-            
-            // Detectar se há um UUID do Notion
             const notionId = params.get('id');
-            const uuidRegex = /^[0-9a-f]{32}$/i;
             
-            // Se há um ID válido do Notion, usar modo API
-            if (notionId && uuidRegex.test(notionId)) {
-                console.log('🔍 UUID Notion detectado:', notionId);
-                return {
-                    mode: 'notion-api',
-                    uuid: notionId,
-                    // Valores padrão que serão sobrescritos pelos dados do Notion
-                    spots30: 0,
-                    spots5: 0,
-                    spots15: 0,
-                    spots60: 0,
-                    test60: 0,
-                    emissora: 'Carregando...',
-                    inicio: '01/01/2025',
-                    fim: '31/01/2025',
-                    dias: 'Seg.,Ter.,Qua.,Qui.,Sex.',
-                    pmm: 1000
+            if (notionId && /^[0-9a-f]{32}$/i.test(notionId)) {
+                console.log('📡 Carregando do Notion:', notionId);
+                campaignData = await fetchNotionData(notionId);
+                campaignData.source = 'notion';
+            } else if (params.toString()) {
+                console.log('📋 Carregando dos parâmetros URL');
+                campaignData = {
+                    spots30: parseInt(params.get('spots30')) || 0,
+                    spots5: parseInt(params.get('spots5')) || 0,
+                    spots15: parseInt(params.get('spots15')) || 0,
+                    spots60: parseInt(params.get('spots60')) || 0,
+                    test60: parseInt(params.get('test60')) || 0,
+                    emissora: params.get('emissora') || 'Emissora',
+                    inicio: params.get('inicio') || '01/01/2025',
+                    fim: params.get('fim') || '31/01/2025',
+                    dias: params.get('dias') || 'Seg.,Ter.,Qua.,Qui.,Sex.',
+                    pmm: parseInt(params.get('pmm')) || 1000,
+                    source: 'url'
+                };
+            } else {
+                console.log('🎭 Carregando exemplo');
+                campaignData = {
+                    spots30: 15, spots5: 8, spots15: 12, spots60: 5, test60: 3,
+                    emissora: 'EXEMPLO RADIO', inicio: '01/11/2025', fim: '30/11/2025',
+                    dias: 'Seg.,Qua.,Sex.', pmm: 1000, source: 'example'
                 };
             }
             
-            // Modo legado: usar parâmetros individuais da URL
-            console.log('📋 Usando modo legado com parâmetros da URL');
-            return {
-                mode: 'legacy',
-                spots30: parseInt(params.get('spots30')) || 0,
-                spots5: parseInt(params.get('spots5')) || 0,
-                spots15: parseInt(params.get('spots15')) || 0,
-                spots60: parseInt(params.get('spots60')) || 0,
-                test60: parseInt(params.get('test60')) || 0,
-                emissora: params.get('emissora') || 'Emissora',
-                inicio: params.get('inicio') || '01/10/2025',
-                fim: params.get('fim') || '31/10/2025',
-                dias: params.get('dias') || 'Seg.,Ter.,Qua.,Qui.,Sex.',
-                pmm: parseInt(params.get('pmm')) || 1000
-            };
+            console.log('📊 Dados carregados:', campaignData);
         }
 
+        // BUSCAR DADOS DO NOTION
         async function fetchNotionData(uuid) {
-            console.log('🚀 Buscando dados do Notion para UUID:', uuid);
-            
-            try {
-                // Usar o endpoint correto da função Netlify
-                const response = await fetch(`/.netlify/functions/notion?id=${uuid}`);
-                console.log('📡 Response status:', response.status);
-                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('❌ Erro na resposta:', errorText);
-                    throw new Error(`Erro HTTP: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                console.log('✅ Dados recebidos do Notion:', data);
-                return data;
-                
-            } catch (error) {
-                console.error('❌ Erro ao buscar dados do Notion:', error);
-                throw error;
+            const response = await fetch(`/.netlify/functions/notion?id=${uuid}`);
+            if (!response.ok) {
+                throw new Error(`Erro ao carregar dados do Notion: ${response.status}`);
             }
+            return await response.json();
         }
 
-        function getActiveProducts(params) {
-            const products = {
-                spots30: params.spots30,
-                spots5: params.spots5,
-                spots15: params.spots15,
-                spots60: params.spots60,
-                test60: params.test60
-            };
+        // RENDERIZAR INTERFACE
+        function renderInterface() {
+            const startDate = parseDate(campaignData.inicio);
+            const endDate = parseDate(campaignData.fim);
+            const selectedWeekdays = parseWeekdays(campaignData.dias);
+            const activeProducts = getActiveProducts();
             
-            return Object.fromEntries(
-                Object.entries(products).filter(([_, value]) => value > 0)
-            );
+            totalSpots = Object.values(activeProducts).reduce((sum, count) => sum + count, 0);
+            validDays = getValidDays(startDate, endDate, selectedWeekdays);
+            
+            // Validações
+            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+                throw new Error('Datas inválidas');
+            }
+            if (validDays.length === 0) {
+                throw new Error('Nenhum dia válido encontrado');
+            }
+            
+            // Calcular distribuição
+            currentDistribution = calculateDistribution(activeProducts, validDays);
+            originalDistribution = JSON.parse(JSON.stringify(currentDistribution));
+            
+            // Renderizar elementos
+            updateHeader();
+            updateProducts(activeProducts);
+            updateStats(startDate, endDate);
+            updateActions();
+            renderCalendar(startDate, endDate, selectedWeekdays);
+            
+            // Mostrar interface
+            document.getElementById('stats').style.display = 'grid';
+            document.getElementById('actions-normal').style.display = 'flex';
         }
 
-        function getProductName(productType) {
-            const productNames = {
-                'spots30': 'Spots 30"',
-                'spots5': 'Spots 5"', 
-                'spots15': 'Spots 15"',
-                'spots60': 'Spots 60"',
-                'test60': 'Test. 60"'
-            };
-            return productNames[productType] || productType;
-        }
-
-        function getProductColor(productType) {
-            const colors = {
-                'spots30': '#1d4ed8',
-                'spots5': '#059669',
-                'spots15': '#dc2626', 
-                'spots60': '#7c3aed',
-                'test60': '#ea580c'
-            };
-            return colors[productType] || '#6b7280';
-        }
-
+        // UTILITÁRIOS DE DATA
         function parseDate(dateStr) {
             const [day, month, year] = dateStr.split('/');
             return new Date(year, month - 1, day);
@@ -816,61 +624,87 @@
             return date.toLocaleDateString('pt-BR');
         }
 
-        function parseSelectedWeekdays(diasStr) {
+        function parseWeekdays(diasStr) {
             const mapping = {
-                'Dom.': 0, 'Seg.': 1, 'Ter.': 2, 'Qua.': 3, 
+                'Dom.': 0, 'Seg.': 1, 'Ter.': 2, 'Qua.': 3,
                 'Qui.': 4, 'Sex.': 5, 'Sáb.': 6
             };
-            
             return diasStr.split(',').map(day => mapping[day.trim()]).filter(d => d !== undefined);
         }
 
-        function isDaySelected(date, selectedWeekdays) {
-            return selectedWeekdays.includes(date.getDay());
-        }
-
         function getValidDays(startDate, endDate, selectedWeekdays) {
-            const validDays = [];
+            const days = [];
             const current = new Date(startDate);
             
             while (current <= endDate) {
-                if (isDaySelected(current, selectedWeekdays)) {
-                    validDays.push(new Date(current));
+                if (selectedWeekdays.includes(current.getDay())) {
+                    days.push(new Date(current));
                 }
                 current.setDate(current.getDate() + 1);
             }
-            
-            return validDays;
+            return days;
         }
 
-        function distributeMultipleSpots(products, validDays) {
+        // PRODUTOS E CÁLCULOS
+        function getActiveProducts() {
+            return {
+                spots30: campaignData.spots30 || 0,
+                spots5: campaignData.spots5 || 0,
+                spots15: campaignData.spots15 || 0,
+                spots60: campaignData.spots60 || 0,
+                test60: campaignData.test60 || 0
+            };
+        }
+
+        function getProductName(type) {
+            const names = {
+                spots30: 'Spots 30"', spots5: 'Spots 5"', spots15: 'Spots 15"',
+                spots60: 'Spots 60"', test60: 'Test. 60"'
+            };
+            return names[type] || type;
+        }
+
+        function calculateImpact(products) {
+            const pmm = campaignData.pmm || 1000;
+            let impact = 0;
+            impact += (products.spots30 || 0) * pmm;
+            impact += (products.test60 || 0) * (pmm * 2);
+            impact += (products.spots60 || 0) * (pmm * 2);
+            impact += (products.spots15 || 0) * (pmm / 2);
+            impact += (products.spots5 || 0) * (pmm / 6);
+            return Math.round(impact);
+        }
+
+        // DISTRIBUIÇÃO
+        function calculateDistribution(products, validDays) {
             const totalSpots = Object.values(products).reduce((sum, spots) => sum + spots, 0);
             
-            if (totalSpots === 0) {
-                return { distribution: {}, totalSpots: 0 };
+            if (totalSpots === 0 || validDays.length === 0) {
+                return {};
             }
             
             const distribution = {};
-            const productEntries = Object.entries(products);
             
+            // Inicializar todos os dias
             validDays.forEach(day => {
                 const dateKey = day.toISOString().split('T')[0];
                 distribution[dateKey] = { total: 0, products: {} };
             });
             
-            productEntries.forEach(([productType, totalSpotsForProduct]) => {
-                const daysForThisProduct = Math.min(totalSpotsForProduct, validDays.length);
-                const spotsPerDayForProduct = Math.floor(totalSpotsForProduct / daysForThisProduct);
-                let remainingSpotsForProduct = totalSpotsForProduct % daysForThisProduct;
+            // Distribuir cada produto
+            Object.entries(products).forEach(([productType, totalSpotsForProduct]) => {
+                if (totalSpotsForProduct <= 0) return;
                 
-                console.log(`📊 Produto ${productType}: ${totalSpotsForProduct} spots em ${daysForThisProduct} dias`);
+                const daysForThisProduct = Math.min(totalSpotsForProduct, validDays.length);
+                const spotsPerDay = Math.floor(totalSpotsForProduct / daysForThisProduct);
+                let remainingSpots = totalSpotsForProduct % daysForThisProduct;
                 
                 for (let i = 0; i < daysForThisProduct; i++) {
                     const dayIndex = Math.floor((i * validDays.length) / daysForThisProduct);
                     const dateKey = validDays[dayIndex].toISOString().split('T')[0];
                     
-                    const spotsForThisDay = spotsPerDayForProduct + (remainingSpotsForProduct > 0 ? 1 : 0);
-                    if (remainingSpotsForProduct > 0) remainingSpotsForProduct--;
+                    const spotsForThisDay = spotsPerDay + (remainingSpots > 0 ? 1 : 0);
+                    if (remainingSpots > 0) remainingSpots--;
                     
                     distribution[dateKey].products[productType] = 
                         (distribution[dateKey].products[productType] || 0) + spotsForThisDay;
@@ -878,19 +712,170 @@
                 }
             });
             
-            console.log('🎯 Distribuição calculada:', distribution);
-            return { distribution, totalSpots };
+            return distribution;
         }
 
-        function getMonthName(month, year) {
-            const months = [
-                'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-            ];
-            return `${months[month]} ${year}`;
+        // ATUALIZAR ELEMENTOS
+        function updateHeader() {
+            const titleSuffix = campaignData.source === 'example' ? ' (EXEMPLO)' : '';
+            document.getElementById('title').textContent = campaignData.emissora.toUpperCase() + titleSuffix;
         }
 
-        function getMonthCalendar(year, month) {
+        function updateProducts(activeProducts) {
+            const container = document.getElementById('products-list');
+            container.innerHTML = '';
+            
+            Object.entries(activeProducts).forEach(([type, count]) => {
+                if (count > 0) {
+                    const tag = document.createElement('span');
+                    tag.className = `product-tag tag-${type}`;
+                    tag.textContent = `${getProductName(type)}: ${count}`;
+                    container.appendChild(tag);
+                }
+            });
+            
+            document.getElementById('products-section').style.display = 'block';
+        }
+
+        function updateStats(startDate, endDate) {
+            const activeProducts = getActiveProducts();
+            const periodRange = `${startDate.getDate().toString().padStart(2, '0')}/${(startDate.getMonth() + 1).toString().padStart(2, '0')}-${endDate.getDate().toString().padStart(2, '0')}/${(endDate.getMonth() + 1).toString().padStart(2, '0')}`;
+            const avgSpots = validDays.length > 0 ? (totalSpots / validDays.length).toFixed(1) : '0';
+            const totalImpact = calculateImpact(activeProducts);
+            
+            document.getElementById('stat-period').textContent = periodRange;
+            document.getElementById('stat-spots').textContent = totalSpots;
+            document.getElementById('stat-impact').textContent = totalImpact.toLocaleString();
+            document.getElementById('stat-avg').textContent = avgSpots;
+        }
+
+        function updateActions() {
+            document.getElementById('campaign-name').textContent = campaignData.emissora;
+        }
+
+        // CALENDÁRIO COM NOVA ESTRUTURA DE CÉLULAS
+        function renderCalendar(startDate, endDate, selectedWeekdays) {
+            const container = document.getElementById('calendar');
+            container.innerHTML = '';
+            
+            // Calcular máximo de spots para heatmap
+            const maxSpots = Math.max(...Object.values(currentDistribution).map(d => d?.total || 0));
+            
+            // Gerar meses
+            const months = new Set();
+            const current = new Date(startDate);
+            
+            while (current <= endDate) {
+                months.add(`${current.getFullYear()}-${current.getMonth()}`);
+                current.setMonth(current.getMonth() + 1);
+                current.setDate(1);
+            }
+            
+            months.forEach(monthKey => {
+                const [year, month] = monthKey.split('-').map(Number);
+                const monthElement = createMonthCalendar(year, month, selectedWeekdays, maxSpots);
+                container.appendChild(monthElement);
+            });
+        }
+
+        function createMonthCalendar(year, month, selectedWeekdays, maxSpots) {
+            const monthContainer = document.createElement('div');
+            monthContainer.className = 'calendar-month';
+            
+            // Cabeçalho do mês
+            const header = document.createElement('div');
+            header.className = 'month-header';
+            header.textContent = getMonthName(month, year);
+            monthContainer.appendChild(header);
+            
+            // Tabela
+            const table = document.createElement('table');
+            table.className = 'calendar-table';
+            
+            // Cabeçalho da semana
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'].forEach(day => {
+                const th = document.createElement('th');
+                th.textContent = day;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+            
+            // Corpo da tabela
+            const tbody = document.createElement('tbody');
+            const days = getMonthDays(year, month);
+            
+            for (let i = 0; i < days.length; i += 7) {
+                const weekDays = days.slice(i, i + 7);
+                const row = document.createElement('tr');
+                
+                weekDays.forEach(day => {
+                    const td = document.createElement('td');
+                    const cell = createDateCell(day, month, selectedWeekdays, maxSpots);
+                    td.appendChild(cell);
+                    row.appendChild(td);
+                });
+                
+                tbody.appendChild(row);
+            }
+            
+            table.appendChild(tbody);
+            monthContainer.appendChild(table);
+            
+            return monthContainer;
+        }
+
+        // NOVA FUNÇÃO PARA CRIAR CÉLULAS COM DIVISÃO HORIZONTAL
+        function createDateCell(day, month, selectedWeekdays, maxSpots) {
+            const cell = document.createElement('div');
+            cell.className = 'date-cell';
+            
+            const isCurrentMonth = day.getMonth() === month;
+            const isDayValid = selectedWeekdays.includes(day.getDay());
+            const dateKey = day.toISOString().split('T')[0];
+            const dayData = currentDistribution[dateKey];
+            
+            if (isCurrentMonth) {
+                cell.classList.add('current-month');
+            }
+            
+            if (isDayValid && isCurrentMonth) {
+                cell.classList.add('selected-weekday');
+            }
+            
+            // PARTE SUPERIOR - DATA (33%)
+            const dateNumber = document.createElement('div');
+            dateNumber.className = 'date-number';
+            dateNumber.textContent = day.getDate();
+            cell.appendChild(dateNumber);
+            
+            // PARTE INFERIOR - INSERÇÕES (67%)
+            const spotsSection = document.createElement('div');
+            spotsSection.className = 'spots-section';
+            
+            if (dayData && dayData.total > 0) {
+                spotsSection.textContent = dayData.total;
+                spotsSection.classList.add(getIntensityClass(dayData.total, maxSpots));
+                
+                // Tooltip
+                setupTooltip(cell, dayData);
+            }
+            
+            cell.appendChild(spotsSection);
+            
+            // Dados para edição
+            cell.dataset.date = dateKey;
+            cell.dataset.spots = dayData ? dayData.total : 0;
+            
+            // Evento de clique para edição
+            cell.addEventListener('click', handleCellClick);
+            
+            return cell;
+        }
+
+        function getMonthDays(year, month) {
             const firstDay = new Date(year, month, 1);
             const startCalendar = new Date(firstDay);
             startCalendar.setDate(startCalendar.getDate() - firstDay.getDay());
@@ -910,75 +895,70 @@
             return days;
         }
 
-        function createBadges(dayData, td) {
-            if (!dayData || dayData.total === 0) return;
-
-            const spotsContainer = document.createElement('div');
-            spotsContainer.className = 'spots-container';
-            
-            const badgesContainer = document.createElement('div');
-            badgesContainer.className = 'spots-badges';
-            
-            // Sempre usar badge consolidado único
-            const consolidatedBadge = document.createElement('div');
-            consolidatedBadge.className = 'consolidated-badge';
-            consolidatedBadge.textContent = dayData.total;
-            
-            // Armazenar dados do dia no badge para o tooltip
-            consolidatedBadge.tooltipData = dayData;
-            
-            badgesContainer.appendChild(consolidatedBadge);
-            spotsContainer.appendChild(badgesContainer);
-            td.appendChild(spotsContainer);
-            
-            // Adicionar event listeners diretamente ao badge
-            consolidatedBadge.addEventListener('mouseenter', showRichTooltip);
-            consolidatedBadge.addEventListener('mouseleave', hideRichTooltip);
-            consolidatedBadge.addEventListener('mousemove', updateTooltipPosition);
+        function getMonthName(month, year) {
+            const months = [
+                'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+            ];
+            return `${months[month]} ${year}`;
         }
 
-        function showRichTooltip(e) {
-            const badge = e.target;
-            const dayData = badge.tooltipData;
+        function getIntensityClass(spotsCount, maxSpots) {
+            if (spotsCount === 0) return '';
             
-            if (!dayData) return;
+            const percentage = (spotsCount / maxSpots) * 100;
             
-            const params = window.currentCampaignData || { pmm: 1000 };
-            const pmm = params.pmm || 1000;
-            
-            // Criar tooltip se não existir
-            let tooltip = document.querySelector('.rich-tooltip');
+            if (percentage <= 20) return 'intensity-1';
+            if (percentage <= 40) return 'intensity-2';
+            if (percentage <= 60) return 'intensity-3';
+            if (percentage <= 80) return 'intensity-4';
+            if (percentage < 100) return 'intensity-5';
+            return 'intensity-max';
+        }
+
+        // TOOLTIP
+        function setupTooltip(cell, dayData) {
+            cell.addEventListener('mouseenter', (e) => showTooltip(e, dayData));
+            cell.addEventListener('mouseleave', hideTooltip);
+            cell.addEventListener('mousemove', updateTooltipPosition);
+        }
+
+        function showTooltip(e, dayData) {
+            let tooltip = document.querySelector('.tooltip');
             if (!tooltip) {
                 tooltip = document.createElement('div');
-                tooltip.className = 'rich-tooltip';
+                tooltip.className = 'tooltip';
                 document.body.appendChild(tooltip);
             }
             
-            // Gerar conteúdo do tooltip CORRIGIDO
-            let tooltipContent = `📺 Total de inserções: ${dayData.total}\n`;
-            tooltipContent += `📊 Impactos total: ${calculateDayImpact(dayData.products, pmm).toLocaleString()}\n\n`;
-            tooltipContent += `📋 Detalhamento:\n`;
+            const pmm = campaignData.pmm || 1000;
+            const dayImpact = calculateImpact(dayData.products);
+            
+            let content = `📺 Total de inserções: ${dayData.total}<br>`;
+            content += `📊 Impactos: ${dayImpact.toLocaleString()}<br><br>`;
+            content += `📋 Detalhamento:<br>`;
             
             Object.entries(dayData.products).forEach(([type, count]) => {
-                const productName = getProductName(type);
-                tooltipContent += `• ${productName}: ${count}\n`;
+                if (count > 0) {
+                    content += `• ${getProductName(type)}: ${count}<br>`;
+                }
             });
             
-            tooltip.innerHTML = tooltipContent.replace(/\n/g, '<br>');
+            tooltip.innerHTML = content;
             tooltip.classList.add('show');
             
             updateTooltipPosition(e);
         }
 
-        function hideRichTooltip() {
-            const tooltip = document.querySelector('.rich-tooltip');
+        function hideTooltip() {
+            const tooltip = document.querySelector('.tooltip');
             if (tooltip) {
                 tooltip.classList.remove('show');
             }
         }
 
         function updateTooltipPosition(e) {
-            const tooltip = document.querySelector('.rich-tooltip');
+            const tooltip = document.querySelector('.tooltip');
             if (!tooltip || !tooltip.classList.contains('show')) return;
             
             const rect = e.target.getBoundingClientRect();
@@ -987,7 +967,6 @@
             let left = rect.left + rect.width / 2 - tooltipRect.width / 2;
             let top = rect.top - tooltipRect.height - 15;
             
-            // Ajustar posição se sair da tela
             if (left < 10) left = 10;
             if (left + tooltipRect.width > window.innerWidth - 10) {
                 left = window.innerWidth - tooltipRect.width - 10;
@@ -998,724 +977,203 @@
             tooltip.style.top = top + 'px';
         }
 
-        function createCompactCalendar(startDate, endDate, distribution, selectedWeekdays) {
-            console.log('📅 Criando calendário com distribuição:', distribution);
-            const container = document.getElementById('calendar-container');
-            container.innerHTML = '';
+        // EDIÇÃO
+        function startEdit() {
+            isEditMode = true;
+            document.body.classList.add('edit-mode');
+            document.getElementById('actions-normal').style.display = 'none';
+            document.getElementById('actions-edit').style.display = 'flex';
             
-            const months = new Set();
-            const current = new Date(startDate);
-            
-            while (current <= endDate) {
-                months.add(`${current.getFullYear()}-${current.getMonth()}`);
-                current.setMonth(current.getMonth() + 1);
-                current.setDate(1);
-            }
-            
-            months.forEach(monthKey => {
-                const [year, month] = monthKey.split('-').map(Number);
-                const days = getMonthCalendar(year, month);
-                
-                const monthContainer = document.createElement('div');
-                monthContainer.className = 'calendar-compact';
-                
-                const monthHeader = document.createElement('div');
-                monthHeader.className = 'month-header';
-                monthHeader.textContent = getMonthName(month, year);
-                monthContainer.appendChild(monthHeader);
-                
-                const table = document.createElement('table');
-                table.className = 'calendar-table';
-                
-                const thead = document.createElement('thead');
-                const headerRow = document.createElement('tr');
-                const weekdays = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
-                
-                weekdays.forEach(day => {
-                    const th = document.createElement('th');
-                    th.textContent = day;
-                    headerRow.appendChild(th);
-                });
-                thead.appendChild(headerRow);
-                table.appendChild(thead);
-                
-                const tbody = document.createElement('tbody');
-                
-                for (let i = 0; i < days.length; i += 7) {
-                    const weekDays = days.slice(i, i + 7);
-                    const row = document.createElement('tr');
-                    
-                    weekDays.forEach(day => {
-                        const td = document.createElement('td');
-                        const isCurrentMonth = day.getMonth() === month;
-                        const isDayValid = isDaySelected(day, selectedWeekdays);
-                        const dateKey = day.toISOString().split('T')[0];
-                        const dayData = distribution[dateKey];
-                        
-                        const dateCell = document.createElement('div');
-                        dateCell.className = 'date-cell';
-                        
-                        if (isCurrentMonth) {
-                            dateCell.classList.add('current-month');
-                        }
-                        
-                        if (isDayValid && isCurrentMonth) {
-                            dateCell.classList.add('selected-weekday');
-                        }
-                        
-                        if (dayData && dayData.total > 0) {
-                            dateCell.classList.add('has-spots');
-                            
-                            // Adicionar número grande para modo de edição
-                            const bigNumber = document.createElement('div');
-                            bigNumber.className = 'big-number';
-                            bigNumber.textContent = dayData.total;
-                            dateCell.appendChild(bigNumber);
-                        }
-                        
-                        const dateNumber = document.createElement('div');
-                        dateNumber.className = 'date-number';
-                        dateNumber.textContent = day.getDate();
-                        dateCell.appendChild(dateNumber);
-                        
-                        td.appendChild(dateCell);
-                        
-                        createBadges(dayData, td);
-                        
-                        row.appendChild(td);
-                    });
-                    
-                    tbody.appendChild(row);
-                }
-                
-                table.appendChild(tbody);
-                monthContainer.appendChild(table);
-                container.appendChild(monthContainer);
-            });
-        }
-
-        function updateProductsInfo(activeProducts) {
-            console.log('🏷️ Atualizando produtos ativos:', activeProducts);
-            const activeProductsElement = document.getElementById('active-products');
-            activeProductsElement.innerHTML = '';
-            
-            Object.entries(activeProducts).forEach(([type, count]) => {
-                const tag = document.createElement('span');
-                tag.className = `product-tag tag-${type}`;
-                tag.textContent = `${getProductName(type)}: ${count}`;
-                activeProductsElement.appendChild(tag);
-                console.log(`🎨 Tag criada: ${type}`);
-            });
-            
-            document.getElementById('products-info').style.display = 'block';
-        }
-
-        function updateWeekdaysInfo(diasStr) {
-            const weekdayNames = {
-                'Dom.': 'Domingo', 'Seg.': 'Segunda', 'Ter.': 'Terça', 'Qua.': 'Quarta',
-                'Qui.': 'Quinta', 'Sex.': 'Sexta', 'Sáb.': 'Sábado'
-            };
-            
-            const selectedNames = diasStr.split(',').map(day => weekdayNames[day.trim()]).filter(Boolean);
-            
-            document.getElementById('selected-weekdays').textContent = selectedNames.join(', ');
-            document.getElementById('weekdays-info').style.display = 'block';
-        }
-
-        function updateStats(params, validDays, totalSpots) {
-            const startDate = parseDate(params.inicio);
-            const endDate = parseDate(params.fim);
-            const avgSpots = validDays.length > 0 ? (totalSpots / validDays.length).toFixed(1) : '0';
-            
-            const periodRange = `${startDate.getDate().toString().padStart(2, '0')}/${(startDate.getMonth() + 1).toString().padStart(2, '0')}-${endDate.getDate().toString().padStart(2, '0')}/${(endDate.getMonth() + 1).toString().padStart(2, '0')}`;
-            
-            const activeProducts = getActiveProducts(params);
-            const pmm = params.pmm || 1000;
-            const totalImpact = calculateImpact(activeProducts, pmm);
-            
-            document.getElementById('total-spots').textContent = totalSpots;
-            document.getElementById('total-days').textContent = validDays.length;
-            document.getElementById('avg-spots').textContent = avgSpots;
-            document.getElementById('period-range').textContent = periodRange;
-            document.getElementById('total-impact').textContent = totalImpact.toLocaleString();
-            document.getElementById('pmm-used').textContent = pmm.toLocaleString();
-            
-            console.log(`📊 Período: ${periodRange}`);
-            document.getElementById('stats').style.display = 'grid';
-        }
-
-        function showExample() {
-            const exampleParams = {
-                spots30: 15,
-                spots5: 8,
-                spots15: 12,
-                spots60: 5,
-                test60: 3,
-                emissora: 'EXEMPLO RADIO',
-                inicio: '01/11/2025',
-                fim: '30/11/2025',
-                dias: 'Seg.,Qua.,Sex.',
-                pmm: 1000
-            };
-            
-            const startDate = parseDate(exampleParams.inicio);
-            const endDate = parseDate(exampleParams.fim);
-            const selectedWeekdays = parseSelectedWeekdays(exampleParams.dias);
-            const activeProducts = getActiveProducts(exampleParams);
-            const totalSpots = Object.values(activeProducts).reduce((sum, spots) => sum + spots, 0);
-            
-            document.getElementById('title').textContent = exampleParams.emissora + ' (EXEMPLO)';
-            document.getElementById('subtitle').textContent = 
-                `${formatDate(startDate)} a ${formatDate(endDate)} • ${totalSpots} inserções • Demonstração`;
-            
-            updateProductsInfo(activeProducts);
-            updateWeekdaysInfo(exampleParams.dias);
-            
-            const validDays = getValidDays(startDate, endDate, selectedWeekdays);
-            const { distribution } = distributeMultipleSpots(activeProducts, validDays);
-            
-            createCompactCalendar(startDate, endDate, distribution, selectedWeekdays);
-            updateStats(exampleParams, validDays, totalSpots);
-        }
-
-        function showEmptyCalendar(params, startDate, endDate, selectedWeekdays) {
-            document.getElementById('title').textContent = params.emissora.toUpperCase();
-            document.getElementById('subtitle').textContent = 
-                `${formatDate(startDate)} a ${formatDate(endDate)} • Nenhuma inserção programada`;
-            
-            updateWeekdaysInfo(params.dias);
-            
-            const validDays = getValidDays(startDate, endDate, selectedWeekdays);
-            const emptyDistribution = {};
-            
-            createCompactCalendar(startDate, endDate, emptyDistribution, selectedWeekdays);
-            updateStats(params, validDays, 0);
-        }
-
-        function calculateImpact(products, pmm) {
-            let totalImpact = 0;
-            
-            totalImpact += (products.spots30 || 0) * pmm;
-            totalImpact += (products.test60 || 0) * (pmm * 2);
-            totalImpact += (products.spots60 || 0) * (pmm * 2);
-            totalImpact += (products.spots15 || 0) * (pmm / 2);
-            totalImpact += (products.spots5 || 0) * (pmm / 6);
-            
-            return Math.round(totalImpact);
-        }
-
-        function calculateDayImpact(dayProducts, pmm) {
-            return calculateImpact(dayProducts, pmm);
-        }
-
-        // ============================================
-        // SISTEMA DE EDIÇÃO - FUNÇÕES IMPLEMENTADAS
-        // ============================================
-
-        // Alternar modo de edição
-        function toggleEditMode() {
-            isEditMode = !isEditMode;
-            
-            if (isEditMode) {
-                // Entrar no modo de edição
-                document.body.classList.add('edit-mode');
-                document.getElementById('actions-bar').style.display = 'none';
-                document.getElementById('edit-actions-bar').style.display = 'flex';
-                
-                // Salvar distribuição original
-                originalDistribution = JSON.parse(JSON.stringify(window.currentDistribution));
-                editedDistribution = JSON.parse(JSON.stringify(window.currentDistribution));
-                
-                // Tornar calendário editável
-                makeCalendarEditable();
-                
-                // Atualizar status
-                document.getElementById('edit-status').textContent = 'Modo de Edição - Clique nos números para editar';
-                validateDistribution();
-                
-            } else {
-                // Sair do modo de edição
-                document.body.classList.remove('edit-mode');
-                document.getElementById('actions-bar').style.display = 'flex';
-                document.getElementById('edit-actions-bar').style.display = 'none';
-                
-                // Tornar calendário somente leitura
-                makeCalendarReadOnly();
-                
-                // Esconder mensagem de validação
-                document.getElementById('edit-validation').style.display = 'none';
-            }
-        }
-
-        // Tornar calendário editável
-        function makeCalendarEditable() {
-            const dateCells = document.querySelectorAll('.date-cell.has-spots');
-            
-            dateCells.forEach(cell => {
-                cell.classList.add('editable');
-                cell.style.cursor = 'pointer';
-                
-                // Remover event listeners antigos
-                cell.removeEventListener('click', handleCellClick);
-                
-                // Adicionar novo event listener para edição
-                cell.addEventListener('click', handleCellClick);
-            });
-        }
-
-        // Tornar calendário somente leitura
-        function makeCalendarReadOnly() {
-            const dateCells = document.querySelectorAll('.date-cell.has-spots');
-            
-            dateCells.forEach(cell => {
-                cell.classList.remove('editable');
-                cell.style.cursor = 'default';
-                
-                // Remover event listeners de edição
-                cell.removeEventListener('click', handleCellClick);
-            });
-        }
-
-        // Manipular clique nas células
-        function handleCellClick(e) {
-            const cell = e.currentTarget;
-            const dateNumber = cell.querySelector('.date-number').textContent;
-            const bigNumber = cell.querySelector('.big-number');
-            
-            // Encontrar a data correspondente
-            let dateKey = null;
-            for (const key in editedDistribution) {
-                const date = new Date(key);
-                if (date.getDate().toString() === dateNumber) {
-                    dateKey = key;
-                    break;
-                }
-            }
-            
-            if (!dateKey) return;
-            
-            // Adicionar classe de edição
-            cell.classList.add('editing');
-            
-            const currentValue = editedDistribution[dateKey].total;
-            
-            // Substituir texto por input
-            bigNumber.innerHTML = '';
-            
-            const input = document.createElement('input');
-            input.type = 'number';
-            input.className = 'big-number-input';
-            input.value = currentValue;
-            input.min = 0;
-            input.style.width = (currentValue.toString().length * 12) + 'px';
-            
-            bigNumber.appendChild(input);
-            input.focus();
-            input.select();
-            
-            // Ajustar largura conforme o valor
-            input.addEventListener('input', function() {
-                this.style.width = (this.value.length * 12) + 'px';
-            });
-            
-            // Quando o input perder foco
-            input.addEventListener('blur', function() {
-                const newValue = parseInt(this.value) || 0;
-                
-                // Validar valor
-                if (newValue < 0) {
-                    alert('Valor não pode ser negativo');
-                    this.value = currentValue;
-                }
-                
-                // Atualizar distribuição
-                editedDistribution[dateKey].total = newValue;
-                
-                // Atualizar badge e número grande
-                const badge = cell.querySelector('.consolidated-badge');
-                if (badge) {
-                    badge.textContent = newValue;
-                }
-                bigNumber.textContent = newValue;
-                
-                // Remover classe de edição
-                cell.classList.remove('editing');
-                
-                // Validar distribuição
-                validateDistribution();
-            });
-            
-            // Tecla Enter confirma a edição
-            input.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    this.blur();
-                }
-            });
-        }
-
-        // Validar distribuição em tempo real
-        function validateDistribution() {
-            let totalUsed = 0;
-            
-            // Calcular total usado
-            for (const dateKey in editedDistribution) {
-                totalUsed += editedDistribution[dateKey].total;
-            }
-            
-            const validationElement = document.getElementById('edit-validation');
-            validationElement.style.display = 'block';
-            
-            if (totalUsed === totalSpotsGlobal) {
-                // Distribuição perfeita
-                validationElement.className = 'edit-validation success';
-                validationElement.innerHTML = `✅ Distribuição válida! Total: ${totalUsed}/${totalSpotsGlobal}`;
-            } else if (totalUsed < totalSpotsGlobal) {
-                // Distribuição com sobra
-                const remaining = totalSpotsGlobal - totalUsed;
-                validationElement.className = 'edit-validation warning';
-                validationElement.innerHTML = `⚠️ Distribuição incompleta! Faltam ${remaining} inserções (${totalUsed}/${totalSpotsGlobal})`;
-            } else {
-                // Distribuição com excesso
-                const excess = totalUsed - totalSpotsGlobal;
-                validationElement.className = 'edit-validation error';
-                validationElement.innerHTML = `❌ Distribuição excedida! ${excess} inserções a mais (${totalUsed}/${totalSpotsGlobal})`;
-            }
-        }
-
-        // Salvar distribuição editada
-        function saveEditedDistribution() {
-            // Validar antes de salvar
-            let totalUsed = 0;
-            
-            for (const dateKey in editedDistribution) {
-                totalUsed += editedDistribution[dateKey].total;
-            }
-            
-            if (totalUsed !== totalSpotsGlobal) {
-                if (!confirm(`A distribuição atual tem ${totalUsed} inserções, mas o total necessário é ${totalSpotsGlobal}. Deseja continuar mesmo assim?`)) {
-                    return;
-                }
-            }
-            
-            // Atualizar distribuição atual
-            window.currentDistribution = JSON.parse(JSON.stringify(editedDistribution));
-            
-            // Sair do modo de edição
-            isEditMode = false;
-            document.body.classList.remove('edit-mode');
-            document.getElementById('actions-bar').style.display = 'flex';
-            document.getElementById('edit-actions-bar').style.display = 'none';
-            document.getElementById('edit-validation').style.display = 'none';
-            
-            // Atualizar calendário visualmente
-            makeCalendarReadOnly();
-            
-            alert('Distribuição salva com sucesso!');
-        }
-
-        // Cancelar edição
-        function cancelEdit() {
-            // Restaurar distribuição original
-            editedDistribution = JSON.parse(JSON.stringify(originalDistribution));
-            
-            // Atualizar visualmente
-            const dateCells = document.querySelectorAll('.date-cell.has-spots');
-            dateCells.forEach(cell => {
-                const dateNumber = cell.querySelector('.date-number').textContent;
-                const bigNumber = cell.querySelector('.big-number');
-                
-                // Encontrar a data correspondente
-                for (const key in originalDistribution) {
-                    const date = new Date(key);
-                    if (date.getDate().toString() === dateNumber) {
-                        const value = originalDistribution[key].total;
-                        
-                        // Atualizar badge e número grande
-                        const badge = cell.querySelector('.consolidated-badge');
-                        if (badge) {
-                            badge.textContent = value;
-                        }
-                        bigNumber.textContent = value;
-                        break;
-                    }
-                }
-                
-                // Remover classe de edição
-                cell.classList.remove('editing');
-            });
-            
-            // Sair do modo de edição
-            isEditMode = false;
-            document.body.classList.remove('edit-mode');
-            document.getElementById('actions-bar').style.display = 'flex';
-            document.getElementById('edit-actions-bar').style.display = 'none';
-            document.getElementById('edit-validation').style.display = 'none';
-            
-            makeCalendarReadOnly();
-        }
-
-        // Resetar para distribuição automática
-        function resetToAuto() {
-            const params = window.currentCampaignData || {};
-            const startDate = parseDate(params.inicio);
-            const endDate = parseDate(params.fim);
-            const selectedWeekdays = parseSelectedWeekdays(params.dias);
-            const activeProducts = getActiveProducts(params);
-            const validDays = getValidDays(startDate, endDate, selectedWeekdays);
-            
-            // Gerar nova distribuição automática
-            const { distribution } = distributeMultipleSpots(activeProducts, validDays);
-            
-            // Atualizar distribuição editada
-            editedDistribution = JSON.parse(JSON.stringify(distribution));
-            
-            // Atualizar visualmente
-            const dateCells = document.querySelectorAll('.date-cell.has-spots');
-            dateCells.forEach(cell => {
-                const dateNumber = cell.querySelector('.date-number').textContent;
-                const bigNumber = cell.querySelector('.big-number');
-                
-                // Encontrar a data correspondente
-                for (const key in distribution) {
-                    const date = new Date(key);
-                    if (date.getDate().toString() === dateNumber && distribution[key]) {
-                        const value = distribution[key].total;
-                        
-                        // Atualizar badge e número grande
-                        const badge = cell.querySelector('.consolidated-badge');
-                        if (badge) {
-                            badge.textContent = value;
-                        }
-                        bigNumber.textContent = value;
-                        break;
-                    }
-                }
-                
-                // Remover classe de edição
-                cell.classList.remove('editing');
-            });
-            
-            // Validar nova distribuição
+            originalDistribution = JSON.parse(JSON.stringify(currentDistribution));
             validateDistribution();
         }
 
-        // Nova função para exportar calendário visual (formato da imagem)
-        function exportCalendarToExcel() {
-            console.log('📅 Iniciando exportação de calendário visual...');
+        function handleCellClick(e) {
+            if (!isEditMode) return;
             
+            const cell = e.currentTarget;
+            const dateKey = cell.dataset.date;
+            const currentSpots = parseInt(cell.dataset.spots) || 0;
+            
+            const newValue = prompt(`Editar inserções para este dia:`, currentSpots);
+            
+            if (newValue !== null) {
+                const numValue = Math.max(0, parseInt(newValue) || 0);
+                
+                // Atualizar distribuição
+                if (!currentDistribution[dateKey]) {
+                    currentDistribution[dateKey] = { total: 0, products: {} };
+                }
+                currentDistribution[dateKey].total = numValue;
+                
+                // Atualizar célula
+                cell.dataset.spots = numValue;
+                
+                const spotsSection = cell.querySelector('.spots-section');
+                
+                if (numValue > 0) {
+                    spotsSection.textContent = numValue;
+                    
+                    // Recalcular intensidade
+                    const maxSpots = Math.max(...Object.values(currentDistribution).map(d => d?.total || 0));
+                    spotsSection.className = 'spots-section ' + getIntensityClass(numValue, maxSpots);
+                } else {
+                    spotsSection.textContent = '';
+                    spotsSection.className = 'spots-section';
+                }
+                
+                validateDistribution();
+            }
+        }
+
+        function validateDistribution() {
+            const totalUsed = Object.values(currentDistribution).reduce((sum, day) => sum + (day.total || 0), 0);
+            const validation = document.getElementById('validation');
+            
+            validation.style.display = 'block';
+            
+            if (totalUsed === totalSpots) {
+                validation.className = 'validation success';
+                validation.textContent = `✅ Distribuição válida! Total: ${totalUsed}/${totalSpots}`;
+            } else if (totalUsed < totalSpots) {
+                const remaining = totalSpots - totalUsed;
+                validation.className = 'validation warning';
+                validation.textContent = `⚠️ Faltam ${remaining} inserções (${totalUsed}/${totalSpots})`;
+            } else {
+                const excess = totalUsed - totalSpots;
+                validation.className = 'validation error';
+                validation.textContent = `❌ ${excess} inserções a mais (${totalUsed}/${totalSpots})`;
+            }
+        }
+
+        function saveEdit() {
+            const totalUsed = Object.values(currentDistribution).reduce((sum, day) => sum + (day.total || 0), 0);
+            
+            if (totalUsed !== totalSpots) {
+                if (!confirm(`Total atual: ${totalUsed}, necessário: ${totalSpots}. Continuar?`)) {
+                    return;
+                }
+            }
+            
+            originalDistribution = JSON.parse(JSON.stringify(currentDistribution));
+            exitEditMode();
+            alert('Distribuição salva com sucesso!');
+        }
+
+        function cancelEdit() {
+            currentDistribution = JSON.parse(JSON.stringify(originalDistribution));
+            
+            // Recriar calendário
+            const startDate = parseDate(campaignData.inicio);
+            const endDate = parseDate(campaignData.fim);
+            const selectedWeekdays = parseWeekdays(campaignData.dias);
+            renderCalendar(startDate, endDate, selectedWeekdays);
+            
+            exitEditMode();
+        }
+
+        function resetAuto() {
+            const activeProducts = getActiveProducts();
+            currentDistribution = calculateDistribution(activeProducts, validDays);
+            
+            // Recriar calendário
+            const startDate = parseDate(campaignData.inicio);
+            const endDate = parseDate(campaignData.fim);
+            const selectedWeekdays = parseWeekdays(campaignData.dias);
+            renderCalendar(startDate, endDate, selectedWeekdays);
+            
+            validateDistribution();
+        }
+
+        function exitEditMode() {
+            isEditMode = false;
+            document.body.classList.remove('edit-mode');
+            document.getElementById('actions-normal').style.display = 'flex';
+            document.getElementById('actions-edit').style.display = 'none';
+            document.getElementById('validation').style.display = 'none';
+        }
+
+        // EXPORTAÇÃO
+        function exportExcel() {
             try {
-                // Verificar se a biblioteca XLSX está carregada
                 if (typeof XLSX === 'undefined') {
-                    console.error('❌ Biblioteca XLSX não carregada!');
-                    alert('Erro: Biblioteca XLSX não disponível. Verifique a conexão com a internet.');
+                    alert('Biblioteca XLSX não disponível. Verifique a conexão.');
                     return;
                 }
                 
-                const params = window.currentCampaignData || {};
-                const startDate = parseDate(params.inicio || '01/01/2025');
-                const endDate = parseDate(params.fim || '31/01/2025');
-                const selectedWeekdays = parseSelectedWeekdays(params.dias || 'Seg.,Ter.,Qua.,Qui.,Sex.');
-                const activeProducts = getActiveProducts(params);
-                const validDays = getValidDays(startDate, endDate, selectedWeekdays);
-                
-                // Usar a distribuição atual (editada ou original)
-                const distribution = window.currentDistribution || distributeMultipleSpots(activeProducts, validDays).distribution;
-                const pmm = params.pmm || 1000;
-                
-                console.log('📊 Dados preparados para exportação:', {
-                    startDate, endDate, activeProducts, validDays: validDays.length
-                });
-                
-                // Criar workbook
                 const wb = XLSX.utils.book_new();
-                console.log('📚 Workbook criado');
+                const activeProducts = getActiveProducts();
                 
-                // Formatar dados conforme a imagem de exemplo
+                // Planilha principal
                 const excelData = [];
-                
-                // Cabeçalho
                 excelData.push(['PROGRAMA E FAIXA HORÁRIA', 'Spots 30"', 'Testemunais 60"', 'Total de spots por dia']);
                 
-                // Adicionar dias válidos com distribuição
                 validDays.forEach(day => {
                     const dateKey = day.toISOString().split('T')[0];
-                    const dayData = distribution[dateKey] || { total: 0, products: {} };
+                    const dayData = currentDistribution[dateKey] || { total: 0, products: {} };
                     const dayName = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'][day.getDay()];
-                    const dateFormatted = formatDate(day);
                     
                     excelData.push([
-                        `${dayName} - ${dateFormatted}`,
+                        `${dayName} - ${formatDate(day)}`,
                         dayData.products.spots30 || 0,
                         dayData.products.test60 || 0,
                         dayData.total
                     ]);
                 });
                 
-                // Adicionar totais
-                const totalSpots30 = Object.values(activeProducts).reduce((sum, spots, idx) => 
-                    idx === 0 ? sum + spots : sum, 0);
-                const totalTest60 = Object.values(activeProducts).reduce((sum, spots, idx) => 
-                    idx === 4 ? sum + spots : sum, 0);
-                const totalGeral = Object.values(activeProducts).reduce((sum, spots) => sum + spots, 0);
+                excelData.push(['TOTAL', activeProducts.spots30 || 0, activeProducts.test60 || 0, totalSpots]);
                 
-                excelData.push(['TOTAL', totalSpots30, totalTest60, totalGeral]);
-                
-                // Criar worksheet
                 const ws = XLSX.utils.aoa_to_sheet(excelData);
-                
-                // Definir larguras das colunas
-                const colWidths = [
-                    { wch: 25 }, // Programa e Faixa Horária
-                    { wch: 10 }, // Spots 30"
-                    { wch: 15 }, // Testemunais 60"
-                    { wch: 18 }  // Total de spots por dia
-                ];
-                ws['!cols'] = colWidths;
-                
-                // Adicionar worksheet ao workbook
+                ws['!cols'] = [{ wch: 25 }, { wch: 10 }, { wch: 15 }, { wch: 18 }];
                 XLSX.utils.book_append_sheet(wb, ws, 'Distribuição');
                 
-                // Criar segunda aba com informações gerais
+                // Planilha de informações
+                const startDate = parseDate(campaignData.inicio);
+                const endDate = parseDate(campaignData.fim);
                 const infoData = [
                     ['INFORMAÇÕES GERAIS'],
                     [''],
-                    ['Emissora:', params.emissora || 'N/A'],
+                    ['Emissora:', campaignData.emissora],
                     ['Período:', `${formatDate(startDate)} a ${formatDate(endDate)}`],
-                    ['PMM Usado:', pmm.toLocaleString()],
-                    ['Dias de veiculação:', params.dias],
+                    ['Dias de veiculação:', campaignData.dias],
                     [''],
                     ['PRODUTOS ATIVOS:']
                 ];
                 
                 Object.entries(activeProducts).forEach(([type, count]) => {
-                    infoData.push([getProductName(type), count]);
+                    if (count > 0) {
+                        infoData.push([getProductName(type), count]);
+                    }
                 });
                 
                 infoData.push(['']);
                 infoData.push(['TOTAIS:']);
-                infoData.push(['Total de inserções:', totalGeral]);
+                infoData.push(['Total de inserções:', totalSpots]);
                 infoData.push(['Dias ativos:', validDays.length]);
-                infoData.push(['Impactos total:', calculateImpact(activeProducts, pmm).toLocaleString()]);
-                infoData.push(['Média inserções/dia:', validDays.length > 0 ? (totalGeral / validDays.length).toFixed(1) : '0']);
+                infoData.push(['Impactos total:', calculateImpact(activeProducts).toLocaleString()]);
+                infoData.push(['Média inserções/dia:', validDays.length > 0 ? (totalSpots / validDays.length).toFixed(1) : '0']);
                 
                 const infoWs = XLSX.utils.aoa_to_sheet(infoData);
                 infoWs['!cols'] = [{ wch: 20 }, { wch: 15 }];
                 XLSX.utils.book_append_sheet(wb, infoWs, 'Informações');
                 
-                // Salvar arquivo
-                const fileName = `distribuicao_${params.emissora||'campanha'}_${formatDate(new Date()).replace(/\//g, '-')}.xlsx`;
-                console.log(`💾 Salvando arquivo: ${fileName}`);
-                
+                // Salvar
+                const fileName = `distribuicao_${campaignData.emissora||'campanha'}_${formatDate(new Date()).replace(/\//g, '-')}.xlsx`;
                 XLSX.writeFile(wb, fileName);
                 
-                console.log('✅ Exportação de calendário concluída com sucesso!');
+                console.log('✅ Exportação concluída:', fileName);
                 
             } catch (error) {
-                console.error('❌ Erro na exportação de calendário:', error);
-                alert(`Erro ao exportar calendário: ${error.message}`);
+                console.error('❌ Erro na exportação:', error);
+                alert(`Erro ao exportar: ${error.message}`);
             }
         }
 
-        async function init() {
-            try {
-                const params = getURLParams();
-                console.log('🎯 Parâmetros detectados:', params);
-                console.log('🔄 Modo de operação:', params.mode);
-                
-                let campaignData;
-                window.currentCampaignData = null;
-                
-                if (params.mode === 'notion-api') {
-                    // Modo dinâmico: buscar dados via API Notion
-                    document.getElementById('subtitle').textContent = 'Conectando com Notion...';
-                    
-                    try {
-                        campaignData = await fetchNotionData(params.uuid);
-                        console.log('📊 Dados da campanha carregados:', campaignData);
-                    } catch (error) {
-                        console.error('❌ Erro ao carregar dados:', error);
-                        throw new Error(`Erro ao carregar dados do Notion: ${error.message}`);
-                    }
-                } else {
-                    // Modo legado: usar parâmetros da URL
-                    campaignData = params;
-                    console.log('📋 Usando dados dos parâmetros URL');
-                }
-                
-                // Salvar dados globalmente para funções auxiliares
-                window.currentCampaignData = campaignData;
-                
-                const startDate = parseDate(campaignData.inicio);
-                const endDate = parseDate(campaignData.fim);
-                const selectedWeekdays = parseSelectedWeekdays(campaignData.dias);
-                const activeProducts = getActiveProducts(campaignData);
-                activeProductsGlobal = activeProducts;
-                
-                const totalSpots = Object.values(activeProducts).reduce((sum, spots) => sum + spots, 0);
-                totalSpotsGlobal = totalSpots;
-                const hasParams = params.mode === 'notion-api' || window.location.search.length > 0;
-                
-                if (!hasParams) {
-                    console.log('🎭 Mostrando exemplo');
-                    showExample();
-                    return;
-                }
-                
-                if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-                    throw new Error('Datas inválidas nos dados recebidos');
-                }
-                
-                if (startDate > endDate) {
-                    throw new Error('Data de início deve ser anterior à data de fim');
-                }
-                
-                if (selectedWeekdays.length === 0) {
-                    throw new Error('Pelo menos um dia da semana deve ser selecionado');
-                }
-                
-                if (totalSpots <= 0) {
-                    console.log('📭 Nenhuma inserção programada');
-                    showEmptyCalendar(campaignData, startDate, endDate, selectedWeekdays);
-                    return;
-                }
-                
-                // Indicar fonte dos dados no título
-                const sourceIndicator = params.mode === 'notion-api' ? ' 📡' : '';
-                document.getElementById('title').textContent = campaignData.emissora.toUpperCase() + sourceIndicator;
-                document.getElementById('subtitle').textContent = 
-                    `${formatDate(startDate)} a ${formatDate(endDate)} • ${totalSpots} inserções`;
-                
-                updateProductsInfo(activeProducts);
-                updateWeekdaysInfo(campaignData.dias);
-                
-                // Mostrar barra de ações
-                document.getElementById('actions-bar').style.display = 'flex';
-                document.getElementById('campaign-title').textContent = `${campaignData.emissora} • PMM: ${(campaignData.pmm || 1000).toLocaleString()}`;
-                
-                const validDays = getValidDays(startDate, endDate, selectedWeekdays);
-                validDaysGlobal = validDays;
-                
-                if (validDays.length === 0) {
-                    throw new Error('Não há dias válidos no período com os dias da semana selecionados');
-                }
-                
-                const { distribution } = distributeMultipleSpots(activeProducts, validDays);
-                window.currentDistribution = distribution;
-                
-                createCompactCalendar(startDate, endDate, distribution, selectedWeekdays, campaignData);
-                updateStats(campaignData, validDays, totalSpots);
-                
-                console.log('✅ Sistema carregado com sucesso!');
-                
-            } catch (error) {
-                console.error('💥 Erro no sistema:', error);
-                document.getElementById('error-message').textContent = error.message;
-                document.getElementById('error-message').style.display = 'block';
-                document.getElementById('subtitle').textContent = 'Erro ao processar dados da campanha';
-            }
+        // UTILITÁRIOS
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error-message').style.display = 'block';
         }
-
-        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
