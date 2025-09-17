@@ -4,434 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Distribuição de Mídias</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Arial', sans-serif;
-            background: #f8fafc;
-            color: #333;
-            line-height: 1.4;
-        }
-        
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        /* CABEÇALHO SIMPLIFICADO */
-        .header {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
-            color: white;
-            padding: 24px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 20px rgba(29, 78, 216, 0.15);
-            text-align: center;
-        }
-        
-        .header-title {
-            font-size: 28px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-        }
-        
-        /* CARDS DE MÉTRICAS - REORGANIZADAS */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-        
-        .stat-card {
-            background: white;
-            padding: 18px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            border-left: 4px solid #1d4ed8;
-            transition: transform 0.2s ease;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-        }
-        
-        .stat-card.primary { border-left-color: #1d4ed8; }
-        .stat-card.orange { border-left-color: #f59e0b; }
-        .stat-card.success { border-left-color: #10b981; }
-        .stat-card.purple { border-left-color: #8b5cf6; }
-        
-        .stat-number {
-            font-size: 22px;
-            font-weight: 700;
-            color: #1e3a8a;
-            display: block;
-            margin-bottom: 4px;
-        }
-        
-        .stat-label {
-            font-size: 11px;
-            color: #6b7280;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            font-weight: 600;
-        }
-        
-        /* PRODUTOS */
-        .info-section {
-            background: white;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            border-left: 4px solid #1d4ed8;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-        }
-        
-        .info-title {
-            color: #1e3a8a;
-            font-size: 12px;
-            text-transform: uppercase;
-            font-weight: 700;
-            margin-bottom: 6px;
-        }
-        
-        .product-tag {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 16px;
-            font-size: 11px;
-            font-weight: 600;
-            color: white;
-            margin-right: 8px;
-            margin-bottom: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .tag-spots30 { background: linear-gradient(135deg, #1d4ed8, #3b82f6); }
-        .tag-spots5 { background: linear-gradient(135deg, #059669, #10b981); }
-        .tag-spots15 { background: linear-gradient(135deg, #dc2626, #ef4444); }
-        .tag-spots60 { background: linear-gradient(135deg, #7c3aed, #a855f7); }
-        .tag-test60 { background: linear-gradient(135deg, #ea580c, #f97316); }
-        
-        /* AÇÕES */
-        .actions-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 12px 16px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        }
-        
-        .actions-left {
-            font-size: 14px;
-            font-weight: 600;
-            color: #374151;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .status-badge {
-            background: #dcfce7;
-            color: #166534;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-        
-        .actions-right {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .btn {
-            border: none;
-            padding: 10px 16px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        }
-        
-        .btn:hover {
-            transform: translateY(-1px);
-        }
-        
-        .btn-edit {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            color: white;
-        }
-        
-        .btn-export {
-            background: linear-gradient(135deg, #059669, #10b981);
-            color: white;
-        }
-        
-        .btn-save {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-        }
-        
-        .btn-cancel {
-            background: linear-gradient(135deg, #6b7280, #4b5563);
-            color: white;
-        }
-        
-        .btn-auto {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            color: white;
-        }
-        
-        /* CALENDÁRIO */
-        .calendar-container {
-            display: grid;
-            gap: 20px;
-        }
-        
-        .calendar-month {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-        }
-        
-        .month-header {
-            background: linear-gradient(135deg, #1e3a8a, #1d4ed8);
-            color: white;
-            padding: 16px;
-            font-size: 18px;
-            font-weight: 600;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .calendar-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .calendar-table th {
-            background: #f8fafc;
-            padding: 12px 8px;
-            text-align: center;
-            font-size: 11px;
-            font-weight: 700;
-            color: #4b5563;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            border-bottom: 2px solid #e5e7eb;
-        }
-        
-        .calendar-table td {
-            padding: 4px;
-            text-align: center;
-            height: 80px;
-            position: relative;
-            min-width: 50px;
-            border-bottom: 1px solid #f3f4f6;
-        }
-        
-        /* NOVA ESTRUTURA DE CÉLULAS - DIVISÃO HORIZONTAL */
-        .date-cell {
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            border-radius: 8px;
-            margin: 2px;
-            transition: all 0.2s ease;
-            cursor: pointer;
-            overflow: hidden;
-        }
-        
-        .date-cell.current-month {
-            border: 1px solid #e2e8f0;
-        }
-        
-        .date-cell.selected-weekday {
-            background: #f1f5f9;
-        }
-        
-        /* PARTE SUPERIOR - DATA (33%) */
-        .date-number {
-            height: 33%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 500;
-            color: #9ca3af;
-            background: #f8fafc;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
-        .date-cell.current-month .date-number {
-            color: #374151;
-            font-weight: 600;
-        }
-        
-        /* PARTE INFERIOR - INSERÇÕES (67%) */
-        .spots-section {
-            height: 67%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            font-weight: 700;
-            color: white;
-            position: relative;
-        }
-        
-        /* HEATMAP - APLICADO APENAS NA SEÇÃO DE INSERÇÕES */
-        .spots-section.intensity-1 { background: linear-gradient(135deg, #dbeafe, #93c5fd); }
-        .spots-section.intensity-2 { background: linear-gradient(135deg, #93c5fd, #60a5fa); }
-        .spots-section.intensity-3 { background: linear-gradient(135deg, #60a5fa, #3b82f6); }
-        .spots-section.intensity-4 { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-        .spots-section.intensity-5 { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
-        .spots-section.intensity-max { background: linear-gradient(135deg, #1d4ed8, #1e40af); }
-        
-        .date-cell:hover {
-            transform: scale(1.02);
-            z-index: 10;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        
-        .spots-section:not(:empty) {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        }
-        
-        /* MODO EDIÇÃO */
-        .edit-mode .calendar-month {
-            border: 3px solid #10b981;
-        }
-        
-        .edit-mode .month-header {
-            background: linear-gradient(135deg, #059669, #10b981);
-        }
-        
-        .edit-mode .date-cell {
-            cursor: pointer;
-        }
-        
-        .edit-mode .date-cell:hover .spots-section {
-            border: 2px solid #10b981;
-        }
-        
-        /* VALIDAÇÃO */
-        .validation {
-            padding: 12px 16px;
-            border-radius: 8px;
-            text-align: center;
-            margin: 12px 0;
-            font-size: 13px;
-            font-weight: 500;
-        }
-        
-        .validation.success {
-            background: #dcfce7;
-            border: 1px solid #059669;
-            color: #059669;
-        }
-        
-        .validation.warning {
-            background: #fef3c7;
-            border: 1px solid #d97706;
-            color: #d97706;
-        }
-        
-        .validation.error {
-            background: #fee2e2;
-            border: 1px solid #dc2626;
-            color: #dc2626;
-        }
-        
-        /* TOOLTIP */
-        .tooltip {
-            position: fixed;
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
-            color: white;
-            padding: 16px 20px;
-            border-radius: 12px;
-            font-size: 13px;
-            z-index: 9999;
-            pointer-events: none;
-            opacity: 0;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-            box-shadow: 0 12px 32px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-            backdrop-filter: blur(16px);
-            max-width: 300px;
-            line-height: 1.5;
-        }
-        
-        .tooltip.show {
-            opacity: 1;
-            transform: translateY(-15px);
-        }
-        
-        .tooltip::after {
-            content: '';
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            border: 10px solid transparent;
-            border-top-color: rgba(15, 23, 42, 0.95);
-            transform: translateX(-50%);
-        }
-        
-        /* RESPONSIVIDADE */
-        @media (max-width: 768px) {
-            .container { padding: 12px; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-            .actions-bar { flex-direction: column; gap: 12px; }
-            .calendar-table td { height: 70px; min-width: 40px; }
-            .spots-section { font-size: 14px; }
-            .date-number { font-size: 10px; }
-        }
-        
-        /* ANIMAÇÕES */
-        .calendar-month { animation: slideIn 0.5s ease-out; }
-        .stat-card { animation: fadeIn 0.4s ease-out; }
-        
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        
-        .error {
-            background: #fee2e2;
-            border: 1px solid #fecaca;
-            color: #dc2626;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            margin: 15px 0;
-        }
-    </style>
+    <!-- Google Fonts - Space Grotesk -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Font Awesome para os ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+
 </head>
 <body>
     <div class="container">
@@ -458,15 +40,15 @@
                 <span class="stat-number" id="stat-period">-</span>
                 <div class="stat-label">Período</div>
             </div>
-            <div class="stat-card orange">
+            <div class="stat-card secondary">
                 <span class="stat-number" id="stat-spots">0</span>
                 <div class="stat-label">Total Inserções</div>
             </div>
-            <div class="stat-card success">
+            <div class="stat-card accent">
                 <span class="stat-number" id="stat-impact">0</span>
                 <div class="stat-label">Impactos Total</div>
             </div>
-            <div class="stat-card purple">
+            <div class="stat-card gradient">
                 <span class="stat-number" id="stat-avg">0</span>
                 <div class="stat-label">Média/Dia</div>
             </div>
@@ -508,672 +90,96 @@
         
         <!-- CALENDÁRIO -->
         <div class="calendar-container" id="calendar"></div>
+        
+        <!-- LOGO DA MARCA -->
+        <div class="brand-footer">
+            <img src="https://raw.githubusercontent.com/distribuicaoemidias/main/logo%20E-MIDIAS%20png%20fundo%20branco.png" 
+                 alt="E-MÍDIAS Logo" 
+                 class="brand-logo"
+                 onerror="this.style.display='none'">
+            <p class="brand-text">Powered by <strong>E-MÍDIAS</strong></p>
+        </div>
     </div>
 
     <!-- XLSX Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="script.js"></script>
 
-    <script>
-        // VARIÁVEIS GLOBAIS
-        let isEditMode = false;
-        let campaignData = {};
-        let originalDistribution = {};
-        let currentDistribution = {};
-        let validDays = [];
-        let totalSpots = 0;
-
-        // INICIALIZAÇÃO
-        document.addEventListener('DOMContentLoaded', async () => {
-            console.log('🚀 Iniciando sistema...');
-            try {
-                await loadCampaignData();
-                renderInterface();
-                console.log('✅ Sistema carregado com sucesso!');
-            } catch (error) {
-                console.error('❌ Erro ao carregar:', error);
-                showError(error.message);
-            }
-        });
-
-        // CARREGAR DADOS
-        async function loadCampaignData() {
-            const params = new URLSearchParams(window.location.search);
-            const notionId = params.get('id');
+    <!-- MODAL DE EDIÇÃO -->
+<div id="edit-modal" class="edit-modal">
+    <div class="edit-modal-content">
+        <div class="edit-modal-header">
+            <h3 class="edit-modal-title" id="edit-modal-title">Editar Distribuição</h3>
+            <button class="edit-modal-close" onclick="closeEditModal()">&times;</button>
+        </div>
+        
+        <div class="edit-form">
+            <!-- Spots 30" -->
+            <div class="edit-form-group" id="group-spots30" style="display: none;">
+                <label class="edit-form-label">📺 Spots 30"</label>
+                <div class="edit-input-group">
+                    <button class="edit-input-btn" onclick="decrementSpot('spots30')">−</button>
+                    <input type="number" class="edit-input-field" id="input-spots30" value="0" min="0" onchange="updateSpotValue('spots30')">
+                    <button class="edit-input-btn" onclick="incrementSpot('spots30')">+</button>
+                </div>
+            </div>
             
-            if (notionId && /^[0-9a-f]{32}$/i.test(notionId)) {
-                console.log('📡 Carregando do Notion:', notionId);
-                campaignData = await fetchNotionData(notionId);
-                campaignData.source = 'notion';
-            } else if (params.toString()) {
-                console.log('📋 Carregando dos parâmetros URL');
-                campaignData = {
-                    spots30: parseInt(params.get('spots30')) || 0,
-                    spots5: parseInt(params.get('spots5')) || 0,
-                    spots15: parseInt(params.get('spots15')) || 0,
-                    spots60: parseInt(params.get('spots60')) || 0,
-                    test60: parseInt(params.get('test60')) || 0,
-                    emissora: params.get('emissora') || 'Emissora',
-                    inicio: params.get('inicio') || '01/01/2025',
-                    fim: params.get('fim') || '31/01/2025',
-                    dias: params.get('dias') || 'Seg.,Ter.,Qua.,Qui.,Sex.',
-                    pmm: parseInt(params.get('pmm')) || 1000,
-                    source: 'url'
-                };
-            } else {
-                console.log('🎭 Carregando exemplo');
-                campaignData = {
-                    spots30: 15, spots5: 8, spots15: 12, spots60: 5, test60: 3,
-                    emissora: 'EXEMPLO RADIO', inicio: '01/11/2025', fim: '30/11/2025',
-                    dias: 'Seg.,Qua.,Sex.', pmm: 1000, source: 'example'
-                };
-            }
+            <!-- Spots 5" -->
+            <div class="edit-form-group" id="group-spots5" style="display: none;">
+                <label class="edit-form-label">⚡ Spots 5"</label>
+                <div class="edit-input-group">
+                    <button class="edit-input-btn" onclick="decrementSpot('spots5')">−</button>
+                    <input type="number" class="edit-input-field" id="input-spots5" value="0" min="0" onchange="updateSpotValue('spots5')">
+                    <button class="edit-input-btn" onclick="incrementSpot('spots5')">+</button>
+                </div>
+            </div>
             
-            console.log('📊 Dados carregados:', campaignData);
-        }
-
-        // BUSCAR DADOS DO NOTION
-        async function fetchNotionData(uuid) {
-            const response = await fetch(`/.netlify/functions/notion?id=${uuid}`);
-            if (!response.ok) {
-                throw new Error(`Erro ao carregar dados do Notion: ${response.status}`);
-            }
-            return await response.json();
-        }
-
-        // RENDERIZAR INTERFACE
-        function renderInterface() {
-            const startDate = parseDate(campaignData.inicio);
-            const endDate = parseDate(campaignData.fim);
-            const selectedWeekdays = parseWeekdays(campaignData.dias);
-            const activeProducts = getActiveProducts();
+            <!-- Spots 15" -->
+            <div class="edit-form-group" id="group-spots15" style="display: none;">
+                <label class="edit-form-label">🎬 Spots 15"</label>
+                <div class="edit-input-group">
+                    <button class="edit-input-btn" onclick="decrementSpot('spots15')">−</button>
+                    <input type="number" class="edit-input-field" id="input-spots15" value="0" min="0" onchange="updateSpotValue('spots15')">
+                    <button class="edit-input-btn" onclick="incrementSpot('spots15')">+</button>
+                </div>
+            </div>
             
-            totalSpots = Object.values(activeProducts).reduce((sum, count) => sum + count, 0);
-            validDays = getValidDays(startDate, endDate, selectedWeekdays);
+            <!-- Spots 60" -->
+            <div class="edit-form-group" id="group-spots60" style="display: none;">
+                <label class="edit-form-label">🎭 Spots 60"</label>
+                <div class="edit-input-group">
+                    <button class="edit-input-btn" onclick="decrementSpot('spots60')">−</button>
+                    <input type="number" class="edit-input-field" id="input-spots60" value="0" min="0" onchange="updateSpotValue('spots60')">
+                    <button class="edit-input-btn" onclick="incrementSpot('spots60')">+</button>
+                </div>
+            </div>
             
-            // Validações
-            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-                throw new Error('Datas inválidas');
-            }
-            if (validDays.length === 0) {
-                throw new Error('Nenhum dia válido encontrado');
-            }
+            <!-- Test 60" -->
+            <div class="edit-form-group" id="group-test60" style="display: none;">
+                <label class="edit-form-label">🎪 Testemunhais 60"</label>
+                <div class="edit-input-group">
+                    <button class="edit-input-btn" onclick="decrementSpot('test60')">−</button>
+                    <input type="number" class="edit-input-field" id="input-test60" value="0" min="0" onchange="updateSpotValue('test60')">
+                    <button class="edit-input-btn" onclick="incrementSpot('test60')">+</button>
+                </div>
+            </div>
             
-            // Calcular distribuição
-            currentDistribution = calculateDistribution(activeProducts, validDays);
-            originalDistribution = JSON.parse(JSON.stringify(currentDistribution));
-            
-            // Renderizar elementos
-            updateHeader();
-            updateProducts(activeProducts);
-            updateStats(startDate, endDate);
-            updateActions();
-            renderCalendar(startDate, endDate, selectedWeekdays);
-            
-            // Mostrar interface
-            document.getElementById('stats').style.display = 'grid';
-            document.getElementById('actions-normal').style.display = 'flex';
-        }
-
-        // UTILITÁRIOS DE DATA
-        function parseDate(dateStr) {
-            const [day, month, year] = dateStr.split('/');
-            return new Date(year, month - 1, day);
-        }
-
-        function formatDate(date) {
-            return date.toLocaleDateString('pt-BR');
-        }
-
-        function parseWeekdays(diasStr) {
-            const mapping = {
-                'Dom.': 0, 'Seg.': 1, 'Ter.': 2, 'Qua.': 3,
-                'Qui.': 4, 'Sex.': 5, 'Sáb.': 6
-            };
-            return diasStr.split(',').map(day => mapping[day.trim()]).filter(d => d !== undefined);
-        }
-
-        function getValidDays(startDate, endDate, selectedWeekdays) {
-            const days = [];
-            const current = new Date(startDate);
-            
-            while (current <= endDate) {
-                if (selectedWeekdays.includes(current.getDay())) {
-                    days.push(new Date(current));
-                }
-                current.setDate(current.getDate() + 1);
-            }
-            return days;
-        }
-
-        // PRODUTOS E CÁLCULOS
-        function getActiveProducts() {
-            return {
-                spots30: campaignData.spots30 || 0,
-                spots5: campaignData.spots5 || 0,
-                spots15: campaignData.spots15 || 0,
-                spots60: campaignData.spots60 || 0,
-                test60: campaignData.test60 || 0
-            };
-        }
-
-        function getProductName(type) {
-            const names = {
-                spots30: 'Spots 30"', spots5: 'Spots 5"', spots15: 'Spots 15"',
-                spots60: 'Spots 60"', test60: 'Test. 60"'
-            };
-            return names[type] || type;
-        }
-
-        function calculateImpact(products) {
-            const pmm = campaignData.pmm || 1000;
-            let impact = 0;
-            impact += (products.spots30 || 0) * pmm;
-            impact += (products.test60 || 0) * (pmm * 2);
-            impact += (products.spots60 || 0) * (pmm * 2);
-            impact += (products.spots15 || 0) * (pmm / 2);
-            impact += (products.spots5 || 0) * (pmm / 6);
-            return Math.round(impact);
-        }
-
-        // DISTRIBUIÇÃO
-        function calculateDistribution(products, validDays) {
-            const totalSpots = Object.values(products).reduce((sum, spots) => sum + spots, 0);
-            
-            if (totalSpots === 0 || validDays.length === 0) {
-                return {};
-            }
-            
-            const distribution = {};
-            
-            // Inicializar todos os dias
-            validDays.forEach(day => {
-                const dateKey = day.toISOString().split('T')[0];
-                distribution[dateKey] = { total: 0, products: {} };
-            });
-            
-            // Distribuir cada produto
-            Object.entries(products).forEach(([productType, totalSpotsForProduct]) => {
-                if (totalSpotsForProduct <= 0) return;
-                
-                const daysForThisProduct = Math.min(totalSpotsForProduct, validDays.length);
-                const spotsPerDay = Math.floor(totalSpotsForProduct / daysForThisProduct);
-                let remainingSpots = totalSpotsForProduct % daysForThisProduct;
-                
-                for (let i = 0; i < daysForThisProduct; i++) {
-                    const dayIndex = Math.floor((i * validDays.length) / daysForThisProduct);
-                    const dateKey = validDays[dayIndex].toISOString().split('T')[0];
-                    
-                    const spotsForThisDay = spotsPerDay + (remainingSpots > 0 ? 1 : 0);
-                    if (remainingSpots > 0) remainingSpots--;
-                    
-                    distribution[dateKey].products[productType] = 
-                        (distribution[dateKey].products[productType] || 0) + spotsForThisDay;
-                    distribution[dateKey].total += spotsForThisDay;
-                }
-            });
-            
-            return distribution;
-        }
-
-        // ATUALIZAR ELEMENTOS
-        function updateHeader() {
-            const titleSuffix = campaignData.source === 'example' ? ' (EXEMPLO)' : '';
-            document.getElementById('title').textContent = campaignData.emissora.toUpperCase() + titleSuffix;
-        }
-
-        function updateProducts(activeProducts) {
-            const container = document.getElementById('products-list');
-            container.innerHTML = '';
-            
-            Object.entries(activeProducts).forEach(([type, count]) => {
-                if (count > 0) {
-                    const tag = document.createElement('span');
-                    tag.className = `product-tag tag-${type}`;
-                    tag.textContent = `${getProductName(type)}: ${count}`;
-                    container.appendChild(tag);
-                }
-            });
-            
-            document.getElementById('products-section').style.display = 'block';
-        }
-
-        function updateStats(startDate, endDate) {
-            const activeProducts = getActiveProducts();
-            const periodRange = `${startDate.getDate().toString().padStart(2, '0')}/${(startDate.getMonth() + 1).toString().padStart(2, '0')}-${endDate.getDate().toString().padStart(2, '0')}/${(endDate.getMonth() + 1).toString().padStart(2, '0')}`;
-            const avgSpots = validDays.length > 0 ? (totalSpots / validDays.length).toFixed(1) : '0';
-            const totalImpact = calculateImpact(activeProducts);
-            
-            document.getElementById('stat-period').textContent = periodRange;
-            document.getElementById('stat-spots').textContent = totalSpots;
-            document.getElementById('stat-impact').textContent = totalImpact.toLocaleString();
-            document.getElementById('stat-avg').textContent = avgSpots;
-        }
-
-        function updateActions() {
-            document.getElementById('campaign-name').textContent = campaignData.emissora;
-        }
-
-        // CALENDÁRIO COM NOVA ESTRUTURA DE CÉLULAS
-        function renderCalendar(startDate, endDate, selectedWeekdays) {
-            const container = document.getElementById('calendar');
-            container.innerHTML = '';
-            
-            // Calcular máximo de spots para heatmap
-            const maxSpots = Math.max(...Object.values(currentDistribution).map(d => d?.total || 0));
-            
-            // Gerar meses
-            const months = new Set();
-            const current = new Date(startDate);
-            
-            while (current <= endDate) {
-                months.add(`${current.getFullYear()}-${current.getMonth()}`);
-                current.setMonth(current.getMonth() + 1);
-                current.setDate(1);
-            }
-            
-            months.forEach(monthKey => {
-                const [year, month] = monthKey.split('-').map(Number);
-                const monthElement = createMonthCalendar(year, month, selectedWeekdays, maxSpots);
-                container.appendChild(monthElement);
-            });
-        }
-
-        function createMonthCalendar(year, month, selectedWeekdays, maxSpots) {
-            const monthContainer = document.createElement('div');
-            monthContainer.className = 'calendar-month';
-            
-            // Cabeçalho do mês
-            const header = document.createElement('div');
-            header.className = 'month-header';
-            header.textContent = getMonthName(month, year);
-            monthContainer.appendChild(header);
-            
-            // Tabela
-            const table = document.createElement('table');
-            table.className = 'calendar-table';
-            
-            // Cabeçalho da semana
-            const thead = document.createElement('thead');
-            const headerRow = document.createElement('tr');
-            ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'].forEach(day => {
-                const th = document.createElement('th');
-                th.textContent = day;
-                headerRow.appendChild(th);
-            });
-            thead.appendChild(headerRow);
-            table.appendChild(thead);
-            
-            // Corpo da tabela
-            const tbody = document.createElement('tbody');
-            const days = getMonthDays(year, month);
-            
-            for (let i = 0; i < days.length; i += 7) {
-                const weekDays = days.slice(i, i + 7);
-                const row = document.createElement('tr');
-                
-                weekDays.forEach(day => {
-                    const td = document.createElement('td');
-                    const cell = createDateCell(day, month, selectedWeekdays, maxSpots);
-                    td.appendChild(cell);
-                    row.appendChild(td);
-                });
-                
-                tbody.appendChild(row);
-            }
-            
-            table.appendChild(tbody);
-            monthContainer.appendChild(table);
-            
-            return monthContainer;
-        }
-
-        // NOVA FUNÇÃO PARA CRIAR CÉLULAS COM DIVISÃO HORIZONTAL
-        function createDateCell(day, month, selectedWeekdays, maxSpots) {
-            const cell = document.createElement('div');
-            cell.className = 'date-cell';
-            
-            const isCurrentMonth = day.getMonth() === month;
-            const isDayValid = selectedWeekdays.includes(day.getDay());
-            const dateKey = day.toISOString().split('T')[0];
-            const dayData = currentDistribution[dateKey];
-            
-            if (isCurrentMonth) {
-                cell.classList.add('current-month');
-            }
-            
-            if (isDayValid && isCurrentMonth) {
-                cell.classList.add('selected-weekday');
-            }
-            
-            // PARTE SUPERIOR - DATA (33%)
-            const dateNumber = document.createElement('div');
-            dateNumber.className = 'date-number';
-            dateNumber.textContent = day.getDate();
-            cell.appendChild(dateNumber);
-            
-            // PARTE INFERIOR - INSERÇÕES (67%)
-            const spotsSection = document.createElement('div');
-            spotsSection.className = 'spots-section';
-            
-            if (dayData && dayData.total > 0) {
-                spotsSection.textContent = dayData.total;
-                spotsSection.classList.add(getIntensityClass(dayData.total, maxSpots));
-                
-                // Tooltip
-                setupTooltip(cell, dayData);
-            }
-            
-            cell.appendChild(spotsSection);
-            
-            // Dados para edição
-            cell.dataset.date = dateKey;
-            cell.dataset.spots = dayData ? dayData.total : 0;
-            
-            // Evento de clique para edição
-            cell.addEventListener('click', handleCellClick);
-            
-            return cell;
-        }
-
-        function getMonthDays(year, month) {
-            const firstDay = new Date(year, month, 1);
-            const startCalendar = new Date(firstDay);
-            startCalendar.setDate(startCalendar.getDate() - firstDay.getDay());
-            
-            const days = [];
-            const current = new Date(startCalendar);
-            
-            for (let i = 0; i < 42; i++) {
-                days.push(new Date(current));
-                current.setDate(current.getDate() + 1);
-                
-                if (current.getMonth() !== month && current.getDay() === 0 && i > 28) {
-                    break;
-                }
-            }
-            
-            return days;
-        }
-
-        function getMonthName(month, year) {
-            const months = [
-                'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-            ];
-            return `${months[month]} ${year}`;
-        }
-
-        function getIntensityClass(spotsCount, maxSpots) {
-            if (spotsCount === 0) return '';
-            
-            const percentage = (spotsCount / maxSpots) * 100;
-            
-            if (percentage <= 20) return 'intensity-1';
-            if (percentage <= 40) return 'intensity-2';
-            if (percentage <= 60) return 'intensity-3';
-            if (percentage <= 80) return 'intensity-4';
-            if (percentage < 100) return 'intensity-5';
-            return 'intensity-max';
-        }
-
-        // TOOLTIP
-        function setupTooltip(cell, dayData) {
-            cell.addEventListener('mouseenter', (e) => showTooltip(e, dayData));
-            cell.addEventListener('mouseleave', hideTooltip);
-            cell.addEventListener('mousemove', updateTooltipPosition);
-        }
-
-        function showTooltip(e, dayData) {
-            let tooltip = document.querySelector('.tooltip');
-            if (!tooltip) {
-                tooltip = document.createElement('div');
-                tooltip.className = 'tooltip';
-                document.body.appendChild(tooltip);
-            }
-            
-            const pmm = campaignData.pmm || 1000;
-            const dayImpact = calculateImpact(dayData.products);
-            
-            let content = `📺 Total de inserções: ${dayData.total}<br>`;
-            content += `📊 Impactos: ${dayImpact.toLocaleString()}<br><br>`;
-            content += `📋 Detalhamento:<br>`;
-            
-            Object.entries(dayData.products).forEach(([type, count]) => {
-                if (count > 0) {
-                    content += `• ${getProductName(type)}: ${count}<br>`;
-                }
-            });
-            
-            tooltip.innerHTML = content;
-            tooltip.classList.add('show');
-            
-            updateTooltipPosition(e);
-        }
-
-        function hideTooltip() {
-            const tooltip = document.querySelector('.tooltip');
-            if (tooltip) {
-                tooltip.classList.remove('show');
-            }
-        }
-
-        function updateTooltipPosition(e) {
-            const tooltip = document.querySelector('.tooltip');
-            if (!tooltip || !tooltip.classList.contains('show')) return;
-            
-            const rect = e.target.getBoundingClientRect();
-            const tooltipRect = tooltip.getBoundingClientRect();
-            
-            let left = rect.left + rect.width / 2 - tooltipRect.width / 2;
-            let top = rect.top - tooltipRect.height - 15;
-            
-            if (left < 10) left = 10;
-            if (left + tooltipRect.width > window.innerWidth - 10) {
-                left = window.innerWidth - tooltipRect.width - 10;
-            }
-            if (top < 10) top = rect.bottom + 15;
-            
-            tooltip.style.left = left + 'px';
-            tooltip.style.top = top + 'px';
-        }
-
-        // EDIÇÃO
-        function startEdit() {
-            isEditMode = true;
-            document.body.classList.add('edit-mode');
-            document.getElementById('actions-normal').style.display = 'none';
-            document.getElementById('actions-edit').style.display = 'flex';
-            
-            originalDistribution = JSON.parse(JSON.stringify(currentDistribution));
-            validateDistribution();
-        }
-
-        function handleCellClick(e) {
-            if (!isEditMode) return;
-            
-            const cell = e.currentTarget;
-            const dateKey = cell.dataset.date;
-            const currentSpots = parseInt(cell.dataset.spots) || 0;
-            
-            const newValue = prompt(`Editar inserções para este dia:`, currentSpots);
-            
-            if (newValue !== null) {
-                const numValue = Math.max(0, parseInt(newValue) || 0);
-                
-                // Atualizar distribuição
-                if (!currentDistribution[dateKey]) {
-                    currentDistribution[dateKey] = { total: 0, products: {} };
-                }
-                currentDistribution[dateKey].total = numValue;
-                
-                // Atualizar célula
-                cell.dataset.spots = numValue;
-                
-                const spotsSection = cell.querySelector('.spots-section');
-                
-                if (numValue > 0) {
-                    spotsSection.textContent = numValue;
-                    
-                    // Recalcular intensidade
-                    const maxSpots = Math.max(...Object.values(currentDistribution).map(d => d?.total || 0));
-                    spotsSection.className = 'spots-section ' + getIntensityClass(numValue, maxSpots);
-                } else {
-                    spotsSection.textContent = '';
-                    spotsSection.className = 'spots-section';
-                }
-                
-                validateDistribution();
-            }
-        }
-
-        function validateDistribution() {
-            const totalUsed = Object.values(currentDistribution).reduce((sum, day) => sum + (day.total || 0), 0);
-            const validation = document.getElementById('validation');
-            
-            validation.style.display = 'block';
-            
-            if (totalUsed === totalSpots) {
-                validation.className = 'validation success';
-                validation.textContent = `✅ Distribuição válida! Total: ${totalUsed}/${totalSpots}`;
-            } else if (totalUsed < totalSpots) {
-                const remaining = totalSpots - totalUsed;
-                validation.className = 'validation warning';
-                validation.textContent = `⚠️ Faltam ${remaining} inserções (${totalUsed}/${totalSpots})`;
-            } else {
-                const excess = totalUsed - totalSpots;
-                validation.className = 'validation error';
-                validation.textContent = `❌ ${excess} inserções a mais (${totalUsed}/${totalSpots})`;
-            }
-        }
-
-        function saveEdit() {
-            const totalUsed = Object.values(currentDistribution).reduce((sum, day) => sum + (day.total || 0), 0);
-            
-            if (totalUsed !== totalSpots) {
-                if (!confirm(`Total atual: ${totalUsed}, necessário: ${totalSpots}. Continuar?`)) {
-                    return;
-                }
-            }
-            
-            originalDistribution = JSON.parse(JSON.stringify(currentDistribution));
-            exitEditMode();
-            alert('Distribuição salva com sucesso!');
-        }
-
-        function cancelEdit() {
-            currentDistribution = JSON.parse(JSON.stringify(originalDistribution));
-            
-            // Recriar calendário
-            const startDate = parseDate(campaignData.inicio);
-            const endDate = parseDate(campaignData.fim);
-            const selectedWeekdays = parseWeekdays(campaignData.dias);
-            renderCalendar(startDate, endDate, selectedWeekdays);
-            
-            exitEditMode();
-        }
-
-        function resetAuto() {
-            const activeProducts = getActiveProducts();
-            currentDistribution = calculateDistribution(activeProducts, validDays);
-            
-            // Recriar calendário
-            const startDate = parseDate(campaignData.inicio);
-            const endDate = parseDate(campaignData.fim);
-            const selectedWeekdays = parseWeekdays(campaignData.dias);
-            renderCalendar(startDate, endDate, selectedWeekdays);
-            
-            validateDistribution();
-        }
-
-        function exitEditMode() {
-            isEditMode = false;
-            document.body.classList.remove('edit-mode');
-            document.getElementById('actions-normal').style.display = 'flex';
-            document.getElementById('actions-edit').style.display = 'none';
-            document.getElementById('validation').style.display = 'none';
-        }
-
-        // EXPORTAÇÃO
-        function exportExcel() {
-            try {
-                if (typeof XLSX === 'undefined') {
-                    alert('Biblioteca XLSX não disponível. Verifique a conexão.');
-                    return;
-                }
-                
-                const wb = XLSX.utils.book_new();
-                const activeProducts = getActiveProducts();
-                
-                // Planilha principal
-                const excelData = [];
-                excelData.push(['PROGRAMA E FAIXA HORÁRIA', 'Spots 30"', 'Testemunais 60"', 'Total de spots por dia']);
-                
-                validDays.forEach(day => {
-                    const dateKey = day.toISOString().split('T')[0];
-                    const dayData = currentDistribution[dateKey] || { total: 0, products: {} };
-                    const dayName = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'][day.getDay()];
-                    
-                    excelData.push([
-                        `${dayName} - ${formatDate(day)}`,
-                        dayData.products.spots30 || 0,
-                        dayData.products.test60 || 0,
-                        dayData.total
-                    ]);
-                });
-                
-                excelData.push(['TOTAL', activeProducts.spots30 || 0, activeProducts.test60 || 0, totalSpots]);
-                
-                const ws = XLSX.utils.aoa_to_sheet(excelData);
-                ws['!cols'] = [{ wch: 25 }, { wch: 10 }, { wch: 15 }, { wch: 18 }];
-                XLSX.utils.book_append_sheet(wb, ws, 'Distribuição');
-                
-                // Planilha de informações
-                const startDate = parseDate(campaignData.inicio);
-                const endDate = parseDate(campaignData.fim);
-                const infoData = [
-                    ['INFORMAÇÕES GERAIS'],
-                    [''],
-                    ['Emissora:', campaignData.emissora],
-                    ['Período:', `${formatDate(startDate)} a ${formatDate(endDate)}`],
-                    ['Dias de veiculação:', campaignData.dias],
-                    [''],
-                    ['PRODUTOS ATIVOS:']
-                ];
-                
-                Object.entries(activeProducts).forEach(([type, count]) => {
-                    if (count > 0) {
-                        infoData.push([getProductName(type), count]);
-                    }
-                });
-                
-                infoData.push(['']);
-                infoData.push(['TOTAIS:']);
-                infoData.push(['Total de inserções:', totalSpots]);
-                infoData.push(['Dias ativos:', validDays.length]);
-                infoData.push(['Impactos total:', calculateImpact(activeProducts).toLocaleString()]);
-                infoData.push(['Média inserções/dia:', validDays.length > 0 ? (totalSpots / validDays.length).toFixed(1) : '0']);
-                
-                const infoWs = XLSX.utils.aoa_to_sheet(infoData);
-                infoWs['!cols'] = [{ wch: 20 }, { wch: 15 }];
-                XLSX.utils.book_append_sheet(wb, infoWs, 'Informações');
-                
-                // Salvar
-                const fileName = `distribuicao_${campaignData.emissora||'campanha'}_${formatDate(new Date()).replace(/\//g, '-')}.xlsx`;
-                XLSX.writeFile(wb, fileName);
-                
-                console.log('✅ Exportação concluída:', fileName);
-                
-            } catch (error) {
-                console.error('❌ Erro na exportação:', error);
-                alert(`Erro ao exportar: ${error.message}`);
-            }
-        }
-
-        // UTILITÁRIOS
-        function showError(message) {
-            document.getElementById('error-message').textContent = message;
-            document.getElementById('error-message').style.display = 'block';
-        }
-    </script>
+            <!-- Total -->
+            <div class="edit-total-section">
+                <div class="edit-total-label">Total de Inserções</div>
+                <div class="edit-total-value" id="edit-total-display">0</div>
+            </div>
+        </div>
+        
+        <div class="edit-modal-actions">
+            <button class="edit-btn edit-btn-cancel" onclick="closeEditModal()">
+                ❌ Cancelar
+            </button>
+            <button class="edit-btn edit-btn-save" onclick="saveEditModal()">
+                💾 Salvar
+            </button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
