@@ -1135,3 +1135,58 @@ body {
     from { transform: translateX(100%); opacity: 0; }
     to { transform: translateX(0); opacity: 1; }
 }
+
+/* CABEÇALHO SUPERIOR COM LOGO */
+.top-header {
+    background: var(--primary-color);
+    padding: 12px 20px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(6, 5, 91, 0.2);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 2px solid var(--secondary-color);
+}
+
+.top-logo {
+    max-height: 40px;
+    height: auto;
+    max-width: 200px;
+    transition: transform 0.3s ease;
+    filter: brightness(1.1);
+}
+
+.top-logo:hover {
+    transform: scale(1.05);
+}
+
+/* AJUSTAR CONTAINER PRINCIPAL */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    margin-top: 0; /* Remove margem superior já que temos o cabeçalho fixo */
+}
+
+/* RESPONSIVIDADE DO CABEÇALHO */
+@media (max-width: 768px) {
+    .top-header {
+        padding: 8px 16px;
+    }
+    
+    .top-logo {
+        max-height: 32px;
+        max-width: 160px;
+    }
+}
+
+@media (max-width: 480px) {
+    .top-header {
+        padding: 6px 12px;
+    }
+    
+    .top-logo {
+        max-height: 28px;
+        max-width: 140px;
+    }
+}

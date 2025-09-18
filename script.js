@@ -863,7 +863,7 @@ function exitEditMode() {
     }
 }
 
-// EXPORTAÇÃO
+// EXPORTAÇÃO COM ESTRUTURA EXATA DO "Excel ideal.png"
 function exportExcel() {
     try {
         if (typeof XLSX === 'undefined') {
@@ -872,63 +872,12 @@ function exportExcel() {
         }
         
         const wb = XLSX.utils.book_new();
-        const activeProducts = getActiveProducts();
+        createExactExcelStructure(wb);
         
-        // Planilha principal
-        const excelData = [];
-        excelData.push(['PROGRAMA E FAIXA HORÁRIA', 'Spots 30"', 'Testemunais 60"', 'Total de spots por dia']);
-        
-        validDays.forEach(day => {
-            const dateKey = day.toISOString().split('T')[0];
-            const dayData = currentDistribution[dateKey] || { total: 0, products: {} };
-            const dayName = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'][day.getDay()];
-            
-            excelData.push([
-                `${dayName} - ${formatDate(day)}`,
-                dayData.products.spots30 || 0,
-                dayData.products.test60 || 0,
-                dayData.total
-            ]);
-        });
-        
-        excelData.push(['TOTAL', activeProducts.spots30 || 0, activeProducts.test60 || 0, totalSpots]);
-        
-        const ws = XLSX.utils.aoa_to_sheet(excelData);
-        ws['!cols'] = [{ wch: 25 }, { wch: 10 }, { wch: 15 }, { wch: 18 }];
-        XLSX.utils.book_append_sheet(wb, ws, 'Distribuição');
-        
-        // Planilha de informações
+        // Salvar arquivo
         const startDate = parseDate(campaignData.inicio);
-        const endDate = parseDate(campaignData.fim);
-        const infoData = [
-            ['INFORMAÇÕES GERAIS'],
-            [''],
-            ['Emissora:', campaignData.emissora],
-            ['Período:', `${formatDate(startDate)} a ${formatDate(endDate)}`],
-            ['Dias de veiculação:', campaignData.dias],
-            [''],
-            ['PRODUTOS ATIVOS:']
-        ];
-        
-        Object.entries(activeProducts).forEach(([type, count]) => {
-            if (count > 0) {
-                infoData.push([getProductName(type), count]);
-            }
-        });
-        
-        infoData.push(['']);
-        infoData.push(['TOTAIS:']);
-        infoData.push(['Total de inserções:', totalSpots]);
-        infoData.push(['Dias ativos:', validDays.length]);
-        infoData.push(['Impactos total:', calculateImpact(activeProducts).toLocaleString()]);
-        infoData.push(['Média inserções/dia:', validDays.length > 0 ? (totalSpots / validDays.length).toFixed(1) : '0']);
-        
-        const infoWs = XLSX.utils.aoa_to_sheet(infoData);
-        infoWs['!cols'] = [{ wch: 20 }, { wch: 15 }];
-        XLSX.utils.book_append_sheet(wb, infoWs, 'Informações');
-        
-        // Salvar
-        const fileName = `distribuicao_${campaignData.emissora||'campanha'}_${formatDate(new Date()).replace(/\//g, '-')}.xlsx`;
+        const monthName = getMonthName(startDate.getMonth(), startDate.getFullYear());
+        const fileName = `${monthName.replace(' ', '_')}_${startDate.getFullYear()}.xlsx`;
         XLSX.writeFile(wb, fileName);
         
         console.log('✅ Exportação concluída:', fileName);
@@ -937,6 +886,253 @@ function exportExcel() {
         console.error('❌ Erro na exportação:', error);
         alert(`Erro ao exportar: ${error.message}`);
     }
+}
+
+function createExactExcelStructure(wb) {
+    const startDate = parseDate(campaignData.inicio);
+    const endDate = parseDate(campaignData.fim);
+    const selectedWeekdays = parseWeekdays(campaignData.dias);
+    
+    // Criar array 2D vazio para 9 linhas x 31 colunas (A-AE)
+    const data = [];
+    for (let i = 0; i < 9; i++) {
+        data[i] = new Array(31).fill('');
+    }
+    
+    // LINHA 1: Título do mês (será mesclado A1:AE1)
+    const monthTitle = getMonthName(startDate.getMonth(), startDate.getFullYear()).toUpperCase();
+    data[0][0] = monthTitle;
+    
+    // LINHA 2: "PRODUTOS" na coluna A + números dos dias (01, 02, 03...)
+    data[1][0] = 'PRODUTOS';
+    for (let day = 1; day <= 30; day++) {
+        data[1][day] = day.toString().padStart(2, '0');
+    }
+    
+    // LINHA 3: Vazio na coluna A + dias da semana
+    data[2][0] = ''; // Será parte da mesclagem A2:A3
+    for (let day = 1; day <= 30; day++) {
+        const date = new Date(startDate.getFullYear(), startDate.getMonth(), day);
+        if (day <= new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0).getDate()) {
+            const dayName = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'][date.getDay()];
+            data[2][day] = dayName;
+        }
+    }
+    
+    // LINHAS 4-8: Produtos
+    const productNames = ['SPOTS 30"', 'SPOTS 5"', 'SPOTS 15"', 'SPOTS 60"', 'TEST. 60"'];
+    const productTypes = ['spots30', 'spots5', 'spots15', 'spots60', 'test60'];
+    
+    for (let i = 0; i < 5; i++) {
+        const rowIndex = 3 + i; // Linhas 4-8 (índices 3-7)
+        data[rowIndex][0] = productNames[i];
+        
+        // Preencher dados dos produtos
+        for (let day = 1; day <= 30; day++) {
+            const date = new Date(startDate.getFullYear(), startDate.getMonth(), day);
+            const dateKey = date.toISOString().split('T')[0];
+            const dayData = currentDistribution[dateKey];
+            const spotCount = dayData?.products[productTypes[i]] || 0;
+            
+            // Verificar se é dia válido da campanha
+            const isValidDay = selectedWeekdays.includes(date.getDay());
+            const isInPeriod = date >= startDate && date <= endDate;
+            const dayExists = day <= new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0).getDate();
+            
+            if (isValidDay && isInPeriod && dayExists && spotCount > 0) {
+                data[rowIndex][day] = spotCount;
+            }
+        }
+    }
+    
+    // LINHA 9: TOTAL POR DIA
+    data[8][0] = 'TOTAL POR DIA';
+    for (let day = 1; day <= 30; day++) {
+        const date = new Date(startDate.getFullYear(), startDate.getMonth(), day);
+        const dateKey = date.toISOString().split('T')[0];
+        const dayData = currentDistribution[dateKey];
+        const totalSpots = dayData?.total || 0;
+        
+        // Verificar se é dia válido da campanha
+        const isValidDay = selectedWeekdays.includes(date.getDay());
+        const isInPeriod = date >= startDate && date <= endDate;
+        const dayExists = day <= new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0).getDate();
+        
+        if (isValidDay && isInPeriod && dayExists && totalSpots > 0) {
+            data[8][day] = totalSpots;
+        }
+    }
+    
+    // Criar worksheet a partir do array
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    
+    // DEFINIR MESCLAGENS
+    ws['!merges'] = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 30 } }, // A1:AE1 - Título do mês
+        { s: { r: 1, c: 0 }, e: { r: 2, c: 0 } }   // A2:A3 - "PRODUTOS"
+    ];
+    
+    // DEFINIR LARGURAS DAS COLUNAS
+    ws['!cols'] = [
+        { wch: 15 }, // Coluna A
+        ...Array(30).fill({ wch: 4 }) // Colunas B-AE
+    ];
+    
+    // APLICAR FORMATAÇÃO CÉLULA POR CÉLULA
+    for (let R = 0; R <= 8; R++) {
+        for (let C = 0; C <= 30; C++) {
+            const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
+            
+            if (!ws[cellRef]) {
+                ws[cellRef] = { v: '', t: 's' };
+            }
+            
+            // Bordas padrão para todas as células
+            const standardBorder = {
+                top: { style: "thin", color: { rgb: "000000" } },
+                bottom: { style: "thin", color: { rgb: "000000" } },
+                left: { style: "thin", color: { rgb: "000000" } },
+                right: { style: "thin", color: { rgb: "000000" } }
+            };
+            
+            // FORMATAÇÃO POR POSIÇÃO
+            if (R === 0) {
+                // LINHA 1: Título do mês (A1:AE1) - Azul escuro, branco, negrito, centralizado
+                ws[cellRef].s = {
+                    fill: { fgColor: { rgb: "002060" } },
+                    font: { color: { rgb: "FFFFFF" }, bold: true, sz: 14 },
+                    alignment: { horizontal: "center", vertical: "center" },
+                    border: standardBorder
+                };
+            }
+            else if ((R === 1 || R === 2) && C === 0) {
+                // A2:A3 "PRODUTOS" - Azul escuro, branco, negrito, centralizado
+                ws[cellRef].s = {
+                    fill: { fgColor: { rgb: "002060" } },
+                    font: { color: { rgb: "FFFFFF" }, bold: true, sz: 12 },
+                    alignment: { horizontal: "center", vertical: "center" },
+                    border: standardBorder
+                };
+            }
+            else if (R === 1 && C > 0) {
+                // LINHA 2: Números dos dias - Verificar se é fim de semana ou dia especial
+                const day = C;
+                const date = new Date(startDate.getFullYear(), startDate.getMonth(), day);
+                const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+                const isSpecialDay = day === 15 || day === 30;
+                const fontColor = (isWeekend || isSpecialDay) ? "FF0000" : "000000";
+                
+                ws[cellRef].s = {
+                    font: { color: { rgb: fontColor }, bold: false, sz: 10 },
+                    alignment: { horizontal: "center", vertical: "center" },
+                    border: standardBorder
+                };
+            }
+            else if (R === 2 && C > 0) {
+                // LINHA 3: Dias da semana - Verificar se é fim de semana
+                const day = C;
+                const date = new Date(startDate.getFullYear(), startDate.getMonth(), day);
+                const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+                const isSpecialDay = day === 15 || day === 30;
+                const fontColor = (isWeekend || isSpecialDay) ? "FF0000" : "000000";
+                
+                ws[cellRef].s = {
+                    font: { color: { rgb: fontColor }, bold: false, sz: 10 },
+                    alignment: { horizontal: "center", vertical: "center" },
+                    border: standardBorder
+                };
+            }
+            else if (R >= 3 && R <= 7 && C === 0) {
+                // A4:A8 Nomes dos produtos - Azul escuro, branco, negrito, centralizado (SEM MESCLAR)
+                ws[cellRef].s = {
+                    fill: { fgColor: { rgb: "002060" } },
+                    font: { color: { rgb: "FFFFFF" }, bold: true, sz: 10 },
+                    alignment: { horizontal: "center", vertical: "center" },
+                    border: standardBorder
+                };
+            }
+            else if (R === 8 && C === 0) {
+                // A9 "TOTAL POR DIA" - Branco, preto, negrito, centralizado
+                ws[cellRef].s = {
+                    fill: { fgColor: { rgb: "FFFFFF" } },
+                    font: { color: { rgb: "000000" }, bold: true, sz: 10 },
+                    alignment: { horizontal: "center", vertical: "center" },
+                    border: standardBorder
+                };
+            }
+            else {
+                // CÉLULAS DE DADOS (B4:AE9)
+                ws[cellRef].s = {
+                    font: { color: { rgb: "000000" }, bold: false, sz: 10 },
+                    alignment: { horizontal: "center", vertical: "center" },
+                    border: standardBorder
+                };
+            }
+        }
+    }
+    
+    // Adicionar ao workbook
+    const sheetName = getMonthName(startDate.getMonth(), startDate.getFullYear());
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+}
+
+function createInfoSheet(wb) {
+    const startDate = parseDate(campaignData.inicio);
+    const endDate = parseDate(campaignData.fim);
+    const activeProducts = getActiveProducts();
+    
+    const infoData = [
+        ['INFORMAÇÕES DA CAMPANHA'],
+        [''],
+        ['Emissora:', campaignData.emissora],
+        ['Período:', `${formatDate(startDate)} a ${formatDate(endDate)}`],
+        ['Dias de veiculação:', campaignData.dias],
+        ['PMM (Pessoas por Mil):', campaignData.pmm || 1000],
+        [''],
+        ['PRODUTOS CONTRATADOS:'],
+        ['']
+    ];
+    
+    Object.entries(activeProducts).forEach(([type, count]) => {
+        if (count > 0) {
+            infoData.push([getProductName(type), count]);
+        }
+    });
+    
+    infoData.push(['']);
+    infoData.push(['RESUMO GERAL:']);
+    infoData.push(['Total de inserções:', totalSpots]);
+    infoData.push(['Dias ativos:', validDays.length]);
+    infoData.push(['Impactos total:', calculateImpact(activeProducts).toLocaleString()]);
+    infoData.push(['Média inserções/dia:', validDays.length > 0 ? (totalSpots / validDays.length).toFixed(1) : '0']);
+    
+    const infoWs = XLSX.utils.aoa_to_sheet(infoData);
+    infoWs['!cols'] = [{ wch: 25 }, { wch: 20 }];
+    
+    // Formatação da planilha de informações
+    const range = XLSX.utils.decode_range(infoWs['!ref']);
+    for (let R = range.s.r; R <= range.e.r; ++R) {
+        for (let C = range.s.c; C <= range.e.c; ++C) {
+            const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+            if (!infoWs[cellAddress]) continue;
+            
+            if (!infoWs[cellAddress].s) infoWs[cellAddress].s = {};
+            
+            // Títulos das seções
+            if (infoWs[cellAddress].v && typeof infoWs[cellAddress].v === 'string' && 
+                (infoWs[cellAddress].v.includes('INFORMAÇÕES') || 
+                 infoWs[cellAddress].v.includes('PRODUTOS') || 
+                 infoWs[cellAddress].v.includes('RESUMO'))) {
+                infoWs[cellAddress].s = {
+                    fill: { fgColor: { rgb: "06055B" } },
+                    font: { color: { rgb: "FFFFFF" }, bold: true, sz: 12 },
+                    alignment: { horizontal: "center", vertical: "center" }
+                };
+            }
+        }
+    }
+    
+    XLSX.utils.book_append_sheet(wb, infoWs, 'Informações');
 }
 
 // UTILITÁRIOS
