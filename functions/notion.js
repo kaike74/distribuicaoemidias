@@ -1,4 +1,4 @@
-// Cloudflare Pages Function - VERSÃO COM DEBUG
+// Cloudflare Pages Function - VERSÃO CORRIGIDA
 export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
@@ -31,7 +31,7 @@ export async function onRequest(context) {
       });
     }
 
-    // ===== DEBUG: VERIFICAR TOKEN =====
+    // ===== BUSCAR TOKEN =====
     const notionToken = env.DistribuicaoHTML;
     
     console.log('=== DEBUG CLOUDFLARE ===');
@@ -39,29 +39,13 @@ export async function onRequest(context) {
     console.log('2. Tipo do token:', typeof notionToken);
     console.log('3. Primeiros 10 caracteres:', notionToken ? notionToken.substring(0, 10) : 'TOKEN_VAZIO');
     console.log('4. Tamanho do token:', notionToken ? notionToken.length : 0);
-    console.log('5. Começa com secret_?', notionToken ? notionToken.startsWith('secret_') : false);
     console.log('========================');
     
     if (!notionToken) {
       return new Response(JSON.stringify({ 
-        error: 'Token do Notion não configurado no Cloudflare',
+        error: 'Token do Notion não configurado',
         debug: {
-          env_keys: Object.keys(env || {}),
-          message: 'Verifique se a variável DistribuicaoHTML está configurada em Production'
-        }
-      }), {
-        status: 500,
-        headers
-      });
-    }
-
-    // Verificar se o token tem formato válido
-    if (!notionToken.startsWith('secret_')) {
-      return new Response(JSON.stringify({ 
-        error: 'Token inválido - deve começar com secret_',
-        debug: {
-          token_start: notionToken.substring(0, 10),
-          token_length: notionToken.length
+          message: 'Variável DistribuicaoHTML não encontrada'
         }
       }), {
         status: 500,
@@ -70,51 +54,40 @@ export async function onRequest(context) {
     }
 
     console.log('Buscando página:', id);
-    console.log('URL completa:', `https://api.notion.com/v1/pages/${id}`);
 
     // Buscar dados da página no Notion
     const response = await fetch(`https://api.notion.com/v1/pages/${id}`, {
       headers: {
-        'Authorization': `Bearer ${notionToken.trim()}`, // .trim() remove espaços
+        'Authorization': `Bearer ${notionToken.trim()}`,
         'Notion-Version': '2022-06-28',
         'Content-Type': 'application/json'
       }
     });
 
-    console.log('Status da resposta Notion:', response.status);
-    console.log('Response OK?', response.ok);
+    console.log('Status da resposta:', response.status);
 
     if (!response.ok) {
-      // Tentar obter detalhes do erro
       let errorDetails = response.statusText;
       let errorBody = null;
       
       try {
         errorBody = await response.json();
-        console.log('Erro JSON da API:', errorBody);
+        console.log('Erro da API:', errorBody);
         errorDetails = JSON.stringify(errorBody);
       } catch (e) {
         try {
           errorBody = await response.text();
-          console.log('Erro TEXT da API:', errorBody);
+          console.log('Erro texto:', errorBody);
           errorDetails = errorBody;
         } catch (e2) {
-          console.log('Não foi possível ler corpo do erro');
+          console.log('Não foi possível ler erro');
         }
       }
       
       return new Response(JSON.stringify({ 
         error: `Erro ao buscar dados do Notion: ${response.status}`,
         status: response.status,
-        details: errorDetails,
-        debug: {
-          token_length: notionToken.length,
-          token_format: notionToken.substring(0, 7) + '...',
-          api_url: `https://api.notion.com/v1/pages/${id}`,
-          message: response.status === 401 ? 
-            'Token inválido ou sem permissão. Verifique: 1) Token está correto 2) Token tem acesso ao banco 3) Token não expirou' :
-            'Erro desconhecido da API Notion'
-        }
+        details: errorDetails
       }), {
         status: response.status,
         headers
@@ -148,7 +121,7 @@ export async function onRequest(context) {
       }
     };
 
-    // Buscar PMM com várias tentativas
+    // Buscar PMM
     const pmmVariations = ['PMM', 'pmm', 'Pmm', 'PMM ', ' PMM'];
     let pmmProperty = null;
     
@@ -192,7 +165,7 @@ export async function onRequest(context) {
       mappedData.fim = endDate.toLocaleDateString('pt-BR');
     }
 
-    console.log('Dados mapeados com sucesso!');
+    console.log('Sucesso! Retornando dados...');
 
     return new Response(JSON.stringify(mappedData), {
       status: 200,
@@ -200,16 +173,13 @@ export async function onRequest(context) {
     });
 
   } catch (error) {
-    console.error('💥 Erro na função:', error);
+    console.error('💥 Erro:', error);
     console.error('Stack:', error.stack);
     
     return new Response(JSON.stringify({ 
-      error: 'Erro interno do servidor',
+      error: 'Erro interno',
       details: error.message,
-      stack: error.stack,
-      debug: {
-        message: 'Erro não esperado na função Cloudflare'
-      }
+      stack: error.stack
     }), {
       status: 500,
       headers
