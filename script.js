@@ -19,6 +19,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+// DETECTAR AMBIENTE (NETLIFY OU CLOUDFLARE)
+function getApiUrl() {
+    const hostname = window.location.hostname;
+    
+    // Se está em localhost, usa Netlify
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return '/.netlify/functions/notion';
+    }
+    
+    // Se o hostname contém 'netlify', usa Netlify
+    if (hostname.includes('netlify.app')) {
+        return '/.netlify/functions/notion';
+    }
+    
+    // Se o hostname contém 'pages.dev', usa Cloudflare
+    if (hostname.includes('pages.dev')) {
+        return '/functions/notion';
+    }
+    
+    // Para domínios customizados, tenta detectar
+    // Cloudflare primeiro (mais comum para novos deploys)
+    return '/functions/notion';
+}
+
 // CARREGAR DADOS
 async function loadCampaignData() {
     const params = new URLSearchParams(window.location.search);
@@ -57,7 +81,10 @@ async function loadCampaignData() {
 
 // BUSCAR DADOS DO NOTION
 async function fetchNotionData(uuid) {
-    const response = await fetch(`/.netlify/functions/notion?id=${uuid}`);
+    const apiUrl = getApiUrl();
+    console.log('🌐 Usando API:', apiUrl);
+    
+    const response = await fetch(`${apiUrl}?id=${uuid}`);
     if (!response.ok) {
         throw new Error(`Erro ao carregar dados do Notion: ${response.status}`);
     }
