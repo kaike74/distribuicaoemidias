@@ -32,7 +32,7 @@ export async function onRequest(context) {
     }
 
     // ===== BUSCAR TOKEN NOTION_TOKEN =====
-    const notionToken = env.NOTION_TOKEN;
+    const notionToken = env.Notion_Token;
     
     console.log('=== DEBUG CLOUDFLARE ===');
     console.log('1. Token existe?', !!notionToken);
