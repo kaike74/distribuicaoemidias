@@ -35,12 +35,12 @@ function getApiUrl() {
     
     // Se o hostname contém 'pages.dev', usa Cloudflare
     if (hostname.includes('pages.dev')) {
-        return '/functions/notion';
+        return '/notion';
     }
     
     // Para domínios customizados, tenta detectar
     // Cloudflare primeiro (mais comum para novos deploys)
-    return '/functions/notion';
+    return '/notion';
 }
 
 // CARREGAR DADOS
