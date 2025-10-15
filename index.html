@@ -12,8 +12,6 @@
     <link rel="stylesheet" href="style.css">
     <!-- Font Awesome para os ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-
 </head>
 <body>
     <!-- CABEÇALHO SUPERIOR COM LOGO -->
@@ -70,6 +68,13 @@
                 <span class="status-badge">🟢 Ativa</span>
             </div>
             <div class="actions-right">
+                <!-- 🆕 NOVOS BOTÕES -->
+                <button class="btn btn-period" onclick="editPeriod()">
+                    📅 Período
+                </button>
+                <button class="btn btn-products-edit" onclick="editProducts()">
+                    🎯 Produtos
+                </button>
                 <button class="btn btn-edit" onclick="startEdit()">
                     ✏️ Editar
                 </button>
@@ -82,11 +87,12 @@
         <!-- AÇÕES EDIÇÃO -->
         <div class="actions-bar" id="actions-edit" style="display: none;">
             <div class="actions-left">
-                <span>Modo de Edição</span>
+                <span>🎨 Modo de Edição</span>
+                <span class="edit-tip">Arraste para preencher</span>
             </div>
             <div class="actions-right">
                 <button class="btn btn-save" onclick="saveEdit()">
-                    💾 Salvar
+                    💾 Salvar no Notion
                 </button>
                 <button class="btn btn-cancel" onclick="cancelEdit()">
                     ❌ Cancelar
@@ -114,81 +120,248 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="script.js"></script>
 
-    <!-- MODAL DE EDIÇÃO -->
-<div id="edit-modal" class="edit-modal">
-    <div class="edit-modal-content">
-        <div class="edit-modal-header">
-            <h3 class="edit-modal-title" id="edit-modal-title">Editar Distribuição</h3>
-            <button class="edit-modal-close" onclick="closeEditModal()">&times;</button>
-        </div>
-        
-        <div class="edit-form">
-            <!-- Spots 30" -->
-            <div class="edit-form-group" id="group-spots30" style="display: none;">
-                <label class="edit-form-label">📺 Spots 30"</label>
-                <div class="edit-input-group">
-                    <button class="edit-input-btn" onclick="decrementSpot('spots30')">−</button>
-                    <input type="number" class="edit-input-field" id="input-spots30" value="0" min="0" onchange="updateSpotValue('spots30')">
-                    <button class="edit-input-btn" onclick="incrementSpot('spots30')">+</button>
+    <!-- 🆕 MODAL PARA EDITAR PERÍODO E DIAS DA SEMANA -->
+    <div id="period-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">📅 Editar Período e Dias da Semana</h3>
+                <button class="modal-close" onclick="closePeriodModal()">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- Datas -->
+                <div class="form-section">
+                    <h4 class="form-section-title">📆 Período de Veiculação</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Data de Início</label>
+                            <input type="date" id="period-start" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Data de Fim</label>
+                            <input type="date" id="period-end" class="form-input">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Dias da Semana -->
+                <div class="form-section">
+                    <h4 class="form-section-title">📅 Dias da Semana</h4>
+                    <div class="weekdays-grid">
+                        <label class="weekday-item">
+                            <input type="checkbox" name="weekdays" value="0">
+                            <span class="weekday-label">DOM</span>
+                        </label>
+                        <label class="weekday-item">
+                            <input type="checkbox" name="weekdays" value="1">
+                            <span class="weekday-label">SEG</span>
+                        </label>
+                        <label class="weekday-item">
+                            <input type="checkbox" name="weekdays" value="2">
+                            <span class="weekday-label">TER</span>
+                        </label>
+                        <label class="weekday-item">
+                            <input type="checkbox" name="weekdays" value="3">
+                            <span class="weekday-label">QUA</span>
+                        </label>
+                        <label class="weekday-item">
+                            <input type="checkbox" name="weekdays" value="4">
+                            <span class="weekday-label">QUI</span>
+                        </label>
+                        <label class="weekday-item">
+                            <input type="checkbox" name="weekdays" value="5">
+                            <span class="weekday-label">SEX</span>
+                        </label>
+                        <label class="weekday-item">
+                            <input type="checkbox" name="weekdays" value="6">
+                            <span class="weekday-label">SÁB</span>
+                        </label>
+                    </div>
                 </div>
             </div>
             
-            <!-- Spots 5" -->
-            <div class="edit-form-group" id="group-spots5" style="display: none;">
-                <label class="edit-form-label">⚡ Spots 5"</label>
-                <div class="edit-input-group">
-                    <button class="edit-input-btn" onclick="decrementSpot('spots5')">−</button>
-                    <input type="number" class="edit-input-field" id="input-spots5" value="0" min="0" onchange="updateSpotValue('spots5')">
-                    <button class="edit-input-btn" onclick="incrementSpot('spots5')">+</button>
-                </div>
+            <div class="modal-actions">
+                <button class="btn btn-cancel" onclick="closePeriodModal()">
+                    ❌ Cancelar
+                </button>
+                <button class="btn btn-save" onclick="savePeriod()">
+                    💾 Salvar no Notion
+                </button>
             </div>
-            
-            <!-- Spots 15" -->
-            <div class="edit-form-group" id="group-spots15" style="display: none;">
-                <label class="edit-form-label">🎬 Spots 15"</label>
-                <div class="edit-input-group">
-                    <button class="edit-input-btn" onclick="decrementSpot('spots15')">−</button>
-                    <input type="number" class="edit-input-field" id="input-spots15" value="0" min="0" onchange="updateSpotValue('spots15')">
-                    <button class="edit-input-btn" onclick="incrementSpot('spots15')">+</button>
-                </div>
-            </div>
-            
-            <!-- Spots 60" -->
-            <div class="edit-form-group" id="group-spots60" style="display: none;">
-                <label class="edit-form-label">🎭 Spots 60"</label>
-                <div class="edit-input-group">
-                    <button class="edit-input-btn" onclick="decrementSpot('spots60')">−</button>
-                    <input type="number" class="edit-input-field" id="input-spots60" value="0" min="0" onchange="updateSpotValue('spots60')">
-                    <button class="edit-input-btn" onclick="incrementSpot('spots60')">+</button>
-                </div>
-            </div>
-            
-            <!-- Test 60" -->
-            <div class="edit-form-group" id="group-test60" style="display: none;">
-                <label class="edit-form-label">🎪 Testemunhais 60"</label>
-                <div class="edit-input-group">
-                    <button class="edit-input-btn" onclick="decrementSpot('test60')">−</button>
-                    <input type="number" class="edit-input-field" id="input-test60" value="0" min="0" onchange="updateSpotValue('test60')">
-                    <button class="edit-input-btn" onclick="incrementSpot('test60')">+</button>
-                </div>
-            </div>
-            
-            <!-- Total -->
-            <div class="edit-total-section">
-                <div class="edit-total-label">Total de Inserções</div>
-                <div class="edit-total-value" id="edit-total-display">0</div>
-            </div>
-        </div>
-        
-        <div class="edit-modal-actions">
-            <button class="edit-btn edit-btn-cancel" onclick="closeEditModal()">
-                ❌ Cancelar
-            </button>
-            <button class="edit-btn edit-btn-save" onclick="saveEditModal()">
-                💾 Salvar
-            </button>
         </div>
     </div>
-</div>
+
+    <!-- 🆕 MODAL PARA EDITAR QUANTIDADES DE PRODUTOS -->
+    <div id="products-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">🎯 Editar Quantidades de Produtos</h3>
+                <button class="modal-close" onclick="closeProductsModal()">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="form-section">
+                    <h4 class="form-section-title">📺 Produtos de Mídia</h4>
+                    
+                    <!-- Spots 30" -->
+                    <div class="product-edit-group">
+                        <label class="product-edit-label">
+                            <span class="product-icon">📺</span>
+                            <span class="product-name">Spots 30"</span>
+                        </label>
+                        <div class="product-edit-controls">
+                            <button type="button" onclick="document.getElementById('edit-spots30').stepDown(); updateProductsTotal()">−</button>
+                            <input type="number" id="edit-spots30" min="0" max="999" value="0" onchange="updateProductsTotal()">
+                            <button type="button" onclick="document.getElementById('edit-spots30').stepUp(); updateProductsTotal()">+</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Spots 5" -->
+                    <div class="product-edit-group">
+                        <label class="product-edit-label">
+                            <span class="product-icon">⚡</span>
+                            <span class="product-name">Spots 5"</span>
+                        </label>
+                        <div class="product-edit-controls">
+                            <button type="button" onclick="document.getElementById('edit-spots5').stepDown(); updateProductsTotal()">−</button>
+                            <input type="number" id="edit-spots5" min="0" max="999" value="0" onchange="updateProductsTotal()">
+                            <button type="button" onclick="document.getElementById('edit-spots5').stepUp(); updateProductsTotal()">+</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Spots 15" -->
+                    <div class="product-edit-group">
+                        <label class="product-edit-label">
+                            <span class="product-icon">🎬</span>
+                            <span class="product-name">Spots 15"</span>
+                        </label>
+                        <div class="product-edit-controls">
+                            <button type="button" onclick="document.getElementById('edit-spots15').stepDown(); updateProductsTotal()">−</button>
+                            <input type="number" id="edit-spots15" min="0" max="999" value="0" onchange="updateProductsTotal()">
+                            <button type="button" onclick="document.getElementById('edit-spots15').stepUp(); updateProductsTotal()">+</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Spots 60" -->
+                    <div class="product-edit-group">
+                        <label class="product-edit-label">
+                            <span class="product-icon">🎭</span>
+                            <span class="product-name">Spots 60"</span>
+                        </label>
+                        <div class="product-edit-controls">
+                            <button type="button" onclick="document.getElementById('edit-spots60').stepDown(); updateProductsTotal()">−</button>
+                            <input type="number" id="edit-spots60" min="0" max="999" value="0" onchange="updateProductsTotal()">
+                            <button type="button" onclick="document.getElementById('edit-spots60').stepUp(); updateProductsTotal()">+</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Testemunhais 60" -->
+                    <div class="product-edit-group">
+                        <label class="product-edit-label">
+                            <span class="product-icon">🎪</span>
+                            <span class="product-name">Testemunhais 60"</span>
+                        </label>
+                        <div class="product-edit-controls">
+                            <button type="button" onclick="document.getElementById('edit-test60').stepDown(); updateProductsTotal()">−</button>
+                            <input type="number" id="edit-test60" min="0" max="999" value="0" onchange="updateProductsTotal()">
+                            <button type="button" onclick="document.getElementById('edit-test60').stepUp(); updateProductsTotal()">+</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Total -->
+                <div class="products-total-section">
+                    <div class="products-total-label">Total de Inserções</div>
+                    <div class="products-total-value" id="products-total">0</div>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn btn-cancel" onclick="closeProductsModal()">
+                    ❌ Cancelar
+                </button>
+                <button class="btn btn-save" onclick="saveProducts()">
+                    💾 Salvar no Notion
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE EDIÇÃO INLINE (MANTIDO) -->
+    <div id="edit-modal" class="edit-modal">
+        <div class="edit-modal-content">
+            <div class="edit-modal-header">
+                <h3 class="edit-modal-title" id="edit-modal-title">Editar Distribuição</h3>
+                <button class="edit-modal-close" onclick="closeEditModal()">&times;</button>
+            </div>
+            
+            <div class="edit-form">
+                <!-- Spots 30" -->
+                <div class="edit-form-group" id="group-spots30" style="display: none;">
+                    <label class="edit-form-label">📺 Spots 30"</label>
+                    <div class="edit-input-group">
+                        <button class="edit-input-btn" onclick="decrementSpot('spots30')">−</button>
+                        <input type="number" class="edit-input-field" id="input-spots30" value="0" min="0" onchange="updateSpotValue('spots30')">
+                        <button class="edit-input-btn" onclick="incrementSpot('spots30')">+</button>
+                    </div>
+                </div>
+                
+                <!-- Spots 5" -->
+                <div class="edit-form-group" id="group-spots5" style="display: none;">
+                    <label class="edit-form-label">⚡ Spots 5"</label>
+                    <div class="edit-input-group">
+                        <button class="edit-input-btn" onclick="decrementSpot('spots5')">−</button>
+                        <input type="number" class="edit-input-field" id="input-spots5" value="0" min="0" onchange="updateSpotValue('spots5')">
+                        <button class="edit-input-btn" onclick="incrementSpot('spots5')">+</button>
+                    </div>
+                </div>
+                
+                <!-- Spots 15" -->
+                <div class="edit-form-group" id="group-spots15" style="display: none;">
+                    <label class="edit-form-label">🎬 Spots 15"</label>
+                    <div class="edit-input-group">
+                        <button class="edit-input-btn" onclick="decrementSpot('spots15')">−</button>
+                        <input type="number" class="edit-input-field" id="input-spots15" value="0" min="0" onchange="updateSpotValue('spots15')">
+                        <button class="edit-input-btn" onclick="incrementSpot('spots15')">+</button>
+                    </div>
+                </div>
+                
+                <!-- Spots 60" -->
+                <div class="edit-form-group" id="group-spots60" style="display: none;">
+                    <label class="edit-form-label">🎭 Spots 60"</label>
+                    <div class="edit-input-group">
+                        <button class="edit-input-btn" onclick="decrementSpot('spots60')">−</button>
+                        <input type="number" class="edit-input-field" id="input-spots60" value="0" min="0" onchange="updateSpotValue('spots60')">
+                        <button class="edit-input-btn" onclick="incrementSpot('spots60')">+</button>
+                    </div>
+                </div>
+                
+                <!-- Test 60" -->
+                <div class="edit-form-group" id="group-test60" style="display: none;">
+                    <label class="edit-form-label">🎪 Testemunhais 60"</label>
+                    <div class="edit-input-group">
+                        <button class="edit-input-btn" onclick="decrementSpot('test60')">−</button>
+                        <input type="number" class="edit-input-field" id="input-test60" value="0" min="0" onchange="updateSpotValue('test60')">
+                        <button class="edit-input-btn" onclick="incrementSpot('test60')">+</button>
+                    </div>
+                </div>
+                
+                <!-- Total -->
+                <div class="edit-total-section">
+                    <div class="edit-total-label">Total de Inserções</div>
+                    <div class="edit-total-value" id="edit-total-display">0</div>
+                </div>
+            </div>
+            
+            <div class="edit-modal-actions">
+                <button class="edit-btn edit-btn-cancel" onclick="closeEditModal()">
+                    ❌ Cancelar
+                </button>
+                <button class="edit-btn edit-btn-save" onclick="saveEditModal()">
+                    💾 Salvar
+                </button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
