@@ -217,23 +217,6 @@ body {
     border: 1px solid #059669;
 }
 
-/* 🆕 DICA DE EDIÇÃO */
-.edit-tip {
-    background: linear-gradient(135deg, #fef3c7, #fde68a);
-    color: #92400e;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 10px;
-    font-weight: 600;
-    border: 1px solid #d97706;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-}
-
 .actions-right {
     display: flex;
     gap: 12px;
@@ -271,14 +254,8 @@ body {
     color: var(--white);
 }
 
-/* 🆕 NOVOS BOTÕES */
 .btn-period {
     background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-    color: var(--white);
-}
-
-.btn-products-edit {
-    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
     color: var(--white);
 }
 
@@ -426,7 +403,7 @@ body {
     line-height: 1.1;
 }
 
-/* QUADRADOS MUITO PEQUENOS */
+/* QUADRADOS MUITO PEQUENOS COM MELHOR UX DE EDIÇÃO */
 .day-cell {
     padding: 4px 2px;
     text-align: center;
@@ -441,6 +418,7 @@ body {
     width: 35px;
     white-space: nowrap;
     position: relative;
+    user-select: none;
 }
 
 /* QUADRADOS BRANCOS MUITO PEQUENOS */
@@ -472,12 +450,35 @@ body {
     background: #f1f5f9;
 }
 
-/* 🆕 DRAG & DROP STYLES */
+/* 🆕 DRAG HANDLE - BOLINHA NO CANTO INFERIOR DIREITO */
+.edit-mode .day-cell:not(.invalid-day)::after {
+    content: '';
+    position: absolute;
+    bottom: 1px;
+    right: 1px;
+    width: 8px;
+    height: 8px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    opacity: 0.7;
+    cursor: se-resize;
+    z-index: 10;
+    transition: all 0.2s ease;
+}
+
+.edit-mode .day-cell:not(.invalid-day):hover::after {
+    opacity: 1;
+    transform: scale(1.2);
+    background: var(--secondary-color);
+}
+
+/* DRAG & DROP STYLES MELHORADOS */
 .day-cell.drag-start {
     background: #3b82f6 !important;
     color: white !important;
     border-color: #1d4ed8 !important;
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4) !important;
+    transform: scale(1.05) !important;
 }
 
 .day-cell.drag-hover {
@@ -487,7 +488,7 @@ body {
 }
 
 .edit-mode .day-cell {
-    cursor: grab;
+    cursor: pointer;
 }
 
 .edit-mode .day-cell:active {
@@ -555,12 +556,12 @@ body {
     background: linear-gradient(135deg, #059669, #10b981);
 }
 
-.edit-mode .day-cell {
+.edit-mode .day-cell:not(.invalid-day) {
     cursor: pointer;
     border: 1px solid transparent;
 }
 
-.edit-mode .day-cell:hover {
+.edit-mode .day-cell:not(.invalid-day):hover {
     border-color: #10b981;
     background: #ecfdf5;
 }
@@ -679,7 +680,7 @@ body {
     margin-bottom: 0;
 }
 
-/* 🆕 MODAIS PRINCIPAIS */
+/* MODAIS PRINCIPAIS */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -774,7 +775,7 @@ body {
     flex: 1;
 }
 
-/* 🆕 FORMULÁRIOS DOS MODAIS */
+/* FORMULÁRIOS DOS MODAIS */
 .form-section {
     margin-bottom: 24px;
 }
@@ -822,7 +823,7 @@ body {
     box-shadow: 0 0 0 3px rgba(6, 5, 91, 0.1);
 }
 
-/* 🆕 SELETOR DE DIAS DA SEMANA */
+/* SELETOR DE DIAS DA SEMANA */
 .weekdays-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -862,97 +863,6 @@ body {
 .weekday-item:hover .weekday-label {
     border-color: var(--primary-color);
     transform: translateY(-2px);
-}
-
-/* 🆕 EDITOR DE PRODUTOS */
-.product-edit-group {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
-    border: 2px solid var(--border-color);
-    border-radius: 12px;
-    margin-bottom: 12px;
-    transition: all 0.2s ease;
-}
-
-.product-edit-group:hover {
-    border-color: var(--primary-color);
-    background: #f8fafc;
-}
-
-.product-edit-label {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-weight: 600;
-    color: var(--text-dark);
-}
-
-.product-edit-label .product-icon {
-    font-size: 20px;
-}
-
-.product-edit-label .product-name {
-    font-size: 14px;
-}
-
-.product-edit-controls {
-    display: flex;
-    align-items: center;
-    background: #f1f5f9;
-    border: 2px solid var(--border-color);
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.product-edit-controls button {
-    background: #e2e8f0;
-    border: none;
-    padding: 8px 12px;
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--text-dark);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.product-edit-controls button:hover {
-    background: #cbd5e1;
-}
-
-.product-edit-controls input {
-    border: none;
-    background: transparent;
-    text-align: center;
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--text-dark);
-    width: 80px;
-    padding: 8px 4px;
-    outline: none;
-}
-
-/* 🆕 TOTAL DE PRODUTOS */
-.products-total-section {
-    background: var(--gradient-primary);
-    color: white;
-    padding: 20px;
-    border-radius: 12px;
-    text-align: center;
-    margin-top: 20px;
-}
-
-.products-total-label {
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    opacity: 0.9;
-}
-
-.products-total-value {
-    font-size: 32px;
-    font-weight: 700;
 }
 
 /* LOGO DA MARCA */
@@ -1198,17 +1108,17 @@ body {
     box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
 }
 
-/* MODO EDIÇÃO - CÉLULAS EDITÁVEIS */
+/* MODO EDIÇÃO - CÉLULAS EDITÁVEIS MELHORADAS */
 .edit-mode .day-cell.editable {
-    background: #fff3cd !important;
-    border: 2px solid #ffc107 !important;
+    background: #f8fafc !important;
+    border: 2px solid #e2e8f0 !important;
     cursor: text;
     position: relative;
 }
 
 .edit-mode .day-cell.editable:hover {
-    background: #fff8e1 !important;
-    border-color: #ff9800 !important;
+    background: #ffffff !important;
+    border-color: #3b82f6 !important;
     transform: scale(1.05);
 }
 
@@ -1219,30 +1129,13 @@ body {
     box-shadow: 0 0 8px rgba(33, 150, 243, 0.3);
 }
 
-/* INDICADOR VISUAL DE CÉLULA EDITÁVEL */
-.edit-mode .day-cell.editable::before {
-    content: "✏️";
-    position: absolute;
-    top: -2px;
-    right: -2px;
-    font-size: 8px;
-    background: #ffc107;
-    border-radius: 50%;
-    width: 12px;
-    height: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
-}
-
 /* CÉLULAS INVÁLIDAS NÃO SÃO EDITÁVEIS */
 .edit-mode .day-cell.invalid-day {
     cursor: not-allowed !important;
     opacity: 0.4;
 }
 
-.edit-mode .day-cell.invalid-day::before {
+.edit-mode .day-cell.invalid-day::after {
     display: none;
 }
 
@@ -1257,26 +1150,6 @@ body {
     0% { transform: scale(1); }
     50% { transform: scale(1.1); }
     100% { transform: scale(1); }
-}
-
-/* TOOLTIP DE AJUDA NO MODO EDIÇÃO */
-.edit-help-tooltip {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    background: #2196f3;
-    color: white;
-    padding: 12px 16px;
-    border-radius: 8px;
-    font-size: 12px;
-    z-index: 1000;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    animation: slideInRight 0.3s ease;
-}
-
-@keyframes slideInRight {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
 }
 
 /* CABEÇALHO SUPERIOR COM LOGO */
