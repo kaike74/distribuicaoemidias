@@ -5,9 +5,9 @@ let originalDistribution = {};
 let currentDistribution = {};
 let validDays = [];
 let totalSpots = 0;
-let notionId = null; // 🆕 Para salvar no Notion
-let isDragging = false; // 🆕 Para funcionalidade de arrastar
-let dragStartCell = null; // 🆕 Célula inicial do drag
+let notionId = null;
+let isDragging = false;
+let dragStartCell = null;
 
 // INICIALIZAÇÃO
 document.addEventListener('DOMContentLoaded', async () => {
@@ -41,7 +41,7 @@ function getApiUrl() {
 // CARREGAR DADOS
 async function loadCampaignData() {
     const params = new URLSearchParams(window.location.search);
-    notionId = params.get('id'); // 🆕 Salvar ID globalmente
+    notionId = params.get('id');
     
     if (notionId && /^[0-9a-f]{32}$/i.test(notionId)) {
         console.log('📡 Carregando do Notion:', notionId);
@@ -86,7 +86,7 @@ async function fetchNotionData(uuid) {
     return await response.json();
 }
 
-// 🆕 SALVAR DADOS NO NOTION
+// 🆕 SALVAR DADOS NO NOTION (INCLUINDO QUANTIDADES ATUALIZADAS)
 async function saveToNotion(dataToSave) {
     if (!notionId || campaignData.source !== 'notion') {
         console.log('⚠️ Não é possível salvar: não conectado ao Notion');
@@ -96,6 +96,13 @@ async function saveToNotion(dataToSave) {
     try {
         const apiUrl = getApiUrl();
         console.log('💾 Salvando no Notion:', dataToSave);
+
+        // 🆕 CALCULAR NOVAS QUANTIDADES BASEADAS NA DISTRIBUIÇÃO ATUAL
+        if (dataToSave.updateProductQuantities) {
+            const newQuantities = calculateProductQuantitiesFromDistribution();
+            Object.assign(dataToSave, newQuantities);
+            delete dataToSave.updateProductQuantities;
+        }
 
         const response = await fetch(`${apiUrl}?id=${notionId}`, {
             method: 'POST',
@@ -119,6 +126,31 @@ async function saveToNotion(dataToSave) {
     }
 }
 
+// 🆕 CALCULAR QUANTIDADES DOS PRODUTOS BASEADO NA DISTRIBUIÇÃO ATUAL
+function calculateProductQuantitiesFromDistribution() {
+    const quantities = {
+        spots30: 0,
+        spots5: 0,
+        spots15: 0,
+        spots60: 0,
+        test60: 0
+    };
+
+    // Somar todas as inserções por produto na distribuição atual
+    Object.values(currentDistribution).forEach(dayData => {
+        if (dayData.products) {
+            Object.entries(dayData.products).forEach(([productType, count]) => {
+                if (quantities.hasOwnProperty(productType)) {
+                    quantities[productType] += count || 0;
+                }
+            });
+        }
+    });
+
+    console.log('📊 Novas quantidades calculadas:', quantities);
+    return quantities;
+}
+
 // RENDERIZAR INTERFACE
 function renderInterface() {
     const startDate = parseDate(campaignData.inicio);
@@ -137,7 +169,7 @@ function renderInterface() {
         throw new Error('Nenhum dia válido encontrado');
     }
     
-    // 🆕 VERIFICAR SE HÁ DISTRIBUIÇÃO CUSTOMIZADA
+    // VERIFICAR SE HÁ DISTRIBUIÇÃO CUSTOMIZADA
     if (campaignData.customDistributionData) {
         console.log('📊 Usando distribuição customizada');
         currentDistribution = campaignData.customDistributionData;
@@ -459,8 +491,9 @@ function createProductRow(productType, monthDays) {
             cell.classList.add('invalid-day');
         }
         
-        // 🆕 ADICIONAR EVENTOS DE DRAG & DROP
+        // 🆕 ADICIONAR EVENTOS DE EDIÇÃO DIRETA
         if (isValidDay) {
+            setupCellEditing(cell);
             setupDragAndDrop(cell);
         }
         
@@ -515,7 +548,89 @@ function createTotalRow(monthDays) {
     return row;
 }
 
-// 🆕 CONFIGURAR DRAG & DROP
+// 🆕 CONFIGURAR EDIÇÃO DIRETA DA CÉLULA
+function setupCellEditing(cell) {
+    cell.addEventListener('click', handleCellClick);
+    cell.addEventListener('dblclick', handleCellDoubleClick);
+}
+
+function handleCellClick(e) {
+    if (!isEditMode) return;
+    
+    const cell = e.currentTarget;
+    if (cell.classList.contains('invalid-day')) return;
+    
+    // Single click: incrementar valor
+    const currentValue = parseInt(cell.textContent) || 0;
+    const newValue = currentValue + 1;
+    
+    updateCellValue(cell, newValue);
+}
+
+function handleCellDoubleClick(e) {
+    if (!isEditMode) return;
+    
+    const cell = e.currentTarget;
+    if (cell.classList.contains('invalid-day')) return;
+    
+    // Double click: zerar valor
+    updateCellValue(cell, 0);
+}
+
+// 🆕 ATUALIZAR VALOR DA CÉLULA
+function updateCellValue(cell, newValue) {
+    const dateKey = cell.dataset.date;
+    const productType = cell.dataset.productType;
+    
+    // Garantir que newValue é um número válido
+    newValue = Math.max(0, parseInt(newValue) || 0);
+    
+    // Atualizar distribuição
+    if (!currentDistribution[dateKey]) {
+        currentDistribution[dateKey] = { total: 0, products: {} };
+    }
+    
+    const oldValue = currentDistribution[dateKey].products[productType] || 0;
+    currentDistribution[dateKey].products[productType] = newValue;
+    
+    // Recalcular total do dia
+    currentDistribution[dateKey].total = Object.values(currentDistribution[dateKey].products)
+        .reduce((sum, count) => sum + (count || 0), 0);
+    
+    // Atualizar célula visualmente
+    cell.dataset.spots = newValue;
+    if (newValue > 0) {
+        cell.textContent = newValue;
+        cell.classList.add('has-spots');
+    } else {
+        cell.textContent = '';
+        cell.classList.remove('has-spots');
+    }
+    
+    // Marcar como modificada
+    cell.classList.add('modified');
+    setTimeout(() => cell.classList.remove('modified'), 1000);
+    
+    // Atualizar célula do total
+    updateTotalCell(dateKey);
+    
+    // 🆕 REMOVER VALIDAÇÃO OBRIGATÓRIA
+    showCurrentStatus();
+}
+
+// 🆕 MOSTRAR STATUS ATUAL (SEM OBRIGAR VALIDAÇÃO)
+function showCurrentStatus() {
+    const totalUsed = Object.values(currentDistribution).reduce((sum, day) => sum + (day.total || 0), 0);
+    const validation = document.getElementById('validation');
+    
+    if (validation) {
+        validation.style.display = 'block';
+        validation.className = 'validation success';
+        validation.textContent = `📊 Total atual: ${totalUsed} inserções distribuídas`;
+    }
+}
+
+// 🆕 CONFIGURAR DRAG & DROP MELHORADO
 function setupDragAndDrop(cell) {
     cell.addEventListener('mousedown', handleDragStart);
     cell.addEventListener('mouseenter', handleDragEnter);
@@ -524,6 +639,12 @@ function setupDragAndDrop(cell) {
 
 function handleDragStart(e) {
     if (!isEditMode) return;
+    
+    // Verificar se o clique foi na bolinha de drag (canto inferior direito)
+    const rect = e.currentTarget.getBoundingClientRect();
+    const isInDragHandle = (e.clientX > rect.right - 12 && e.clientY > rect.bottom - 12);
+    
+    if (!isInDragHandle) return; // Só inicia drag se clicar na bolinha
     
     isDragging = true;
     dragStartCell = e.currentTarget;
@@ -593,7 +714,7 @@ function handleDragEnd(e) {
     dragStartCell = null;
 }
 
-// 🆕 PREENCHER RANGE DE CÉLULAS
+// PREENCHER RANGE DE CÉLULAS
 function fillCellRange(startCell, endCell) {
     const startValue = parseInt(startCell.textContent) || 0;
     const startProductType = startCell.dataset.productType;
@@ -617,41 +738,8 @@ function fillCellRange(startCell, endCell) {
         const cell = allCells[i];
         if (cell.classList.contains('invalid-day')) continue;
         
-        const dateKey = cell.dataset.date;
-        const productType = cell.dataset.productType;
-        
-        // Atualizar distribuição
-        if (!currentDistribution[dateKey]) {
-            currentDistribution[dateKey] = { total: 0, products: {} };
-        }
-        
-        const oldValue = currentDistribution[dateKey].products[productType] || 0;
-        currentDistribution[dateKey].products[productType] = startValue;
-        
-        // Recalcular total do dia
-        currentDistribution[dateKey].total = Object.values(currentDistribution[dateKey].products)
-            .reduce((sum, count) => sum + (count || 0), 0);
-        
-        // Atualizar célula visualmente
-        cell.dataset.spots = startValue;
-        if (startValue > 0) {
-            cell.textContent = startValue;
-            cell.classList.add('has-spots');
-        } else {
-            cell.textContent = '';
-            cell.classList.remove('has-spots');
-        }
-        
-        // Marcar como modificada
-        cell.classList.add('modified');
-        setTimeout(() => cell.classList.remove('modified'), 1000);
-        
-        // Atualizar célula do total
-        updateTotalCell(dateKey);
+        updateCellValue(cell, startValue);
     }
-    
-    // Validar distribuição
-    validateDistribution();
 }
 
 function getProductIcon(productType) {
@@ -749,7 +837,7 @@ function updateTooltipPosition(e) {
     tooltip.style.top = top + 'px';
 }
 
-// EDIÇÃO INLINE
+// EDIÇÃO
 function startEdit() {
     isEditMode = true;
     document.body.classList.add('edit-mode');
@@ -759,185 +847,10 @@ function startEdit() {
     // Salvar estado original
     originalDistribution = JSON.parse(JSON.stringify(currentDistribution));
     
-    // Tornar células editáveis
-    makeTableEditable();
+    // Mostrar status atual
+    showCurrentStatus();
     
-    // Mostrar tooltip de ajuda
-    showEditHelpTooltip();
-    
-    validateDistribution();
-}
-
-// TORNAR TABELA EDITÁVEL
-function makeTableEditable() {
-    const cells = document.querySelectorAll('.day-cell');
-    
-    cells.forEach(cell => {
-        const dateKey = cell.dataset.date;
-        const productType = cell.dataset.productType;
-        
-        // Verificar se é dia válido
-        const date = new Date(dateKey + 'T00:00:00');
-        const selectedWeekdays = parseWeekdays(campaignData.dias);
-        const isValidDay = selectedWeekdays.includes(date.getDay());
-        
-        if (isValidDay && productType) {
-            cell.classList.add('editable');
-            cell.setAttribute('contenteditable', 'true');
-            cell.setAttribute('inputmode', 'numeric');
-            
-            // Eventos de edição
-            cell.addEventListener('blur', handleCellBlur);
-            cell.addEventListener('keydown', handleCellKeydown);
-            cell.addEventListener('input', handleCellInput);
-            cell.addEventListener('focus', handleCellFocus);
-        }
-    });
-}
-
-// REMOVER EDIÇÃO DA TABELA
-function makeTableReadOnly() {
-    const cells = document.querySelectorAll('.day-cell.editable');
-    
-    cells.forEach(cell => {
-        cell.classList.remove('editable', 'modified');
-        cell.removeAttribute('contenteditable');
-        cell.removeAttribute('inputmode');
-        
-        // Remover eventos
-        cell.removeEventListener('blur', handleCellBlur);
-        cell.removeEventListener('keydown', handleCellKeydown);
-        cell.removeEventListener('input', handleCellInput);
-        cell.removeEventListener('focus', handleCellFocus);
-    });
-}
-
-// MANIPULAR FOCO NA CÉLULA
-function handleCellFocus(e) {
-    const cell = e.currentTarget;
-    const currentValue = cell.textContent.trim();
-    
-    // Selecionar todo o texto
-    if (currentValue && currentValue !== '') {
-        const range = document.createRange();
-        range.selectNodeContents(cell);
-        const selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(range);
-    }
-}
-
-// MANIPULAR ENTRADA DE DADOS
-function handleCellInput(e) {
-    const cell = e.currentTarget;
-    let value = cell.textContent.replace(/[^0-9]/g, ''); // Apenas números
-    
-    // Limitar a 3 dígitos
-    if (value.length > 3) {
-        value = value.substring(0, 3);
-    }
-    
-    cell.textContent = value;
-    
-    // Mover cursor para o final
-    const range = document.createRange();
-    const selection = window.getSelection();
-    range.selectNodeContents(cell);
-    range.collapse(false);
-    selection.removeAllRanges();
-    selection.addRange(range);
-}
-
-// MANIPULAR TECLAS
-function handleCellKeydown(e) {
-    const cell = e.currentTarget;
-    
-    // Enter ou Tab - confirmar e ir para próxima célula
-    if (e.key === 'Enter' || e.key === 'Tab') {
-        e.preventDefault();
-        cell.blur();
-        
-        if (e.key === 'Tab') {
-            const nextCell = findNextEditableCell(cell, !e.shiftKey);
-            if (nextCell) {
-                nextCell.focus();
-            }
-        }
-    }
-    
-    // Escape - cancelar edição
-    if (e.key === 'Escape') {
-        const dateKey = cell.dataset.date;
-        const productType = cell.dataset.productType;
-        const originalValue = originalDistribution[dateKey]?.products[productType] || 0;
-        
-        cell.textContent = originalValue > 0 ? originalValue : '';
-        cell.blur();
-    }
-    
-    // Permitir apenas números, backspace, delete, setas
-    const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'];
-    if (!/^[0-9]$/.test(e.key) && !allowedKeys.includes(e.key)) {
-        e.preventDefault();
-    }
-}
-
-// MANIPULAR SAÍDA DA CÉLULA
-function handleCellBlur(e) {
-    const cell = e.currentTarget;
-    const dateKey = cell.dataset.date;
-    const productType = cell.dataset.productType;
-    const newValue = Math.max(0, parseInt(cell.textContent.trim()) || 0);
-    
-    // Atualizar distribuição
-    if (!currentDistribution[dateKey]) {
-        currentDistribution[dateKey] = { total: 0, products: {} };
-    }
-    
-    const oldValue = currentDistribution[dateKey].products[productType] || 0;
-    currentDistribution[dateKey].products[productType] = newValue;
-    
-    // Recalcular total do dia
-    currentDistribution[dateKey].total = Object.values(currentDistribution[dateKey].products)
-        .reduce((sum, count) => sum + (count || 0), 0);
-    
-    // Atualizar célula
-    cell.dataset.spots = newValue;
-    if (newValue > 0) {
-        cell.textContent = newValue;
-        cell.classList.add('has-spots');
-    } else {
-        cell.textContent = '';
-        cell.classList.remove('has-spots');
-    }
-    
-    // Marcar como modificada se mudou
-    if (oldValue !== newValue) {
-        cell.classList.add('modified');
-        setTimeout(() => cell.classList.remove('modified'), 1000);
-    }
-    
-    // Atualizar célula do total na mesma coluna
-    updateTotalCell(dateKey);
-    
-    // Validar distribuição
-    validateDistribution();
-}
-
-// ENCONTRAR PRÓXIMA CÉLULA EDITÁVEL
-function findNextEditableCell(currentCell, forward = true) {
-    const editableCells = Array.from(document.querySelectorAll('.day-cell.editable'));
-    const currentIndex = editableCells.indexOf(currentCell);
-    
-    if (currentIndex === -1) return null;
-    
-    const nextIndex = forward ? currentIndex + 1 : currentIndex - 1;
-    
-    if (nextIndex >= 0 && nextIndex < editableCells.length) {
-        return editableCells[nextIndex];
-    }
-    
-    return null;
+    console.log('✏️ Modo de edição ativado - Clique para editar, bolinha no canto para arrastar');
 }
 
 // ATUALIZAR CÉLULA DE TOTAL
@@ -956,75 +869,31 @@ function updateTotalCell(dateKey) {
     }
 }
 
-// MOSTRAR TOOLTIP DE AJUDA
-function showEditHelpTooltip() {
-    const tooltip = document.createElement('div');
-    tooltip.className = 'edit-help-tooltip';
-    tooltip.innerHTML = `
-        <strong>💡 Modo de Edição Ativo</strong><br>
-        • Clique nas células para editar<br>
-        • Arraste para preencher múltiplas células<br>
-        • Enter/Tab: próxima célula<br>
-        • Esc: cancelar alteração
-    `;
-    
-    document.body.appendChild(tooltip);
-    
-    // Remover após 8 segundos
-    setTimeout(() => {
-        if (tooltip.parentNode) {
-            tooltip.remove();
-        }
-    }, 8000);
-}
-
-function validateDistribution() {
-    const totalUsed = Object.values(currentDistribution).reduce((sum, day) => sum + (day.total || 0), 0);
-    const validation = document.getElementById('validation');
-    
-    validation.style.display = 'block';
-    
-    if (totalUsed === totalSpots) {
-        validation.className = 'validation success';
-        validation.textContent = `✅ Distribuição válida! Total: ${totalUsed}/${totalSpots}`;
-    } else if (totalUsed < totalSpots) {
-        const remaining = totalSpots - totalUsed;
-        validation.className = 'validation warning';
-        validation.textContent = `⚠️ Faltam ${remaining} inserções (${totalUsed}/${totalSpots})`;
-    } else {
-        const excess = totalUsed - totalSpots;
-        validation.className = 'validation error';
-        validation.textContent = `❌ ${excess} inserções a mais (${totalUsed}/${totalSpots})`;
-    }
-}
-
-// 🆕 SALVAR EDIÇÃO (AGORA SALVA NO NOTION)
+// 🆕 SALVAR EDIÇÃO (AGORA SALVA DISTRIBUIÇÃO + ATUALIZA QUANTIDADES)
 async function saveEdit() {
     try {
-        // Validação opcional
-        const totalUsed = Object.values(currentDistribution).reduce((sum, day) => sum + (day.total || 0), 0);
-        
-        if (Math.abs(totalUsed - totalSpots) > 0) {
-            const confirmSave = confirm(`Total atual: ${totalUsed}, esperado: ${totalSpots}. Salvar mesmo assim?`);
-            if (!confirmSave) return;
-        }
+        showLoadingMessage('💾 Salvando distribuição e atualizando quantidades...');
 
-        // Mostrar loading
-        showLoadingMessage('💾 Salvando distribuição...');
-
-        // Salvar no Notion
+        // Salvar distribuição customizada + atualizar quantidades dos produtos
         await saveToNotion({
-            customDistribution: JSON.stringify(currentDistribution)
+            customDistribution: JSON.stringify(currentDistribution),
+            updateProductQuantities: true
         });
 
-        // Atualizar estado
+        // Atualizar dados locais
         originalDistribution = JSON.parse(JSON.stringify(currentDistribution));
         campaignData.customDistributionData = currentDistribution;
         
+        // 🆕 ATUALIZAR QUANTIDADES LOCAIS TAMBÉM
+        const newQuantities = calculateProductQuantitiesFromDistribution();
+        Object.assign(campaignData, newQuantities);
+        
         exitEditMode();
 
-        // Feedback de sucesso
-        showSuccessMessage('✅ Distribuição salva com sucesso no Notion!');
+        // Recarregar interface para refletir mudanças
+        renderInterface();
+
+        showSuccessMessage('✅ Distribuição salva e quantidades atualizadas no Notion!');
 
     } catch (error) {
         console.error('❌ Erro ao salvar:', error);
@@ -1054,7 +923,7 @@ function resetAuto() {
     const selectedWeekdays = parseWeekdays(campaignData.dias);
     renderCalendar(startDate, endDate, selectedWeekdays);
     
-    validateDistribution();
+    showCurrentStatus();
 }
 
 function exitEditMode() {
@@ -1066,18 +935,9 @@ function exitEditMode() {
     document.getElementById('actions-normal').style.display = 'flex';
     document.getElementById('actions-edit').style.display = 'none';
     document.getElementById('validation').style.display = 'none';
-    
-    // Remover edição da tabela
-    makeTableReadOnly();
-    
-    // Remover tooltip de ajuda se existir
-    const helpTooltip = document.querySelector('.edit-help-tooltip');
-    if (helpTooltip) {
-        helpTooltip.remove();
-    }
 }
 
-// 🆕 EDITAR PERÍODO E DIAS DA SEMANA
+// EDITAR PERÍODO E DIAS DA SEMANA
 function editPeriod() {
     document.getElementById('period-modal').style.display = 'flex';
     
@@ -1159,66 +1019,7 @@ async function savePeriod() {
     }
 }
 
-// 🆕 EDITAR QUANTIDADES DE PRODUTOS
-function editProducts() {
-    document.getElementById('products-modal').style.display = 'flex';
-    
-    // Preencher valores atuais
-    document.getElementById('edit-spots30').value = campaignData.spots30 || 0;
-    document.getElementById('edit-spots5').value = campaignData.spots5 || 0;
-    document.getElementById('edit-spots15').value = campaignData.spots15 || 0;
-    document.getElementById('edit-spots60').value = campaignData.spots60 || 0;
-    document.getElementById('edit-test60').value = campaignData.test60 || 0;
-    
-    updateProductsTotal();
-}
-
-function updateProductsTotal() {
-    const spots30 = parseInt(document.getElementById('edit-spots30').value) || 0;
-    const spots5 = parseInt(document.getElementById('edit-spots5').value) || 0;
-    const spots15 = parseInt(document.getElementById('edit-spots15').value) || 0;
-    const spots60 = parseInt(document.getElementById('edit-spots60').value) || 0;
-    const test60 = parseInt(document.getElementById('edit-test60').value) || 0;
-    
-    const total = spots30 + spots5 + spots15 + spots60 + test60;
-    document.getElementById('products-total').textContent = total;
-}
-
-async function saveProducts() {
-    try {
-        const newProducts = {
-            spots30: parseInt(document.getElementById('edit-spots30').value) || 0,
-            spots5: parseInt(document.getElementById('edit-spots5').value) || 0,
-            spots15: parseInt(document.getElementById('edit-spots15').value) || 0,
-            spots60: parseInt(document.getElementById('edit-spots60').value) || 0,
-            test60: parseInt(document.getElementById('edit-test60').value) || 0
-        };
-        
-        showLoadingMessage('💾 Salvando produtos...');
-        
-        // Salvar no Notion
-        await saveToNotion(newProducts);
-        
-        // Atualizar dados locais
-        Object.assign(campaignData, newProducts);
-        
-        // Limpar distribuição customizada (forçar recálculo)
-        campaignData.customDistributionData = null;
-        await saveToNotion({ customDistribution: '' });
-        
-        // Recarregar interface
-        renderInterface();
-        
-        document.getElementById('products-modal').style.display = 'none';
-        showSuccessMessage('✅ Produtos atualizados com sucesso!');
-        
-    } catch (error) {
-        console.error('❌ Erro ao salvar produtos:', error);
-        showErrorMessage(`❌ Erro ao salvar produtos: ${error.message}`);
-    }
-}
-
-// 🆕 FUNÇÕES DE FEEDBACK VISUAL
+// FUNÇÕES DE FEEDBACK VISUAL
 function showLoadingMessage(message) {
     removeAllMessages();
     const msg = document.createElement('div');
@@ -1278,11 +1079,7 @@ function closePeriodModal() {
     document.getElementById('period-modal').style.display = 'none';
 }
 
-function closeProductsModal() {
-    document.getElementById('products-modal').style.display = 'none';
-}
-
-// EXPORTAÇÃO COM ESTRUTURA EXATA DO "Excel ideal.png"
+// EXPORTAÇÃO
 function exportExcel() {
     try {
         if (typeof XLSX === 'undefined') {
