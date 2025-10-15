@@ -44,7 +44,7 @@ async function loadCampaignData() {
     notionId = params.get('id');
     
     if (notionId && /^[0-9a-f]{32}$/i.test(notionId)) {
-        console.log('📡 Carregando do Notion:', notionId);
+        console.log('📡 Carregando da proposta:', notionId);
         campaignData = await fetchNotionData(notionId);
         campaignData.source = 'notion';
     } else if (params.toString()) {
@@ -74,28 +74,28 @@ async function loadCampaignData() {
     console.log('📊 Dados carregados:', campaignData);
 }
 
-// BUSCAR DADOS DO NOTION
+// BUSCAR DADOS DA PROPOSTA
 async function fetchNotionData(uuid) {
     const apiUrl = getApiUrl();
     console.log('🌐 Usando API:', apiUrl);
     
     const response = await fetch(`${apiUrl}?id=${uuid}`);
     if (!response.ok) {
-        throw new Error(`Erro ao carregar dados do Notion: ${response.status}`);
+        throw new Error(`Erro ao carregar dados da proposta: ${response.status}`);
     }
     return await response.json();
 }
 
-// 🆕 SALVAR DADOS NO NOTION (INCLUINDO QUANTIDADES ATUALIZADAS)
+// 🆕 SALVAR DADOS NA PROPOSTA (INCLUINDO QUANTIDADES ATUALIZADAS)
 async function saveToNotion(dataToSave) {
     if (!notionId || campaignData.source !== 'notion') {
-        console.log('⚠️ Não é possível salvar: não conectado ao Notion');
+        console.log('⚠️ Não é possível salvar: não conectado à proposta');
         return false;
     }
 
     try {
         const apiUrl = getApiUrl();
-        console.log('💾 Preparando dados para salvar...');
+        console.log('💾 Preparando dados para salvar na proposta...');
         console.log('Dados originais:', dataToSave);
 
         // 🆕 CALCULAR NOVAS QUANTIDADES BASEADAS NA DISTRIBUIÇÃO ATUAL
@@ -143,14 +143,14 @@ async function saveToNotion(dataToSave) {
                 console.error('❌ Não foi possível ler erro:', e);
                 errorDetails = await response.text();
             }
-            throw new Error(`Erro ao salvar: ${errorDetails}`);
+            throw new Error(`Erro ao salvar na proposta: ${errorDetails}`);
         }
 
         const result = await response.json();
-        console.log('✅ Salvo com sucesso no Notion');
+        console.log('✅ Salvo com sucesso na proposta');
         return true;
     } catch (error) {
-        console.error('❌ Erro ao salvar no Notion:', error);
+        console.error('❌ Erro ao salvar na proposta:', error);
         console.error('❌ Stack completo:', error.stack);
         throw error;
     }
@@ -228,8 +228,21 @@ function renderInterface() {
 
 // UTILITÁRIOS DE DATA
 function parseDate(dateStr) {
+    console.log('🔍 Parseando data:', dateStr);
+    
+    // Se já é uma string no formato ISO (YYYY-MM-DD), converter direto
+    if (dateStr.includes('-') && dateStr.length === 10) {
+        const [year, month, day] = dateStr.split('-');
+        const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        console.log('📅 Data ISO convertida:', date.toLocaleDateString('pt-BR'));
+        return date;
+    }
+    
+    // Formato brasileiro DD/MM/YYYY
     const [day, month, year] = dateStr.split('/');
-    return new Date(year, month - 1, day);
+    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    console.log('📅 Data BR convertida:', date.toLocaleDateString('pt-BR'));
+    return date;
 }
 
 function formatDate(date) {
@@ -1142,7 +1155,7 @@ async function saveEdit() {
 
     } catch (error) {
         console.error('❌ Erro ao salvar:', error);
-        showErrorMessage(`❌ Erro ao salvar: ${error.message}`);
+        showErrorMessage(`❌ Erro ao salvar na proposta: ${error.message.replace(/Notion/g, 'proposta')}`);
     }
 }
 
@@ -1193,8 +1206,18 @@ function editPeriod() {
     const startDate = parseDate(campaignData.inicio);
     const endDate = parseDate(campaignData.fim);
     
-    document.getElementById('period-start').value = startDate.toISOString().split('T')[0];
-    document.getElementById('period-end').value = endDate.toISOString().split('T')[0];
+    // 🆕 CONVERTER PARA FORMATO ISO CORRETAMENTE
+    const startISO = startDate.toISOString().split('T')[0];
+    const endISO = endDate.toISOString().split('T')[0];
+    
+    console.log('📅 Editando período:');
+    console.log('  - Data início original:', campaignData.inicio);
+    console.log('  - Data fim original:', campaignData.fim);
+    console.log('  - Convertido para ISO início:', startISO);
+    console.log('  - Convertido para ISO fim:', endISO);
+    
+    document.getElementById('period-start').value = startISO;
+    document.getElementById('period-end').value = endISO;
     
     // Preencher dias da semana
     const currentDays = parseWeekdays(campaignData.dias);
@@ -1214,8 +1237,15 @@ async function savePeriod() {
             return;
         }
         
-        const startDate = new Date(startInput);
-        const endDate = new Date(endInput);
+        // 🆕 CONVERSÃO CORRETA DE DATAS
+        const startDate = new Date(startInput + 'T00:00:00');
+        const endDate = new Date(endInput + 'T00:00:00');
+        
+        console.log('📅 Datas originais:', { startInput, endInput });
+        console.log('📅 Datas convertidas:', { 
+            start: startDate.toLocaleDateString('pt-BR'),
+            end: endDate.toLocaleDateString('pt-BR')
+        });
         
         if (startDate >= endDate) {
             alert('Data de início deve ser anterior à data de fim');
@@ -1238,22 +1268,27 @@ async function savePeriod() {
         
         showLoadingMessage('💾 Salvando período na proposta...');
         
-        // Formatar datas
+        // 🆕 FORMATAR DATAS CORRETAMENTE
         const novoInicio = startDate.toLocaleDateString('pt-BR');
         const novoFim = endDate.toLocaleDateString('pt-BR');
-        const novosDias = selectedDays.join(',');
         
-        // Salvar no Notion
+        console.log('📤 Enviando datas:', { novoInicio, novoFim, dias: selectedDays });
+        
+        // Salvar na proposta
         await saveToNotion({
             inicio: novoInicio,
             fim: novoFim,
-            dias: selectedDays
+            dias: selectedDays,
+            customDistribution: '' // 🆕 LIMPAR DISTRIBUIÇÃO CUSTOMIZADA
         });
         
         // Atualizar dados locais
         campaignData.inicio = novoInicio;
         campaignData.fim = novoFim;
-        campaignData.dias = novosDias;
+        campaignData.dias = selectedDays.join(',');
+        
+        // 🆕 LIMPAR DISTRIBUIÇÃO CUSTOMIZADA (FORÇAR RECÁLCULO)
+        campaignData.customDistributionData = null;
         
         // Recarregar interface
         renderInterface();
@@ -1263,7 +1298,7 @@ async function savePeriod() {
         
     } catch (error) {
         console.error('❌ Erro ao salvar período:', error);
-        showErrorMessage(`❌ Erro ao salvar período: ${error.message}`);
+        showErrorMessage(`❌ Erro ao salvar período: ${error.message.replace(/Notion/g, 'proposta')}`);
     }
 }
 
