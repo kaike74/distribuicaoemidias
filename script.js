@@ -8,6 +8,7 @@ let totalSpots = 0;
 let notionId = null;
 let isDragging = false;
 let dragStartCell = null;
+let originalActiveProducts = {}; // 🆕 MANTER PRODUTOS ORIGINALMENTE ATIVOS
 
 // INICIALIZAÇÃO
 document.addEventListener('DOMContentLoaded', async () => {
@@ -226,20 +227,22 @@ async function saveToNotion(dataToSave) {
         if (dataToSave.updateProductQuantities) {
             const newQuantities = calculateProductQuantitiesFromDistribution();
             
-            // 🆕 GARANTIR QUE SÃO NÚMEROS VÁLIDOS E REMOVER CAMPOS INVÁLIDOS
+            // 🆕 SÓ ATUALIZAR PRODUTOS QUE REALMENTE TÊMM INSERÇÕES
+            // Se um produto fica com 0, não enviamos o campo (mantém valor original no Notion)
             Object.keys(newQuantities).forEach(key => {
                 const value = newQuantities[key];
                 if (typeof value !== 'number' || isNaN(value) || value < 0) {
-                    console.warn(`⚠️ Valor inválido para ${key}:`, value, 'convertendo para 0');
-                    newQuantities[key] = 0;
+                    console.warn(`⚠️ Valor inválido para ${key}:`, value, 'removendo do envio');
+                    // Não incluir no envio
+                } else if (value > 0) {
+                    // Só incluir se > 0 (preserva valores originais se editado para 0)
+                    dataToSave[key] = Math.floor(value);
+                    console.log(`📊 ${key}: ${value} (será enviado)`);
                 } else {
-                    // Garantir que é um número inteiro
-                    newQuantities[key] = Math.floor(value);
+                    console.log(`🚫 ${key}: ${value} (não enviado, mantém valor original)`);
                 }
             });
             
-            console.log('📊 Quantidades validadas:', newQuantities);
-            Object.assign(dataToSave, newQuantities);
             delete dataToSave.updateProductQuantities;
         }
 
@@ -416,6 +419,12 @@ function renderInterface() {
     const selectedWeekdays = parseWeekdays(campaignData.dias);
     const activeProducts = getActiveProducts(); // Manter para cálculos internos
     
+    // 🆕 SALVAR PRODUTOS ORIGINALMENTE ATIVOS (NÃO MUDA DEPOIS)
+    if (Object.keys(originalActiveProducts).length === 0) {
+        originalActiveProducts = JSON.parse(JSON.stringify(activeProducts));
+        console.log('💾 Produtos originalmente ativos salvos:', originalActiveProducts);
+    }
+    
     totalSpots = Object.values(activeProducts).reduce((sum, count) => sum + count, 0);
     validDays = getValidDays(startDate, endDate, selectedWeekdays);
     
@@ -511,11 +520,12 @@ function getVisibleProducts() {
     const visibleProducts = {};
     
     // Só incluir produtos que:
-    // 1. Têm valor > 0 na campanha original (não estão "ocultos")
+    // 1. Estavam originalmente ativos (> 0 na proposta inicial) - NUNCA SOMEM
     // OU
     // 2. Estão sendo usados na distribuição atual (foram editados pelo usuário)
-    Object.entries(allProducts).forEach(([productType, originalCount]) => {
-        const isOriginallyActive = originalCount > 0;
+    Object.entries(allProducts).forEach(([productType, currentCount]) => {
+        // 🆕 USAR PRODUTOS ORIGINALMENTE ATIVOS PARA DETERMINAR VISIBILIDADE
+        const wasOriginallyActive = (originalActiveProducts[productType] || 0) > 0;
         
         // Verificar se está sendo usado na distribuição atual
         const currentUsage = Object.values(currentDistribution).reduce((sum, dayData) => {
@@ -523,9 +533,12 @@ function getVisibleProducts() {
         }, 0);
         const isCurrentlyUsed = currentUsage > 0;
         
-        // Mostrar se é originalmente ativo OU está sendo usado atualmente
-        if (isOriginallyActive || isCurrentlyUsed) {
-            visibleProducts[productType] = originalCount;
+        // 🆕 MOSTRAR SE ERA ORIGINALMENTE ATIVO OU ESTÁ SENDO USADO ATUALMENTE
+        if (wasOriginallyActive || isCurrentlyUsed) {
+            visibleProducts[productType] = currentCount;
+            console.log(`👁️ ${productType}: originalmente=${originalActiveProducts[productType] || 0}, atual=${currentCount}, uso=${currentUsage} → VISÍVEL`);
+        } else {
+            console.log(`🚫 ${productType}: originalmente=${originalActiveProducts[productType] || 0}, atual=${currentCount}, uso=${currentUsage} → OCULTO`);
         }
     });
     
@@ -1387,10 +1400,17 @@ async function saveEdit() {
         originalDistribution = JSON.parse(JSON.stringify(currentDistribution));
         campaignData.customDistributionData = currentDistribution;
         
-        // 🆕 ATUALIZAR QUANTIDADES LOCAIS TAMBÉM
+        // 🆕 ATUALIZAR APENAS QUANTIDADES > 0 LOCALMENTE TAMBÉM
         const newQuantities = calculateProductQuantitiesFromDistribution();
-        console.log('🔄 Atualizando quantidades locais:', newQuantities);
-        Object.assign(campaignData, newQuantities);
+        console.log('🔄 Atualizando quantidades locais...');
+        Object.entries(newQuantities).forEach(([key, value]) => {
+            if (value > 0) {
+                campaignData[key] = value;
+                console.log(`✅ ${key}: ${value} (atualizado localmente)`);
+            } else {
+                console.log(`🚫 ${key}: ${value} (mantido valor original: ${campaignData[key]})`);
+            }
+        });
         
         exitEditMode();
 
