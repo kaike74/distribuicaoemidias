@@ -1108,12 +1108,13 @@ body {
     box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
 }
 
-/* MODO EDIÇÃO - CÉLULAS EDITÁVEIS MELHORADAS */
+/* MODO EDIÇÃO - CÉLULAS EDITÁVEIS TIPO EXCEL */
 .edit-mode .day-cell.editable {
     background: #f8fafc !important;
     border: 2px solid #e2e8f0 !important;
     cursor: text;
     position: relative;
+    outline: none;
 }
 
 .edit-mode .day-cell.editable:hover {
@@ -1127,6 +1128,13 @@ body {
     border-color: #2196f3 !important;
     outline: none;
     box-shadow: 0 0 8px rgba(33, 150, 243, 0.3);
+    transform: scale(1.05);
+}
+
+.edit-mode .day-cell.editable[contenteditable="true"]:empty::before {
+    content: "0";
+    color: #94a3b8;
+    font-style: italic;
 }
 
 /* CÉLULAS INVÁLIDAS NÃO SÃO EDITÁVEIS */
