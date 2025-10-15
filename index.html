@@ -68,12 +68,9 @@
                 <span class="status-badge">🟢 Ativa</span>
             </div>
             <div class="actions-right">
-                <!-- 🆕 NOVOS BOTÕES -->
+                <!-- BOTÃO DE PRODUTOS REMOVIDO -->
                 <button class="btn btn-period" onclick="editPeriod()">
                     📅 Período
-                </button>
-                <button class="btn btn-products-edit" onclick="editProducts()">
-                    🎯 Produtos
                 </button>
                 <button class="btn btn-edit" onclick="startEdit()">
                     ✏️ Editar
@@ -88,7 +85,7 @@
         <div class="actions-bar" id="actions-edit" style="display: none;">
             <div class="actions-left">
                 <span>🎨 Modo de Edição</span>
-                <span class="edit-tip">Arraste para preencher</span>
+                <!-- AVISO REMOVIDO -->
             </div>
             <div class="actions-right">
                 <button class="btn btn-save" onclick="saveEdit()">
@@ -120,7 +117,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="script.js"></script>
 
-    <!-- 🆕 MODAL PARA EDITAR PERÍODO E DIAS DA SEMANA -->
+    <!-- MODAL PARA EDITAR PERÍODO E DIAS DA SEMANA -->
     <div id="period-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
@@ -185,102 +182,6 @@
                     ❌ Cancelar
                 </button>
                 <button class="btn btn-save" onclick="savePeriod()">
-                    💾 Salvar no Notion
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 🆕 MODAL PARA EDITAR QUANTIDADES DE PRODUTOS -->
-    <div id="products-modal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">🎯 Editar Quantidades de Produtos</h3>
-                <button class="modal-close" onclick="closeProductsModal()">&times;</button>
-            </div>
-            
-            <div class="modal-body">
-                <div class="form-section">
-                    <h4 class="form-section-title">📺 Produtos de Mídia</h4>
-                    
-                    <!-- Spots 30" -->
-                    <div class="product-edit-group">
-                        <label class="product-edit-label">
-                            <span class="product-icon">📺</span>
-                            <span class="product-name">Spots 30"</span>
-                        </label>
-                        <div class="product-edit-controls">
-                            <button type="button" onclick="document.getElementById('edit-spots30').stepDown(); updateProductsTotal()">−</button>
-                            <input type="number" id="edit-spots30" min="0" max="999" value="0" onchange="updateProductsTotal()">
-                            <button type="button" onclick="document.getElementById('edit-spots30').stepUp(); updateProductsTotal()">+</button>
-                        </div>
-                    </div>
-                    
-                    <!-- Spots 5" -->
-                    <div class="product-edit-group">
-                        <label class="product-edit-label">
-                            <span class="product-icon">⚡</span>
-                            <span class="product-name">Spots 5"</span>
-                        </label>
-                        <div class="product-edit-controls">
-                            <button type="button" onclick="document.getElementById('edit-spots5').stepDown(); updateProductsTotal()">−</button>
-                            <input type="number" id="edit-spots5" min="0" max="999" value="0" onchange="updateProductsTotal()">
-                            <button type="button" onclick="document.getElementById('edit-spots5').stepUp(); updateProductsTotal()">+</button>
-                        </div>
-                    </div>
-                    
-                    <!-- Spots 15" -->
-                    <div class="product-edit-group">
-                        <label class="product-edit-label">
-                            <span class="product-icon">🎬</span>
-                            <span class="product-name">Spots 15"</span>
-                        </label>
-                        <div class="product-edit-controls">
-                            <button type="button" onclick="document.getElementById('edit-spots15').stepDown(); updateProductsTotal()">−</button>
-                            <input type="number" id="edit-spots15" min="0" max="999" value="0" onchange="updateProductsTotal()">
-                            <button type="button" onclick="document.getElementById('edit-spots15').stepUp(); updateProductsTotal()">+</button>
-                        </div>
-                    </div>
-                    
-                    <!-- Spots 60" -->
-                    <div class="product-edit-group">
-                        <label class="product-edit-label">
-                            <span class="product-icon">🎭</span>
-                            <span class="product-name">Spots 60"</span>
-                        </label>
-                        <div class="product-edit-controls">
-                            <button type="button" onclick="document.getElementById('edit-spots60').stepDown(); updateProductsTotal()">−</button>
-                            <input type="number" id="edit-spots60" min="0" max="999" value="0" onchange="updateProductsTotal()">
-                            <button type="button" onclick="document.getElementById('edit-spots60').stepUp(); updateProductsTotal()">+</button>
-                        </div>
-                    </div>
-                    
-                    <!-- Testemunhais 60" -->
-                    <div class="product-edit-group">
-                        <label class="product-edit-label">
-                            <span class="product-icon">🎪</span>
-                            <span class="product-name">Testemunhais 60"</span>
-                        </label>
-                        <div class="product-edit-controls">
-                            <button type="button" onclick="document.getElementById('edit-test60').stepDown(); updateProductsTotal()">−</button>
-                            <input type="number" id="edit-test60" min="0" max="999" value="0" onchange="updateProductsTotal()">
-                            <button type="button" onclick="document.getElementById('edit-test60').stepUp(); updateProductsTotal()">+</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Total -->
-                <div class="products-total-section">
-                    <div class="products-total-label">Total de Inserções</div>
-                    <div class="products-total-value" id="products-total">0</div>
-                </div>
-            </div>
-            
-            <div class="modal-actions">
-                <button class="btn btn-cancel" onclick="closeProductsModal()">
-                    ❌ Cancelar
-                </button>
-                <button class="btn btn-save" onclick="saveProducts()">
                     💾 Salvar no Notion
                 </button>
             </div>
