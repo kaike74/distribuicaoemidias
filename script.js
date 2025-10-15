@@ -38,6 +38,108 @@ function getApiUrl() {
     return '/notion';
 }
 
+// 🆕 SISTEMA DE COMPACTAÇÃO DA DISTRIBUIÇÃO
+function compressDistribution(distribution) {
+    if (!distribution || typeof distribution !== 'object') {
+        return '';
+    }
+
+    const parts = [];
+    
+    Object.entries(distribution).forEach(([dateKey, dayData]) => {
+        if (!dayData || !dayData.products) return;
+        
+        // Converter data YYYY-MM-DD para YYYYMMDD (mais compacto)
+        const shortDate = dateKey.replace(/-/g, '');
+        
+        // Montar produtos de forma compacta
+        const productParts = [];
+        Object.entries(dayData.products).forEach(([productType, count]) => {
+            if (count > 0) {
+                // Usar abreviações: spots30->s30, spots5->s5, etc.
+                const shortType = productType
+                    .replace('spots30', 's30')
+                    .replace('spots5', 's5')
+                    .replace('spots15', 's15')
+                    .replace('spots60', 's60')
+                    .replace('test60', 't60');
+                
+                productParts.push(`${shortType}=${count}`);
+            }
+        });
+        
+        if (productParts.length > 0) {
+            // Formato: YYYYMMDD:total:produto1=valor1,produto2=valor2
+            parts.push(`${shortDate}:${dayData.total}:${productParts.join(',')}`);
+        }
+    });
+    
+    const compressed = parts.join('|');
+    console.log(`📦 Compactação: ${JSON.stringify(distribution).length} → ${compressed.length} chars`);
+    
+    return compressed;
+}
+
+function decompressDistribution(compressedData) {
+    if (!compressedData || typeof compressedData !== 'string') {
+        console.log('📦 Dados de distribuição vazios ou inválidos');
+        return {};
+    }
+
+    console.log(`📦 Descompactando: ${compressedData.length} chars`);
+    
+    const distribution = {};
+    
+    try {
+        const parts = compressedData.split('|');
+        
+        parts.forEach(part => {
+            if (!part.trim()) return;
+            
+            const [shortDate, total, productsStr] = part.split(':');
+            
+            // Converter YYYYMMDD de volta para YYYY-MM-DD
+            const year = shortDate.substring(0, 4);
+            const month = shortDate.substring(4, 6);
+            const day = shortDate.substring(6, 8);
+            const dateKey = `${year}-${month}-${day}`;
+            
+            const dayData = {
+                total: parseInt(total) || 0,
+                products: {}
+            };
+            
+            if (productsStr) {
+                const productPairs = productsStr.split(',');
+                productPairs.forEach(pair => {
+                    const [shortType, count] = pair.split('=');
+                    if (shortType && count) {
+                        // Converter abreviações de volta
+                        const fullType = shortType
+                            .replace('s30', 'spots30')
+                            .replace('s5', 'spots5')
+                            .replace('s15', 'spots15')
+                            .replace('s60', 'spots60')
+                            .replace('t60', 'test60');
+                        
+                        dayData.products[fullType] = parseInt(count) || 0;
+                    }
+                });
+            }
+            
+            distribution[dateKey] = dayData;
+        });
+        
+        console.log('📦 Descompactação concluída:', Object.keys(distribution).length, 'dias');
+        
+    } catch (error) {
+        console.error('❌ Erro na descompactação:', error);
+        return {};
+    }
+    
+    return distribution;
+}
+
 // CARREGAR DADOS
 async function loadCampaignData() {
     const params = new URLSearchParams(window.location.search);
@@ -83,10 +185,32 @@ async function fetchNotionData(uuid) {
     if (!response.ok) {
         throw new Error(`Erro ao carregar dados da proposta: ${response.status}`);
     }
-    return await response.json();
+    
+    const data = await response.json();
+    
+    // 🆕 DESCOMPACTAR DISTRIBUIÇÃO CUSTOMIZADA SE EXISTIR
+    if (data.customDistribution && typeof data.customDistribution === 'string') {
+        // Tentar descompactar primeiro (novo formato)
+        let distributionData = decompressDistribution(data.customDistribution);
+        
+        // Se falhou, tentar como JSON (formato antigo)
+        if (Object.keys(distributionData).length === 0) {
+            try {
+                distributionData = JSON.parse(data.customDistribution);
+                console.log('📦 Usando formato JSON legado');
+            } catch (e) {
+                console.warn('⚠️ Não foi possível interpretar distribuição customizada');
+                distributionData = {};
+            }
+        }
+        
+        data.customDistributionData = distributionData;
+    }
+    
+    return data;
 }
 
-// 🆕 SALVAR DADOS NA PROPOSTA (INCLUINDO QUANTIDADES ATUALIZADAS)
+// 🆕 SALVAR DADOS NA PROPOSTA (AGORA COM COMPACTAÇÃO)
 async function saveToNotion(dataToSave) {
     if (!notionId || campaignData.source !== 'notion') {
         console.log('⚠️ Não é possível salvar: não conectado à proposta');
@@ -119,6 +243,20 @@ async function saveToNotion(dataToSave) {
             delete dataToSave.updateProductQuantities;
         }
 
+        // 🆕 COMPACTAR DISTRIBUIÇÃO CUSTOMIZADA
+        if (dataToSave.customDistribution && typeof dataToSave.customDistribution === 'string') {
+            // Se é JSON, tentar descompactar e compactar
+            if (dataToSave.customDistribution.startsWith('{')) {
+                try {
+                    const distributionObj = JSON.parse(dataToSave.customDistribution);
+                    dataToSave.customDistribution = compressDistribution(distributionObj);
+                    console.log('📦 Distribuição compactada automaticamente');
+                } catch (e) {
+                    console.error('❌ Erro ao compactar JSON:', e);
+                }
+            }
+        }
+
         // 🆕 VALIDAR E LIMPAR DADOS ANTES DE ENVIAR
         const cleanedData = {};
         Object.entries(dataToSave).forEach(([key, value]) => {
@@ -139,17 +277,17 @@ async function saveToNotion(dataToSave) {
                     cleanedData[key] = numValue;
                 }
             } else if (key === 'customDistribution') {
-                // Validar JSON da distribuição
-                if (typeof value === 'string' && value.trim() !== '') {
-                    try {
-                        JSON.parse(value); // Testar se é JSON válido
+                // Validar tamanho da distribuição compactada
+                if (typeof value === 'string') {
+                    if (value.trim() === '') {
+                        cleanedData[key] = ''; // Permitir string vazia para limpar
+                    } else if (value.length > 1900) { // Margem de segurança
+                        console.error(`❌ Distribuição muito grande: ${value.length} chars`);
+                        throw new Error('Distribuição muito complexa para salvar. Tente reduzir o período ou produtos.');
+                    } else {
                         cleanedData[key] = value;
-                    } catch (e) {
-                        console.error(`❌ JSON inválido para ${key}:`, e);
-                        // Não incluir se JSON é inválido
+                        console.log(`✅ Distribuição compactada: ${value.length} chars`);
                     }
-                } else if (value === '') {
-                    cleanedData[key] = ''; // Permitir string vazia para limpar
                 }
             } else {
                 // Outros campos
@@ -1213,7 +1351,7 @@ function updateTotalCell(dateKey) {
     }
 }
 
-// 🆕 SALVAR EDIÇÃO (AGORA SALVA DISTRIBUIÇÃO + ATUALIZA QUANTIDADES)
+// 🆕 SALVAR EDIÇÃO (AGORA COM COMPACTAÇÃO AUTOMÁTICA)
 async function saveEdit() {
     try {
         console.log('🚀 Iniciando processo de salvamento...');
@@ -1227,9 +1365,16 @@ async function saveEdit() {
             throw new Error('Distribuição contém dados inválidos');
         }
 
+        // 🆕 COMPACTAR DISTRIBUIÇÃO AUTOMATICAMENTE
+        const compressedDistribution = compressDistribution(currentDistribution);
+        
+        if (compressedDistribution.length > 1900) {
+            throw new Error('Distribuição muito complexa para salvar. Tente reduzir o período da campanha.');
+        }
+
         // Preparar dados para salvar
         const dataToSave = {
-            customDistribution: JSON.stringify(currentDistribution),
+            customDistribution: compressedDistribution,
             updateProductQuantities: true
         };
 
