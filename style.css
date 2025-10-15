@@ -217,6 +217,23 @@ body {
     border: 1px solid #059669;
 }
 
+/* 🆕 DICA DE EDIÇÃO */
+.edit-tip {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    color: #92400e;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    border: 1px solid #d97706;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
 .actions-right {
     display: flex;
     gap: 12px;
@@ -254,6 +271,17 @@ body {
     color: var(--white);
 }
 
+/* 🆕 NOVOS BOTÕES */
+.btn-period {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: var(--white);
+}
+
+.btn-products-edit {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: var(--white);
+}
+
 .btn-save {
     background: linear-gradient(135deg, #059669, #10b981);
     color: var(--white);
@@ -279,7 +307,7 @@ body {
 .calendar-month-horizontal {
     background: var(--white);
     border-radius: 16px;
-    overflow: hidden; /* ✅ MANTER */
+    overflow: hidden;
     box-shadow: 0 8px 32px rgba(0,0,0,0.08);
     border: 1px solid var(--border-color);
     margin-bottom: 24px;
@@ -290,7 +318,7 @@ body {
 
 /* TABELA SEM CANTOS ARREDONDADOS */
 .horizontal-calendar-table {
-    border-collapse: collapse; /* ✅ VOLTAR PARA collapse */
+    border-collapse: collapse;
     font-size: 12px;
     width: 100%;
     table-layout: fixed;
@@ -300,12 +328,12 @@ body {
 .month-header {
     background: var(--gradient-primary);
     color: var(--white);
-    padding: 12px; /* PADDING MENOR */
-    font-size: 16px; /* FONTE MENOR */
+    padding: 12px;
+    font-size: 16px;
     font-weight: 700;
     text-align: center;
     text-transform: uppercase;
-    letter-spacing: 1px; /* ESPAÇAMENTO MENOR */
+    letter-spacing: 1px;
 }
 
 .month-header::after {
@@ -322,12 +350,12 @@ body {
 .product-label-header {
     background: var(--gradient-primary);
     color: var(--white);
-    padding: 8px 4px; /* PADDING MUITO MENOR */
+    padding: 8px 4px;
     text-align: center;
-    font-size: 8px; /* FONTE MUITO MENOR */
+    font-size: 8px;
     font-weight: 700;
     letter-spacing: 0.5px;
-    width: 100px; /* LARGURA MUITO MENOR */
+    width: 100px;
     position: sticky;
     left: 0;
     z-index: 15;
@@ -336,23 +364,23 @@ body {
 .day-header {
     background: var(--gradient-primary);
     color: var(--white);
-    padding: 6px 2px; /* PADDING MUITO MENOR */
+    padding: 6px 2px;
     text-align: center;
-    font-size: 10px; /* FONTE MUITO MENOR */
+    font-size: 10px;
     font-weight: 600;
-    width: 35px; /* LARGURA MUITO MENOR */
+    width: 35px;
     border-left: 1px solid rgba(255,255,255,0.2);
     white-space: nowrap;
 }
 
 .day-name {
-    font-size: 9px; /* FONTE MUITO MENOR */
+    font-size: 9px;
     opacity: 0.9;
     margin-bottom: 1px;
 }
 
 .day-number {
-    font-size: 10px; /* FONTE MUITO MENOR */
+    font-size: 10px;
     font-weight: 700;
 }
 
@@ -369,17 +397,17 @@ body {
 
 /* LABELS DOS PRODUTOS - MUITO MENORES */
 .product-label {
-    padding: 6px 4px; /* PADDING MUITO MENOR */
+    padding: 6px 4px;
     text-align: left;
     font-weight: 600;
-    font-size: 9px; /* FONTE MUITO MENOR */
-    width: 100px; /* LARGURA MUITO MENOR */
+    font-size: 9px;
+    width: 100px;
     position: sticky;
     left: 0;
     z-index: 5;
     display: flex;
     align-items: center;
-    gap: 4px; /* GAP MENOR */
+    gap: 4px;
 }
 
 .product-spots30 { background: linear-gradient(135deg, #e3f2fd, #bbdefb); border-left: 4px solid #1976d2; }
@@ -389,29 +417,30 @@ body {
 .product-test60 { background: linear-gradient(135deg, #fff3e0, #ffcc02); border-left: 4px solid #f57c00; }
 
 .product-icon {
-    font-size: 12px; /* ÍCONE MENOR */
+    font-size: 12px;
 }
 
 .product-name {
-    font-size: 10px; /* FONTE MUITO MENOR */
+    font-size: 10px;
     letter-spacing: 0.2px;
     line-height: 1.1;
 }
 
 /* QUADRADOS MUITO PEQUENOS */
 .day-cell {
-    padding: 4px 2px; /* PADDING MUITO MENOR */
+    padding: 4px 2px;
     text-align: center;
     font-weight: 600;
-    font-size: 10px; /* FONTE MUITO MENOR */
+    font-size: 10px;
     color: var(--text-light);
     border-left: 1px solid var(--border-color);
     background: #fafafa;
     transition: all 0.2s ease;
     cursor: pointer;
-    height: 28px; /* ALTURA MUITO MENOR */
-    width: 35px; /* LARGURA MUITO MENOR */
+    height: 28px;
+    width: 35px;
     white-space: nowrap;
+    position: relative;
 }
 
 /* QUADRADOS BRANCOS MUITO PEQUENOS */
@@ -419,15 +448,15 @@ body {
     background: #ffffff;
     color: #000000;
     font-weight: 700;
-    border: 1px solid var(--primary-color); /* BORDA MAIS FINA */
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1); /* SOMBRA MENOR */
-    font-size: 10px; /* FONTE MUITO MENOR */
+    border: 1px solid var(--primary-color);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    font-size: 10px;
 }
 
 .day-cell.has-spots:hover {
     background: #f8f9fa;
     border-color: var(--secondary-color);
-    transform: scale(1.1); /* ESCALA MAIOR PARA COMPENSAR TAMANHO */
+    transform: scale(1.1);
 }
 
 /* DIAS INVÁLIDOS */
@@ -443,12 +472,34 @@ body {
     background: #f1f5f9;
 }
 
+/* 🆕 DRAG & DROP STYLES */
+.day-cell.drag-start {
+    background: #3b82f6 !important;
+    color: white !important;
+    border-color: #1d4ed8 !important;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4) !important;
+}
+
+.day-cell.drag-hover {
+    background: #dbeafe !important;
+    border-color: #3b82f6 !important;
+    transform: scale(1.05) !important;
+}
+
+.edit-mode .day-cell {
+    cursor: grab;
+}
+
+.edit-mode .day-cell:active {
+    cursor: grabbing;
+}
+
 /* LINHA DE TOTAL - FONTE MAIOR */
 .total-label {
     padding: 6px 4px;
     text-align: left;
     font-weight: 700;
-    font-size: 10px; /* ✅ AUMENTADO de 7px para 9px */
+    font-size: 10px;
     background: linear-gradient(135deg, #263238, #37474f);
     color: var(--white);
     width: 100px;
@@ -461,17 +512,17 @@ body {
 }
 
 .total-name {
-    font-size: 11px; /* ✅ AUMENTADO de 7px para 9px */
+    font-size: 11px;
     letter-spacing: 0.2px;
     line-height: 1.1;
-    font-weight: 700; /* ✅ MAIS NEGRITO */
+    font-weight: 700;
 }
 
 .total-cell {
     padding: 4px 2px;
     text-align: center;
     font-weight: 700;
-    font-size: 11px; /* ✅ AUMENTADO de 10px para 11px */
+    font-size: 11px;
     color: var(--text-light);
     border-left: 1px solid var(--border-color);
     background: #f8f9fa;
@@ -485,27 +536,13 @@ body {
     color: #000000;
     border: 1px solid #263238;
     box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-    font-size: 10px; /* ✅ AUMENTADO de 9px para 10px */
+    font-size: 10px;
     font-weight: 700;
 }
 
 /* CALENDÁRIO COM ALTURA CONTROLADA */
-.calendar-month-horizontal {
-    background: var(--white);
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
-    border: 1px solid var(--border-color);
-    margin-bottom: 24px;
-    width: 100%;
-    overflow: visible;
-    position: relative;
-    max-height: 400px; /* ✅ ADICIONAR: limita altura máxima */
-}
-
-/* CONTAINER DA TABELA COM ALTURA LIMITADA */
 .table-container {
-    max-height: 350px; /* ✅ ADICIONAR: altura máxima do conteúdo */
+    max-height: 350px;
     overflow: visible;
 }
 
@@ -642,6 +679,282 @@ body {
     margin-bottom: 0;
 }
 
+/* 🆕 MODAIS PRINCIPAIS */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    backdrop-filter: blur(8px);
+}
+
+.modal-overlay.show {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    padding: 0;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-40px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-header {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 16px 16px 0 0;
+}
+
+.modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-actions {
+    padding: 20px 24px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 12px;
+    background: #f8fafc;
+    border-radius: 0 0 16px 16px;
+}
+
+.modal-actions .btn {
+    flex: 1;
+}
+
+/* 🆕 FORMULÁRIOS DOS MODAIS */
+.form-section {
+    margin-bottom: 24px;
+}
+
+.form-section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+}
+
+.form-input {
+    padding: 12px 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(6, 5, 91, 0.1);
+}
+
+/* 🆕 SELETOR DE DIAS DA SEMANA */
+.weekdays-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.weekday-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.weekday-item input[type="checkbox"] {
+    display: none;
+}
+
+.weekday-label {
+    padding: 12px 8px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.2s ease;
+    width: 100%;
+    background: white;
+}
+
+.weekday-item input:checked + .weekday-label {
+    background: var(--gradient-primary);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.weekday-item:hover .weekday-label {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+/* 🆕 EDITOR DE PRODUTOS */
+.product-edit-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    transition: all 0.2s ease;
+}
+
+.product-edit-group:hover {
+    border-color: var(--primary-color);
+    background: #f8fafc;
+}
+
+.product-edit-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.product-edit-label .product-icon {
+    font-size: 20px;
+}
+
+.product-edit-label .product-name {
+    font-size: 14px;
+}
+
+.product-edit-controls {
+    display: flex;
+    align-items: center;
+    background: #f1f5f9;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.product-edit-controls button {
+    background: #e2e8f0;
+    border: none;
+    padding: 8px 12px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-dark);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.product-edit-controls button:hover {
+    background: #cbd5e1;
+}
+
+.product-edit-controls input {
+    border: none;
+    background: transparent;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-dark);
+    width: 80px;
+    padding: 8px 4px;
+    outline: none;
+}
+
+/* 🆕 TOTAL DE PRODUTOS */
+.products-total-section {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.products-total-label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    opacity: 0.9;
+}
+
+.products-total-value {
+    font-size: 32px;
+    font-weight: 700;
+}
+
 /* LOGO DA MARCA */
 .brand-footer {
     margin-top: 40px;
@@ -688,7 +1001,7 @@ body {
     font-weight: 600;
 }
 
-/* POP-UP DE EDIÇÃO */
+/* POP-UP DE EDIÇÃO ORIGINAL (MANTIDO PARA COMPATIBILIDADE) */
 .edit-modal {
     position: fixed;
     top: 0;
@@ -716,17 +1029,6 @@ body {
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     position: relative;
     animation: modalSlideIn 0.3s ease-out;
-}
-
-@keyframes modalSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-30px) scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
 }
 
 .edit-modal-header {
@@ -896,145 +1198,6 @@ body {
     box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
 }
 
-/* RESPONSIVIDADE AJUSTADA PARA TAMANHOS MENORES */
-@media (max-width: 768px) {
-    .container { padding: 16px; }
-    .stats-grid { 
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-    }
-    .actions-bar { 
-        flex-direction: column; 
-        gap: 16px;
-        padding: 20px;
-    }
-    .header-title { 
-        font-size: 24px;
-        letter-spacing: 1px;
-    }
-    .brand-logo {
-        max-width: 150px;
-    }
-    
-    /* CALENDÁRIO RESPONSIVO */
-    .product-label-header,
-    .product-label,
-    .total-label {
-        width: 80px; /* AINDA MENOR EM MOBILE */
-        padding: 4px 2px;
-        font-size: 6px;
-    }
-    
-    .day-header,
-    .day-cell,
-    .total-cell {
-        width: 30px; /* AINDA MENOR EM MOBILE */
-        padding: 3px 1px;
-        font-size: 7px;
-    }
-    
-    .day-cell,
-    .total-cell {
-        height: 24px;
-    }
-    
-    .month-header {
-        padding: 8px;
-        font-size: 14px;
-    }
-    
-    /* MODAL RESPONSIVO */
-    .edit-modal-content {
-        width: 95%;
-        margin: 20px;
-        padding: 20px;
-    }
-    
-    .edit-modal-actions {
-        flex-direction: column;
-    }
-    
-    .edit-btn {
-        width: 100%;
-    }
-}
-
-@media (max-width: 480px) {
-    .stats-grid { 
-        grid-template-columns: 1fr;
-    }
-    .header {
-        padding: 24px 16px;
-    }
-    .header-title {
-        font-size: 20px;
-    }
-    .brand-footer {
-        margin-top: 24px;
-        padding: 24px 16px;
-    }
-    
-    /* CALENDÁRIO MOBILE EXTREMO */
-    .product-label-header,
-    .product-label,
-    .total-label {
-        width: 70px;
-        font-size: 5px;
-    }
-    
-    .day-header,
-    .day-cell,
-    .total-cell {
-        width: 25px;
-        font-size: 6px;
-    }
-    
-    .day-cell,
-    .total-cell {
-        height: 20px;
-    }
-}
-
-/* ANIMAÇÕES MELHORADAS */
-.calendar-month-horizontal { 
-    animation: slideInUp 0.6s ease-out;
-}
-
-.stat-card { 
-    animation: fadeInScale 0.5s ease-out;
-}
-
-.brand-footer {
-    animation: fadeIn 0.8s ease-out 0.3s both;
-}
-
-@keyframes slideInUp {
-    from { 
-        opacity: 0; 
-        transform: translateY(30px);
-    }
-    to { 
-        opacity: 1; 
-        transform: translateY(0);
-    }
-}
-
-@keyframes fadeInScale {
-    from { 
-        opacity: 0; 
-        transform: scale(0.9);
-    }
-    to { 
-        opacity: 1; 
-        transform: scale(1);
-    }
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
 /* MODO EDIÇÃO - CÉLULAS EDITÁVEIS */
 .edit-mode .day-cell.editable {
     background: #fff3cd !important;
@@ -1054,26 +1217,6 @@ body {
     border-color: #2196f3 !important;
     outline: none;
     box-shadow: 0 0 8px rgba(33, 150, 243, 0.3);
-}
-
-/* INPUT INLINE PARA EDIÇÃO */
-.inline-edit-input {
-    width: 100%;
-    height: 100%;
-    border: none;
-    background: transparent;
-    text-align: center;
-    font-size: 10px;
-    font-weight: 700;
-    color: #000000;
-    outline: none;
-    padding: 0;
-    margin: 0;
-    box-sizing: border-box;
-}
-
-.inline-edit-input:focus {
-    background: rgba(33, 150, 243, 0.1);
 }
 
 /* INDICADOR VISUAL DE CÉLULA EDITÁVEL */
@@ -1165,11 +1308,89 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
-    margin-top: 0; /* Remove margem superior já que temos o cabeçalho fixo */
+    margin-top: 0;
 }
 
-/* RESPONSIVIDADE DO CABEÇALHO */
+/* RESPONSIVIDADE AJUSTADA PARA TAMANHOS MENORES */
 @media (max-width: 768px) {
+    .container { padding: 16px; }
+    .stats-grid { 
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    .actions-bar { 
+        flex-direction: column; 
+        gap: 16px;
+        padding: 20px;
+    }
+    .actions-right {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .btn {
+        flex: 1;
+        min-width: 120px;
+    }
+    .header-title { 
+        font-size: 24px;
+        letter-spacing: 1px;
+    }
+    .brand-logo {
+        max-width: 150px;
+    }
+    
+    /* CALENDÁRIO RESPONSIVO */
+    .product-label-header,
+    .product-label,
+    .total-label {
+        width: 80px;
+        padding: 4px 2px;
+        font-size: 6px;
+    }
+    
+    .day-header,
+    .day-cell,
+    .total-cell {
+        width: 30px;
+        padding: 3px 1px;
+        font-size: 7px;
+    }
+    
+    .day-cell,
+    .total-cell {
+        height: 24px;
+    }
+    
+    .month-header {
+        padding: 8px;
+        font-size: 14px;
+    }
+    
+    /* MODAL RESPONSIVO */
+    .modal-content {
+        width: 95%;
+        margin: 20px;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .weekdays-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+    }
+    
+    .weekday-label {
+        padding: 8px 4px;
+        font-size: 11px;
+    }
+    
+    /* CABEÇALHO RESPONSIVO */
     .top-header {
         padding: 8px 16px;
     }
@@ -1181,6 +1402,44 @@ body {
 }
 
 @media (max-width: 480px) {
+    .stats-grid { 
+        grid-template-columns: 1fr;
+    }
+    .header {
+        padding: 24px 16px;
+    }
+    .header-title {
+        font-size: 20px;
+    }
+    .brand-footer {
+        margin-top: 24px;
+        padding: 24px 16px;
+    }
+    
+    /* CALENDÁRIO MOBILE EXTREMO */
+    .product-label-header,
+    .product-label,
+    .total-label {
+        width: 70px;
+        font-size: 5px;
+    }
+    
+    .day-header,
+    .day-cell,
+    .total-cell {
+        width: 25px;
+        font-size: 6px;
+    }
+    
+    .day-cell,
+    .total-cell {
+        height: 20px;
+    }
+    
+    .weekdays-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
     .top-header {
         padding: 6px 12px;
     }
@@ -1189,4 +1448,44 @@ body {
         max-height: 28px;
         max-width: 140px;
     }
+}
+
+/* ANIMAÇÕES MELHORADAS */
+.calendar-month-horizontal { 
+    animation: slideInUp 0.6s ease-out;
+}
+
+.stat-card { 
+    animation: fadeInScale 0.5s ease-out;
+}
+
+.brand-footer {
+    animation: fadeIn 0.8s ease-out 0.3s both;
+}
+
+@keyframes slideInUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(30px);
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInScale {
+    from { 
+        opacity: 0; 
+        transform: scale(0.9);
+    }
+    to { 
+        opacity: 1; 
+        transform: scale(1);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
