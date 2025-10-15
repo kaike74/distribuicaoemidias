@@ -190,7 +190,7 @@ function renderInterface() {
     const startDate = parseDate(campaignData.inicio);
     const endDate = parseDate(campaignData.fim);
     const selectedWeekdays = parseWeekdays(campaignData.dias);
-    const activeProducts = getActiveProducts();
+    const activeProducts = getActiveProducts(); // Manter para cálculos internos
     
     totalSpots = Object.values(activeProducts).reduce((sum, count) => sum + count, 0);
     validDays = getValidDays(startDate, endDate, selectedWeekdays);
@@ -214,9 +214,9 @@ function renderInterface() {
     
     originalDistribution = JSON.parse(JSON.stringify(currentDistribution));
     
-    // Renderizar elementos
+    // Renderizar elementos - usar produtos visíveis para interface
     updateHeader();
-    updateProducts(activeProducts);
+    updateProducts(activeProducts); // Função já usa getVisibleProducts() internamente
     updateStats(startDate, endDate);
     updateActions();
     renderCalendar(startDate, endDate, selectedWeekdays);
@@ -266,6 +266,34 @@ function getActiveProducts() {
         spots60: campaignData.spots60 || 0,
         test60: campaignData.test60 || 0
     };
+}
+
+// 🆕 OBTER PRODUTOS VISÍVEIS (NÃO OCULTOS)
+function getVisibleProducts() {
+    const allProducts = getActiveProducts();
+    const visibleProducts = {};
+    
+    // Só incluir produtos que:
+    // 1. Têm valor > 0 na campanha original (não estão "ocultos")
+    // OU
+    // 2. Estão sendo usados na distribuição atual (foram editados pelo usuário)
+    Object.entries(allProducts).forEach(([productType, originalCount]) => {
+        const isOriginallyActive = originalCount > 0;
+        
+        // Verificar se está sendo usado na distribuição atual
+        const currentUsage = Object.values(currentDistribution).reduce((sum, dayData) => {
+            return sum + (dayData.products?.[productType] || 0);
+        }, 0);
+        const isCurrentlyUsed = currentUsage > 0;
+        
+        // Mostrar se é originalmente ativo OU está sendo usado atualmente
+        if (isOriginallyActive || isCurrentlyUsed) {
+            visibleProducts[productType] = originalCount;
+        }
+    });
+    
+    console.log('👁️ Produtos visíveis:', visibleProducts);
+    return visibleProducts;
 }
 
 function getProductName(type) {
@@ -337,8 +365,10 @@ function updateProducts(activeProducts) {
     const container = document.getElementById('products-list');
     container.innerHTML = '';
     
-    // 🆕 SEMPRE MOSTRAR TODOS OS PRODUTOS DA CAMPANHA (MESMO COM 0 INSERÇÕES)
-    Object.entries(activeProducts).forEach(([type, originalCount]) => {
+    // 🆕 MOSTRAR APENAS PRODUTOS VISÍVEIS (NÃO OCULTOS)
+    const visibleProducts = getVisibleProducts();
+    
+    Object.entries(visibleProducts).forEach(([type, originalCount]) => {
         // Calcular total atual da distribuição para este produto
         const currentCount = Object.values(currentDistribution).reduce((sum, dayData) => {
             return sum + (dayData.products?.[type] || 0);
@@ -476,12 +506,11 @@ function createHorizontalMonthCalendar(year, month, selectedWeekdays) {
     // Corpo da tabela
     const tbody = document.createElement('tbody');
     
-    // 🆕 MOSTRAR TODOS OS PRODUTOS DEFINIDOS NA CAMPANHA (NÃO APENAS OS COM SPOTS > 0)
-    const allProducts = getActiveProducts();
+    // 🆕 MOSTRAR APENAS PRODUTOS VISÍVEIS (NÃO OCULTOS)
+    const visibleProducts = getVisibleProducts();
     
-    // Linhas de produtos - SEMPRE mostrar todos os produtos da campanha
-    Object.entries(allProducts).forEach(([productType, originalCount]) => {
-        // Mostrar produto se ele existe na campanha original (mesmo que zerado)
+    // Linhas de produtos - APENAS produtos visíveis
+    Object.entries(visibleProducts).forEach(([productType, originalCount]) => {
         const row = createProductRow(productType, monthDays);
         tbody.appendChild(row);
     });
@@ -1038,9 +1067,10 @@ function updateLiveProducts() {
     const container = document.getElementById('products-list');
     container.innerHTML = '';
     
-    const activeProducts = getActiveProducts();
+    // 🆕 MOSTRAR APENAS PRODUTOS VISÍVEIS (NÃO OCULTOS)
+    const visibleProducts = getVisibleProducts();
     
-    Object.entries(activeProducts).forEach(([type, originalCount]) => {
+    Object.entries(visibleProducts).forEach(([type, originalCount]) => {
         const currentCount = Object.values(currentDistribution).reduce((sum, dayData) => {
             return sum + (dayData.products?.[type] || 0);
         }, 0);
