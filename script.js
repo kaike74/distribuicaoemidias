@@ -5,6 +5,9 @@ let originalDistribution = {};
 let currentDistribution = {};
 let validDays = [];
 let totalSpots = 0;
+let notionId = null; // 🆕 Para salvar no Notion
+let isDragging = false; // 🆕 Para funcionalidade de arrastar
+let dragStartCell = null; // 🆕 Célula inicial do drag
 
 // INICIALIZAÇÃO
 document.addEventListener('DOMContentLoaded', async () => {
@@ -23,30 +26,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 function getApiUrl() {
     const hostname = window.location.hostname;
     
-    // Se está em localhost, usa Netlify
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
         return '/.netlify/functions/notion';
     }
-    
-    // Se o hostname contém 'netlify', usa Netlify
     if (hostname.includes('netlify.app')) {
         return '/.netlify/functions/notion';
     }
-    
-    // Se o hostname contém 'pages.dev', usa Cloudflare
     if (hostname.includes('pages.dev')) {
         return '/notion';
     }
-    
-    // Para domínios customizados, tenta detectar
-    // Cloudflare primeiro (mais comum para novos deploys)
     return '/notion';
 }
 
 // CARREGAR DADOS
 async function loadCampaignData() {
     const params = new URLSearchParams(window.location.search);
-    const notionId = params.get('id');
+    notionId = params.get('id'); // 🆕 Salvar ID globalmente
     
     if (notionId && /^[0-9a-f]{32}$/i.test(notionId)) {
         console.log('📡 Carregando do Notion:', notionId);
@@ -91,6 +86,39 @@ async function fetchNotionData(uuid) {
     return await response.json();
 }
 
+// 🆕 SALVAR DADOS NO NOTION
+async function saveToNotion(dataToSave) {
+    if (!notionId || campaignData.source !== 'notion') {
+        console.log('⚠️ Não é possível salvar: não conectado ao Notion');
+        return false;
+    }
+
+    try {
+        const apiUrl = getApiUrl();
+        console.log('💾 Salvando no Notion:', dataToSave);
+
+        const response = await fetch(`${apiUrl}?id=${notionId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dataToSave)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`Erro ao salvar: ${errorData.error}`);
+        }
+
+        const result = await response.json();
+        console.log('✅ Salvo com sucesso no Notion');
+        return true;
+    } catch (error) {
+        console.error('❌ Erro ao salvar no Notion:', error);
+        throw error;
+    }
+}
+
 // RENDERIZAR INTERFACE
 function renderInterface() {
     const startDate = parseDate(campaignData.inicio);
@@ -109,8 +137,15 @@ function renderInterface() {
         throw new Error('Nenhum dia válido encontrado');
     }
     
-    // Calcular distribuição
-    currentDistribution = calculateDistribution(activeProducts, validDays);
+    // 🆕 VERIFICAR SE HÁ DISTRIBUIÇÃO CUSTOMIZADA
+    if (campaignData.customDistributionData) {
+        console.log('📊 Usando distribuição customizada');
+        currentDistribution = campaignData.customDistributionData;
+    } else {
+        console.log('🔄 Calculando distribuição automática');
+        currentDistribution = calculateDistribution(activeProducts, validDays);
+    }
+    
     originalDistribution = JSON.parse(JSON.stringify(currentDistribution));
     
     // Renderizar elementos
@@ -424,6 +459,11 @@ function createProductRow(productType, monthDays) {
             cell.classList.add('invalid-day');
         }
         
+        // 🆕 ADICIONAR EVENTOS DE DRAG & DROP
+        if (isValidDay) {
+            setupDragAndDrop(cell);
+        }
+        
         // Adicionar tooltip se há dados
         if (isValidDay && dayData) {
             setupTooltip(cell, dayData);
@@ -473,6 +513,145 @@ function createTotalRow(monthDays) {
     });
     
     return row;
+}
+
+// 🆕 CONFIGURAR DRAG & DROP
+function setupDragAndDrop(cell) {
+    cell.addEventListener('mousedown', handleDragStart);
+    cell.addEventListener('mouseenter', handleDragEnter);
+    cell.addEventListener('mouseup', handleDragEnd);
+}
+
+function handleDragStart(e) {
+    if (!isEditMode) return;
+    
+    isDragging = true;
+    dragStartCell = e.currentTarget;
+    dragStartCell.classList.add('drag-start');
+    
+    // Prevenir seleção de texto
+    e.preventDefault();
+    
+    // Adicionar listeners globais
+    document.addEventListener('mouseup', handleDragEnd);
+    document.addEventListener('mousemove', handleDragMove);
+}
+
+function handleDragEnter(e) {
+    if (!isDragging || !isEditMode) return;
+    
+    const cell = e.currentTarget;
+    if (cell.classList.contains('invalid-day')) return;
+    
+    cell.classList.add('drag-hover');
+}
+
+function handleDragMove(e) {
+    if (!isDragging) return;
+    
+    // Remover hover de todas as células
+    document.querySelectorAll('.day-cell').forEach(cell => {
+        cell.classList.remove('drag-hover');
+    });
+    
+    // Adicionar hover na célula atual
+    const elementUnderMouse = document.elementFromPoint(e.clientX, e.clientY);
+    if (elementUnderMouse && elementUnderMouse.classList.contains('day-cell')) {
+        if (!elementUnderMouse.classList.contains('invalid-day')) {
+            elementUnderMouse.classList.add('drag-hover');
+        }
+    }
+}
+
+function handleDragEnd(e) {
+    if (!isDragging) return;
+    
+    isDragging = false;
+    
+    // Remover listeners globais
+    document.removeEventListener('mouseup', handleDragEnd);
+    document.removeEventListener('mousemove', handleDragMove);
+    
+    // Encontrar célula final
+    const elementUnderMouse = document.elementFromPoint(e.clientX, e.clientY);
+    let dragEndCell = null;
+    
+    if (elementUnderMouse && elementUnderMouse.classList.contains('day-cell')) {
+        dragEndCell = elementUnderMouse;
+    }
+    
+    // Limpar classes visuais
+    document.querySelectorAll('.day-cell').forEach(cell => {
+        cell.classList.remove('drag-start', 'drag-hover');
+    });
+    
+    // Executar preenchimento se válido
+    if (dragStartCell && dragEndCell && dragStartCell !== dragEndCell) {
+        fillCellRange(dragStartCell, dragEndCell);
+    }
+    
+    dragStartCell = null;
+}
+
+// 🆕 PREENCHER RANGE DE CÉLULAS
+function fillCellRange(startCell, endCell) {
+    const startValue = parseInt(startCell.textContent) || 0;
+    const startProductType = startCell.dataset.productType;
+    const endProductType = endCell.dataset.productType;
+    
+    // Só funciona na mesma linha de produto
+    if (startProductType !== endProductType) return;
+    
+    // Encontrar todas as células da mesma linha entre start e end
+    const allCells = Array.from(document.querySelectorAll(`[data-product-type="${startProductType}"]`));
+    const startIndex = allCells.indexOf(startCell);
+    const endIndex = allCells.indexOf(endCell);
+    
+    if (startIndex === -1 || endIndex === -1) return;
+    
+    const minIndex = Math.min(startIndex, endIndex);
+    const maxIndex = Math.max(startIndex, endIndex);
+    
+    // Preencher células no range
+    for (let i = minIndex; i <= maxIndex; i++) {
+        const cell = allCells[i];
+        if (cell.classList.contains('invalid-day')) continue;
+        
+        const dateKey = cell.dataset.date;
+        const productType = cell.dataset.productType;
+        
+        // Atualizar distribuição
+        if (!currentDistribution[dateKey]) {
+            currentDistribution[dateKey] = { total: 0, products: {} };
+        }
+        
+        const oldValue = currentDistribution[dateKey].products[productType] || 0;
+        currentDistribution[dateKey].products[productType] = startValue;
+        
+        // Recalcular total do dia
+        currentDistribution[dateKey].total = Object.values(currentDistribution[dateKey].products)
+            .reduce((sum, count) => sum + (count || 0), 0);
+        
+        // Atualizar célula visualmente
+        cell.dataset.spots = startValue;
+        if (startValue > 0) {
+            cell.textContent = startValue;
+            cell.classList.add('has-spots');
+        } else {
+            cell.textContent = '';
+            cell.classList.remove('has-spots');
+        }
+        
+        // Marcar como modificada
+        cell.classList.add('modified');
+        setTimeout(() => cell.classList.remove('modified'), 1000);
+        
+        // Atualizar célula do total
+        updateTotalCell(dateKey);
+    }
+    
+    // Validar distribuição
+    validateDistribution();
 }
 
 function getProductIcon(productType) {
@@ -783,19 +962,20 @@ function showEditHelpTooltip() {
     tooltip.className = 'edit-help-tooltip';
     tooltip.innerHTML = `
         <strong>💡 Modo de Edição Ativo</strong><br>
-        • Clique nas células amarelas para editar<br>
+        • Clique nas células para editar<br>
+        • Arraste para preencher múltiplas células<br>
         • Enter/Tab: próxima célula<br>
         • Esc: cancelar alteração
     `;
     
     document.body.appendChild(tooltip);
     
-    // Remover após 5 segundos
+    // Remover após 8 segundos
     setTimeout(() => {
         if (tooltip.parentNode) {
             tooltip.remove();
         }
-    }, 5000);
+    }, 8000);
 }
 
 function validateDistribution() {
@@ -818,34 +998,38 @@ function validateDistribution() {
     }
 }
 
-function saveEdit() {
-    const totalUsed = Object.values(currentDistribution).reduce((sum, day) => sum + (day.total || 0), 0);
-    
-    if (totalUsed !== totalSpots) {
-        if (!confirm(`Total atual: ${totalUsed}, necessário: ${totalSpots}. Continuar mesmo assim?`)) {
-            return;
+// 🆕 SALVAR EDIÇÃO (AGORA SALVA NO NOTION)
+async function saveEdit() {
+    try {
+        // Validação opcional
+        const totalUsed = Object.values(currentDistribution).reduce((sum, day) => sum + (day.total || 0), 0);
+        
+        if (Math.abs(totalUsed - totalSpots) > 0) {
+            const confirmSave = confirm(`Total atual: ${totalUsed}, esperado: ${totalSpots}. Salvar mesmo assim?`);
+            if (!confirmSave) return;
         }
+
+        // Mostrar loading
+        showLoadingMessage('💾 Salvando distribuição...');
+
+        // Salvar no Notion
+        await saveToNotion({
+            customDistribution: JSON.stringify(currentDistribution)
+        });
+
+        // Atualizar estado
+        originalDistribution = JSON.parse(JSON.stringify(currentDistribution));
+        campaignData.customDistributionData = currentDistribution;
+        
+        exitEditMode();
+
+        // Feedback de sucesso
+        showSuccessMessage('✅ Distribuição salva com sucesso no Notion!');
+
+    } catch (error) {
+        console.error('❌ Erro ao salvar:', error);
+        showErrorMessage(`❌ Erro ao salvar: ${error.message}`);
     }
-    
-    originalDistribution = JSON.parse(JSON.stringify(currentDistribution));
-    exitEditMode();
-    
-    // Feedback visual
-    const successMsg = document.createElement('div');
-    successMsg.className = 'validation success';
-    successMsg.style.position = 'fixed';
-    successMsg.style.top = '20px';
-    successMsg.style.right = '20px';
-    successMsg.style.zIndex = '10000';
-    successMsg.textContent = '✅ Distribuição salva com sucesso!';
-    
-    document.body.appendChild(successMsg);
-    
-    setTimeout(() => {
-        if (successMsg.parentNode) {
-            successMsg.remove();
-        }
-    }, 3000);
 }
 
 function cancelEdit() {
@@ -875,6 +1059,9 @@ function resetAuto() {
 
 function exitEditMode() {
     isEditMode = false;
+    isDragging = false;
+    dragStartCell = null;
+    
     document.body.classList.remove('edit-mode');
     document.getElementById('actions-normal').style.display = 'flex';
     document.getElementById('actions-edit').style.display = 'none';
@@ -888,6 +1075,211 @@ function exitEditMode() {
     if (helpTooltip) {
         helpTooltip.remove();
     }
+}
+
+// 🆕 EDITAR PERÍODO E DIAS DA SEMANA
+function editPeriod() {
+    document.getElementById('period-modal').style.display = 'flex';
+    
+    // Preencher valores atuais
+    const startDate = parseDate(campaignData.inicio);
+    const endDate = parseDate(campaignData.fim);
+    
+    document.getElementById('period-start').value = startDate.toISOString().split('T')[0];
+    document.getElementById('period-end').value = endDate.toISOString().split('T')[0];
+    
+    // Preencher dias da semana
+    const currentDays = parseWeekdays(campaignData.dias);
+    const dayCheckboxes = document.querySelectorAll('input[name="weekdays"]');
+    dayCheckboxes.forEach((checkbox, index) => {
+        checkbox.checked = currentDays.includes(index);
+    });
+}
+
+async function savePeriod() {
+    try {
+        const startInput = document.getElementById('period-start').value;
+        const endInput = document.getElementById('period-end').value;
+        
+        if (!startInput || !endInput) {
+            alert('Por favor, preencha as datas');
+            return;
+        }
+        
+        const startDate = new Date(startInput);
+        const endDate = new Date(endInput);
+        
+        if (startDate >= endDate) {
+            alert('Data de início deve ser anterior à data de fim');
+            return;
+        }
+        
+        // Obter dias selecionados
+        const selectedDays = [];
+        const dayNames = ['Dom.', 'Seg.', 'Ter.', 'Qua.', 'Qui.', 'Sex.', 'Sáb.'];
+        const dayCheckboxes = document.querySelectorAll('input[name="weekdays"]:checked');
+        
+        dayCheckboxes.forEach(checkbox => {
+            selectedDays.push(dayNames[parseInt(checkbox.value)]);
+        });
+        
+        if (selectedDays.length === 0) {
+            alert('Selecione pelo menos um dia da semana');
+            return;
+        }
+        
+        showLoadingMessage('💾 Salvando período...');
+        
+        // Formatar datas
+        const novoInicio = startDate.toLocaleDateString('pt-BR');
+        const novoFim = endDate.toLocaleDateString('pt-BR');
+        const novosDias = selectedDays.join(',');
+        
+        // Salvar no Notion
+        await saveToNotion({
+            inicio: novoInicio,
+            fim: novoFim,
+            dias: selectedDays
+        });
+        
+        // Atualizar dados locais
+        campaignData.inicio = novoInicio;
+        campaignData.fim = novoFim;
+        campaignData.dias = novosDias;
+        
+        // Recarregar interface
+        renderInterface();
+        
+        document.getElementById('period-modal').style.display = 'none';
+        showSuccessMessage('✅ Período atualizado com sucesso!');
+        
+    } catch (error) {
+        console.error('❌ Erro ao salvar período:', error);
+        showErrorMessage(`❌ Erro ao salvar período: ${error.message}`);
+    }
+}
+
+// 🆕 EDITAR QUANTIDADES DE PRODUTOS
+function editProducts() {
+    document.getElementById('products-modal').style.display = 'flex';
+    
+    // Preencher valores atuais
+    document.getElementById('edit-spots30').value = campaignData.spots30 || 0;
+    document.getElementById('edit-spots5').value = campaignData.spots5 || 0;
+    document.getElementById('edit-spots15').value = campaignData.spots15 || 0;
+    document.getElementById('edit-spots60').value = campaignData.spots60 || 0;
+    document.getElementById('edit-test60').value = campaignData.test60 || 0;
+    
+    updateProductsTotal();
+}
+
+function updateProductsTotal() {
+    const spots30 = parseInt(document.getElementById('edit-spots30').value) || 0;
+    const spots5 = parseInt(document.getElementById('edit-spots5').value) || 0;
+    const spots15 = parseInt(document.getElementById('edit-spots15').value) || 0;
+    const spots60 = parseInt(document.getElementById('edit-spots60').value) || 0;
+    const test60 = parseInt(document.getElementById('edit-test60').value) || 0;
+    
+    const total = spots30 + spots5 + spots15 + spots60 + test60;
+    document.getElementById('products-total').textContent = total;
+}
+
+async function saveProducts() {
+    try {
+        const newProducts = {
+            spots30: parseInt(document.getElementById('edit-spots30').value) || 0,
+            spots5: parseInt(document.getElementById('edit-spots5').value) || 0,
+            spots15: parseInt(document.getElementById('edit-spots15').value) || 0,
+            spots60: parseInt(document.getElementById('edit-spots60').value) || 0,
+            test60: parseInt(document.getElementById('edit-test60').value) || 0
+        };
+        
+        showLoadingMessage('💾 Salvando produtos...');
+        
+        // Salvar no Notion
+        await saveToNotion(newProducts);
+        
+        // Atualizar dados locais
+        Object.assign(campaignData, newProducts);
+        
+        // Limpar distribuição customizada (forçar recálculo)
+        campaignData.customDistributionData = null;
+        await saveToNotion({ customDistribution: '' });
+        
+        // Recarregar interface
+        renderInterface();
+        
+        document.getElementById('products-modal').style.display = 'none';
+        showSuccessMessage('✅ Produtos atualizados com sucesso!');
+        
+    } catch (error) {
+        console.error('❌ Erro ao salvar produtos:', error);
+        showErrorMessage(`❌ Erro ao salvar produtos: ${error.message}`);
+    }
+}
+
+// 🆕 FUNÇÕES DE FEEDBACK VISUAL
+function showLoadingMessage(message) {
+    removeAllMessages();
+    const msg = document.createElement('div');
+    msg.className = 'feedback-message loading';
+    msg.textContent = message;
+    msg.style.cssText = `
+        position: fixed; top: 20px; right: 20px; z-index: 10000;
+        background: #3b82f6; color: white; padding: 12px 20px;
+        border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        font-weight: 600; font-size: 14px;
+    `;
+    document.body.appendChild(msg);
+}
+
+function showSuccessMessage(message) {
+    removeAllMessages();
+    const msg = document.createElement('div');
+    msg.className = 'feedback-message success';
+    msg.textContent = message;
+    msg.style.cssText = `
+        position: fixed; top: 20px; right: 20px; z-index: 10000;
+        background: #10b981; color: white; padding: 12px 20px;
+        border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        font-weight: 600; font-size: 14px;
+    `;
+    document.body.appendChild(msg);
+    
+    setTimeout(() => {
+        if (msg.parentNode) msg.remove();
+    }, 4000);
+}
+
+function showErrorMessage(message) {
+    removeAllMessages();
+    const msg = document.createElement('div');
+    msg.className = 'feedback-message error';
+    msg.textContent = message;
+    msg.style.cssText = `
+        position: fixed; top: 20px; right: 20px; z-index: 10000;
+        background: #ef4444; color: white; padding: 12px 20px;
+        border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        font-weight: 600; font-size: 14px;
+    `;
+    document.body.appendChild(msg);
+    
+    setTimeout(() => {
+        if (msg.parentNode) msg.remove();
+    }, 6000);
+}
+
+function removeAllMessages() {
+    document.querySelectorAll('.feedback-message').forEach(msg => msg.remove());
+}
+
+// FECHAR MODAIS
+function closePeriodModal() {
+    document.getElementById('period-modal').style.display = 'none';
+}
+
+function closeProductsModal() {
+    document.getElementById('products-modal').style.display = 'none';
 }
 
 // EXPORTAÇÃO COM ESTRUTURA EXATA DO "Excel ideal.png"
@@ -1101,65 +1493,6 @@ function createExactExcelStructure(wb) {
     // Adicionar ao workbook
     const sheetName = getMonthName(startDate.getMonth(), startDate.getFullYear());
     XLSX.utils.book_append_sheet(wb, ws, sheetName);
-}
-
-function createInfoSheet(wb) {
-    const startDate = parseDate(campaignData.inicio);
-    const endDate = parseDate(campaignData.fim);
-    const activeProducts = getActiveProducts();
-    
-    const infoData = [
-        ['INFORMAÇÕES DA CAMPANHA'],
-        [''],
-        ['Emissora:', campaignData.emissora],
-        ['Período:', `${formatDate(startDate)} a ${formatDate(endDate)}`],
-        ['Dias de veiculação:', campaignData.dias],
-        ['PMM (Pessoas por Mil):', campaignData.pmm || 1000],
-        [''],
-        ['PRODUTOS CONTRATADOS:'],
-        ['']
-    ];
-    
-    Object.entries(activeProducts).forEach(([type, count]) => {
-        if (count > 0) {
-            infoData.push([getProductName(type), count]);
-        }
-    });
-    
-    infoData.push(['']);
-    infoData.push(['RESUMO GERAL:']);
-    infoData.push(['Total de inserções:', totalSpots]);
-    infoData.push(['Dias ativos:', validDays.length]);
-    infoData.push(['Impactos total:', calculateImpact(activeProducts).toLocaleString()]);
-    infoData.push(['Média inserções/dia:', validDays.length > 0 ? (totalSpots / validDays.length).toFixed(1) : '0']);
-    
-    const infoWs = XLSX.utils.aoa_to_sheet(infoData);
-    infoWs['!cols'] = [{ wch: 25 }, { wch: 20 }];
-    
-    // Formatação da planilha de informações
-    const range = XLSX.utils.decode_range(infoWs['!ref']);
-    for (let R = range.s.r; R <= range.e.r; ++R) {
-        for (let C = range.s.c; C <= range.e.c; ++C) {
-            const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
-            if (!infoWs[cellAddress]) continue;
-            
-            if (!infoWs[cellAddress].s) infoWs[cellAddress].s = {};
-            
-            // Títulos das seções
-            if (infoWs[cellAddress].v && typeof infoWs[cellAddress].v === 'string' && 
-                (infoWs[cellAddress].v.includes('INFORMAÇÕES') || 
-                 infoWs[cellAddress].v.includes('PRODUTOS') || 
-                 infoWs[cellAddress].v.includes('RESUMO'))) {
-                infoWs[cellAddress].s = {
-                    fill: { fgColor: { rgb: "06055B" } },
-                    font: { color: { rgb: "FFFFFF" }, bold: true, sz: 12 },
-                    alignment: { horizontal: "center", vertical: "center" }
-                };
-            }
-        }
-    }
-    
-    XLSX.utils.book_append_sheet(wb, infoWs, 'Informações');
 }
 
 // UTILITÁRIOS
