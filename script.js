@@ -548,74 +548,9 @@ function createTotalRow(monthDays) {
     return row;
 }
 
-// 🆕 CONFIGURAR EDIÇÃO DIRETA DA CÉLULA
+// 🆕 CONFIGURAR EDIÇÃO DIRETA DA CÉLULA (TIPO EXCEL)
 function setupCellEditing(cell) {
-    cell.addEventListener('click', handleCellClick);
-    cell.addEventListener('dblclick', handleCellDoubleClick);
-}
-
-function handleCellClick(e) {
-    if (!isEditMode) return;
-    
-    const cell = e.currentTarget;
-    if (cell.classList.contains('invalid-day')) return;
-    
-    // Single click: incrementar valor
-    const currentValue = parseInt(cell.textContent) || 0;
-    const newValue = currentValue + 1;
-    
-    updateCellValue(cell, newValue);
-}
-
-function handleCellDoubleClick(e) {
-    if (!isEditMode) return;
-    
-    const cell = e.currentTarget;
-    if (cell.classList.contains('invalid-day')) return;
-    
-    // Double click: zerar valor
-    updateCellValue(cell, 0);
-}
-
-// 🆕 ATUALIZAR VALOR DA CÉLULA
-function updateCellValue(cell, newValue) {
-    const dateKey = cell.dataset.date;
-    const productType = cell.dataset.productType;
-    
-    // Garantir que newValue é um número válido
-    newValue = Math.max(0, parseInt(newValue) || 0);
-    
-    // Atualizar distribuição
-    if (!currentDistribution[dateKey]) {
-        currentDistribution[dateKey] = { total: 0, products: {} };
-    }
-    
-    const oldValue = currentDistribution[dateKey].products[productType] || 0;
-    currentDistribution[dateKey].products[productType] = newValue;
-    
-    // Recalcular total do dia
-    currentDistribution[dateKey].total = Object.values(currentDistribution[dateKey].products)
-        .reduce((sum, count) => sum + (count || 0), 0);
-    
-    // Atualizar célula visualmente
-    cell.dataset.spots = newValue;
-    if (newValue > 0) {
-        cell.textContent = newValue;
-        cell.classList.add('has-spots');
-    } else {
-        cell.textContent = '';
-        cell.classList.remove('has-spots');
-    }
-    
-    // Marcar como modificada
-    cell.classList.add('modified');
-    setTimeout(() => cell.classList.remove('modified'), 1000);
-    
-    // Atualizar célula do total
-    updateTotalCell(dateKey);
-    
-    // 🆕 REMOVER VALIDAÇÃO OBRIGATÓRIA
-    showCurrentStatus();
+    // Não adicionar eventos de clique - apenas permitir edição direta
 }
 
 // 🆕 MOSTRAR STATUS ATUAL (SEM OBRIGAR VALIDAÇÃO)
@@ -738,7 +673,12 @@ function fillCellRange(startCell, endCell) {
         const cell = allCells[i];
         if (cell.classList.contains('invalid-day')) continue;
         
-        updateCellValue(cell, startValue);
+        // Definir valor e simular blur para atualizar
+        cell.textContent = startValue;
+        
+        // Disparar evento de blur para atualizar a distribuição
+        const blurEvent = new Event('blur');
+        cell.dispatchEvent(blurEvent);
     }
 }
 
@@ -847,10 +787,181 @@ function startEdit() {
     // Salvar estado original
     originalDistribution = JSON.parse(JSON.stringify(currentDistribution));
     
+    // 🆕 TORNAR CÉLULAS EDITÁVEIS (TIPO EXCEL)
+    makeTableEditable();
+    
     // Mostrar status atual
     showCurrentStatus();
     
-    console.log('✏️ Modo de edição ativado - Clique para editar, bolinha no canto para arrastar');
+    console.log('✏️ Modo de edição ativado - Digite nas células para editar');
+}
+
+// 🆕 TORNAR TABELA EDITÁVEL TIPO EXCEL
+function makeTableEditable() {
+    const cells = document.querySelectorAll('.day-cell');
+    
+    cells.forEach(cell => {
+        const dateKey = cell.dataset.date;
+        const productType = cell.dataset.productType;
+        
+        // Verificar se é dia válido
+        if (dateKey && productType && !cell.classList.contains('invalid-day')) {
+            cell.classList.add('editable');
+            cell.setAttribute('contenteditable', 'true');
+            cell.setAttribute('inputmode', 'numeric');
+            
+            // Eventos de edição
+            cell.addEventListener('blur', handleCellBlur);
+            cell.addEventListener('keydown', handleCellKeydown);
+            cell.addEventListener('input', handleCellInput);
+            cell.addEventListener('focus', handleCellFocus);
+        }
+    });
+}
+
+// 🆕 REMOVER EDIÇÃO DA TABELA
+function makeTableReadOnly() {
+    const cells = document.querySelectorAll('.day-cell.editable');
+    
+    cells.forEach(cell => {
+        cell.classList.remove('editable', 'modified');
+        cell.removeAttribute('contenteditable');
+        cell.removeAttribute('inputmode');
+        
+        // Remover eventos
+        cell.removeEventListener('blur', handleCellBlur);
+        cell.removeEventListener('keydown', handleCellKeydown);
+        cell.removeEventListener('input', handleCellInput);
+        cell.removeEventListener('focus', handleCellFocus);
+    });
+}
+
+// 🆕 MANIPULAR FOCO NA CÉLULA
+function handleCellFocus(e) {
+    const cell = e.currentTarget;
+    const currentValue = cell.textContent.trim();
+    
+    // Selecionar todo o texto
+    if (currentValue && currentValue !== '') {
+        const range = document.createRange();
+        range.selectNodeContents(cell);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
+}
+
+// 🆕 MANIPULAR ENTRADA DE DADOS
+function handleCellInput(e) {
+    const cell = e.currentTarget;
+    let value = cell.textContent.replace(/[^0-9]/g, ''); // Apenas números
+    
+    // Limitar a 3 dígitos
+    if (value.length > 3) {
+        value = value.substring(0, 3);
+    }
+    
+    cell.textContent = value;
+    
+    // Mover cursor para o final
+    const range = document.createRange();
+    const selection = window.getSelection();
+    range.selectNodeContents(cell);
+    range.collapse(false);
+    selection.removeAllRanges();
+    selection.addRange(range);
+}
+
+// 🆕 MANIPULAR TECLAS
+function handleCellKeydown(e) {
+    const cell = e.currentTarget;
+    
+    // Enter ou Tab - confirmar e ir para próxima célula
+    if (e.key === 'Enter' || e.key === 'Tab') {
+        e.preventDefault();
+        cell.blur();
+        
+        if (e.key === 'Tab') {
+            const nextCell = findNextEditableCell(cell, !e.shiftKey);
+            if (nextCell) {
+                nextCell.focus();
+            }
+        }
+    }
+    
+    // Escape - cancelar edição
+    if (e.key === 'Escape') {
+        const dateKey = cell.dataset.date;
+        const productType = cell.dataset.productType;
+        const originalValue = originalDistribution[dateKey]?.products[productType] || 0;
+        
+        cell.textContent = originalValue > 0 ? originalValue : '';
+        cell.blur();
+    }
+    
+    // Permitir apenas números, backspace, delete, setas
+    const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'];
+    if (!/^[0-9]$/.test(e.key) && !allowedKeys.includes(e.key)) {
+        e.preventDefault();
+    }
+}
+
+// 🆕 MANIPULAR SAÍDA DA CÉLULA
+function handleCellBlur(e) {
+    const cell = e.currentTarget;
+    const dateKey = cell.dataset.date;
+    const productType = cell.dataset.productType;
+    const newValue = Math.max(0, parseInt(cell.textContent.trim()) || 0);
+    
+    // Atualizar distribuição
+    if (!currentDistribution[dateKey]) {
+        currentDistribution[dateKey] = { total: 0, products: {} };
+    }
+    
+    const oldValue = currentDistribution[dateKey].products[productType] || 0;
+    currentDistribution[dateKey].products[productType] = newValue;
+    
+    // Recalcular total do dia
+    currentDistribution[dateKey].total = Object.values(currentDistribution[dateKey].products)
+        .reduce((sum, count) => sum + (count || 0), 0);
+    
+    // Atualizar célula visualmente
+    cell.dataset.spots = newValue;
+    if (newValue > 0) {
+        cell.textContent = newValue;
+        cell.classList.add('has-spots');
+    } else {
+        cell.textContent = '';
+        cell.classList.remove('has-spots');
+    }
+    
+    // Marcar como modificada se mudou
+    if (oldValue !== newValue) {
+        cell.classList.add('modified');
+        setTimeout(() => cell.classList.remove('modified'), 1000);
+    }
+    
+    // Atualizar célula do total na mesma coluna
+    updateTotalCell(dateKey);
+    
+    // Mostrar status atual
+    showCurrentStatus();
+}
+
+// 🆕 ENCONTRAR PRÓXIMA CÉLULA EDITÁVEL
+function findNextEditableCell(currentCell, forward = true) {
+    const editableCells = Array.from(document.querySelectorAll('.day-cell.editable'));
+    const currentIndex = editableCells.indexOf(currentCell);
+    
+    if (currentIndex === -1) return null;
+    
+    const nextIndex = forward ? currentIndex + 1 : currentIndex - 1;
+    
+    if (nextIndex >= 0 && nextIndex < editableCells.length) {
+        return editableCells[nextIndex];
+    }
+    
+    return null;
 }
 
 // ATUALIZAR CÉLULA DE TOTAL
@@ -872,7 +983,7 @@ function updateTotalCell(dateKey) {
 // 🆕 SALVAR EDIÇÃO (AGORA SALVA DISTRIBUIÇÃO + ATUALIZA QUANTIDADES)
 async function saveEdit() {
     try {
-        showLoadingMessage('💾 Salvando distribuição e atualizando quantidades...');
+        showLoadingMessage('💾 Salvando na proposta...');
 
         // Salvar distribuição customizada + atualizar quantidades dos produtos
         await saveToNotion({
@@ -893,7 +1004,7 @@ async function saveEdit() {
         // Recarregar interface para refletir mudanças
         renderInterface();
 
-        showSuccessMessage('✅ Distribuição salva e quantidades atualizadas no Notion!');
+        showSuccessMessage('✅ Proposta salva com sucesso!');
 
     } catch (error) {
         console.error('❌ Erro ao salvar:', error);
@@ -935,6 +1046,9 @@ function exitEditMode() {
     document.getElementById('actions-normal').style.display = 'flex';
     document.getElementById('actions-edit').style.display = 'none';
     document.getElementById('validation').style.display = 'none';
+    
+    // 🆕 REMOVER EDIÇÃO DA TABELA
+    makeTableReadOnly();
 }
 
 // EDITAR PERÍODO E DIAS DA SEMANA
@@ -988,7 +1102,7 @@ async function savePeriod() {
             return;
         }
         
-        showLoadingMessage('💾 Salvando período...');
+        showLoadingMessage('💾 Salvando período na proposta...');
         
         // Formatar datas
         const novoInicio = startDate.toLocaleDateString('pt-BR');
@@ -1011,7 +1125,7 @@ async function savePeriod() {
         renderInterface();
         
         document.getElementById('period-modal').style.display = 'none';
-        showSuccessMessage('✅ Período atualizado com sucesso!');
+        showSuccessMessage('✅ Período salvo na proposta!');
         
     } catch (error) {
         console.error('❌ Erro ao salvar período:', error);
