@@ -95,26 +95,55 @@ async function saveToNotion(dataToSave) {
 
     try {
         const apiUrl = getApiUrl();
-        console.log('💾 Salvando no Notion:', dataToSave);
+        console.log('💾 Preparando dados para salvar...');
+        console.log('Dados originais:', dataToSave);
 
         // 🆕 CALCULAR NOVAS QUANTIDADES BASEADAS NA DISTRIBUIÇÃO ATUAL
         if (dataToSave.updateProductQuantities) {
             const newQuantities = calculateProductQuantitiesFromDistribution();
+            
+            // Garantir que são números válidos
+            Object.keys(newQuantities).forEach(key => {
+                if (typeof newQuantities[key] !== 'number' || isNaN(newQuantities[key])) {
+                    newQuantities[key] = 0;
+                }
+            });
+            
             Object.assign(dataToSave, newQuantities);
             delete dataToSave.updateProductQuantities;
         }
+
+        // 🆕 VALIDAR DADOS ANTES DE ENVIAR
+        const cleanedData = {};
+        Object.entries(dataToSave).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+                cleanedData[key] = value;
+            }
+        });
+
+        console.log('📤 Dados limpos para envio:', cleanedData);
 
         const response = await fetch(`${apiUrl}?id=${notionId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(dataToSave)
+            body: JSON.stringify(cleanedData)
         });
 
+        console.log('📡 Resposta do servidor:', response.status);
+
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(`Erro ao salvar: ${errorData.error}`);
+            let errorDetails = `Status: ${response.status}`;
+            try {
+                const errorData = await response.json();
+                console.error('❌ Erro detalhado:', errorData);
+                errorDetails = errorData.error || errorData.message || errorDetails;
+            } catch (e) {
+                console.error('❌ Não foi possível ler erro:', e);
+                errorDetails = await response.text();
+            }
+            throw new Error(`Erro ao salvar: ${errorDetails}`);
         }
 
         const result = await response.json();
@@ -122,6 +151,7 @@ async function saveToNotion(dataToSave) {
         return true;
     } catch (error) {
         console.error('❌ Erro ao salvar no Notion:', error);
+        console.error('❌ Stack completo:', error.stack);
         throw error;
     }
 }
@@ -136,12 +166,16 @@ function calculateProductQuantitiesFromDistribution() {
         test60: 0
     };
 
+    console.log('🔍 Calculando quantidades da distribuição atual...');
+    console.log('Distribuição atual:', currentDistribution);
+
     // Somar todas as inserções por produto na distribuição atual
     Object.values(currentDistribution).forEach(dayData => {
-        if (dayData.products) {
+        if (dayData && dayData.products) {
             Object.entries(dayData.products).forEach(([productType, count]) => {
                 if (quantities.hasOwnProperty(productType)) {
-                    quantities[productType] += count || 0;
+                    const validCount = parseInt(count) || 0;
+                    quantities[productType] += validCount;
                 }
             });
         }
@@ -303,26 +337,37 @@ function updateProducts(activeProducts) {
     const container = document.getElementById('products-list');
     container.innerHTML = '';
     
-    Object.entries(activeProducts).forEach(([type, count]) => {
-        if (count > 0) {
-            const tag = document.createElement('span');
-            tag.className = `product-tag tag-${type}`;
-            tag.textContent = `${getProductName(type)}: ${count}`;
-            container.appendChild(tag);
-        }
+    // 🆕 SEMPRE MOSTRAR TODOS OS PRODUTOS DA CAMPANHA (MESMO COM 0 INSERÇÕES)
+    Object.entries(activeProducts).forEach(([type, originalCount]) => {
+        // Calcular total atual da distribuição para este produto
+        const currentCount = Object.values(currentDistribution).reduce((sum, dayData) => {
+            return sum + (dayData.products?.[type] || 0);
+        }, 0);
+        
+        const tag = document.createElement('span');
+        tag.className = `product-tag tag-${type}`;
+        // Mostrar a quantidade atual da distribuição, não a original
+        tag.textContent = `${getProductName(type)}: ${currentCount}`;
+        container.appendChild(tag);
     });
     
     document.getElementById('products-section').style.display = 'block';
 }
 
 function updateStats(startDate, endDate) {
+    // 🆕 CALCULAR TOTAIS BASEADOS NA DISTRIBUIÇÃO ATUAL
+    const currentTotalSpots = Object.values(currentDistribution).reduce((sum, day) => sum + (day.total || 0), 0);
     const activeProducts = getActiveProducts();
+    
     const periodRange = `${startDate.getDate().toString().padStart(2, '0')}/${(startDate.getMonth() + 1).toString().padStart(2, '0')}-${endDate.getDate().toString().padStart(2, '0')}/${(endDate.getMonth() + 1).toString().padStart(2, '0')}`;
-    const avgSpots = validDays.length > 0 ? (totalSpots / validDays.length).toFixed(1) : '0';
-    const totalImpact = calculateImpact(activeProducts);
+    const avgSpots = validDays.length > 0 ? (currentTotalSpots / validDays.length).toFixed(1) : '0';
+    
+    // 🆕 CALCULAR IMPACTO BASEADO NA DISTRIBUIÇÃO ATUAL
+    const currentProductTotals = calculateProductQuantitiesFromDistribution();
+    const totalImpact = calculateImpact(currentProductTotals);
     
     document.getElementById('stat-period').textContent = periodRange;
-    document.getElementById('stat-spots').textContent = totalSpots;
+    document.getElementById('stat-spots').textContent = currentTotalSpots;
     document.getElementById('stat-impact').textContent = totalImpact.toLocaleString();
     document.getElementById('stat-avg').textContent = avgSpots;
 }
@@ -336,20 +381,38 @@ function renderCalendar(startDate, endDate, selectedWeekdays) {
     const container = document.getElementById('calendar');
     container.innerHTML = '';
     
-    // Gerar meses
+    console.log('📅 Renderizando calendário:', {
+        inicio: startDate.toLocaleDateString('pt-BR'),
+        fim: endDate.toLocaleDateString('pt-BR'),
+        dias: selectedWeekdays
+    });
+    
+    // 🆕 GERAR APENAS OS MESES QUE ESTÃO NO PERÍODO
     const months = new Set();
     const current = new Date(startDate);
     
+    // Ir mês por mês apenas no período definido
     while (current <= endDate) {
         months.add(`${current.getFullYear()}-${current.getMonth()}`);
+        
+        // Avançar para o próximo mês
         current.setMonth(current.getMonth() + 1);
-        current.setDate(1);
+        current.setDate(1); // Sempre dia 1 do mês
     }
+    
+    console.log('📊 Meses a renderizar:', Array.from(months));
     
     months.forEach(monthKey => {
         const [year, month] = monthKey.split('-').map(Number);
         const monthElement = createHorizontalMonthCalendar(year, month, selectedWeekdays);
-        container.appendChild(monthElement);
+        
+        // Só adicionar se o mês tem dias válidos
+        const monthDays = getValidDaysForMonth(year, month, selectedWeekdays);
+        if (monthDays.length > 0) {
+            container.appendChild(monthElement);
+        } else {
+            console.log(`⚠️ Mês ${year}-${month} não tem dias válidos, pulando...`);
+        }
     });
 }
 
@@ -412,14 +475,15 @@ function createHorizontalMonthCalendar(year, month, selectedWeekdays) {
     
     // Corpo da tabela
     const tbody = document.createElement('tbody');
-    const activeProducts = getActiveProducts();
     
-    // Linhas de produtos
-    Object.entries(activeProducts).forEach(([productType, totalSpots]) => {
-        if (totalSpots > 0) {
-            const row = createProductRow(productType, monthDays);
-            tbody.appendChild(row);
-        }
+    // 🆕 MOSTRAR TODOS OS PRODUTOS DEFINIDOS NA CAMPANHA (NÃO APENAS OS COM SPOTS > 0)
+    const allProducts = getActiveProducts();
+    
+    // Linhas de produtos - SEMPRE mostrar todos os produtos da campanha
+    Object.entries(allProducts).forEach(([productType, originalCount]) => {
+        // Mostrar produto se ele existe na campanha original (mesmo que zerado)
+        const row = createProductRow(productType, monthDays);
+        tbody.appendChild(row);
     });
     
     // Linha de total
@@ -438,13 +502,17 @@ function getValidDaysForMonth(year, month, selectedWeekdays) {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     
+    // 🆕 OBTER PERÍODO REAL DA CAMPANHA
+    const startDate = parseDate(campaignData.inicio);
+    const endDate = parseDate(campaignData.fim);
+    
     const current = new Date(firstDay);
     while (current <= lastDay) {
-        // Verificar se está dentro do período da campanha
-        const startDate = parseDate(campaignData.inicio);
-        const endDate = parseDate(campaignData.fim);
+        // ✅ VERIFICAR SE ESTÁ DENTRO DO PERÍODO DA CAMPANHA E É DIA VÁLIDO
+        const isInPeriod = current >= startDate && current <= endDate;
+        const isValidWeekday = selectedWeekdays.includes(current.getDay());
         
-        if (current >= startDate && current <= endDate) {
+        if (isInPeriod && isValidWeekday) {
             days.push(new Date(current));
         }
         
@@ -944,8 +1012,44 @@ function handleCellBlur(e) {
     // Atualizar célula do total na mesma coluna
     updateTotalCell(dateKey);
     
+    // 🆕 ATUALIZAR ESTATÍSTICAS E PRODUTOS EM TEMPO REAL
+    updateLiveStats();
+    updateLiveProducts();
+    
     // Mostrar status atual
     showCurrentStatus();
+}
+
+// 🆕 ATUALIZAR ESTATÍSTICAS EM TEMPO REAL
+function updateLiveStats() {
+    const currentTotalSpots = Object.values(currentDistribution).reduce((sum, day) => sum + (day.total || 0), 0);
+    const avgSpots = validDays.length > 0 ? (currentTotalSpots / validDays.length).toFixed(1) : '0';
+    
+    const currentProductTotals = calculateProductQuantitiesFromDistribution();
+    const totalImpact = calculateImpact(currentProductTotals);
+    
+    document.getElementById('stat-spots').textContent = currentTotalSpots;
+    document.getElementById('stat-impact').textContent = totalImpact.toLocaleString();
+    document.getElementById('stat-avg').textContent = avgSpots;
+}
+
+// 🆕 ATUALIZAR PRODUTOS EM TEMPO REAL
+function updateLiveProducts() {
+    const container = document.getElementById('products-list');
+    container.innerHTML = '';
+    
+    const activeProducts = getActiveProducts();
+    
+    Object.entries(activeProducts).forEach(([type, originalCount]) => {
+        const currentCount = Object.values(currentDistribution).reduce((sum, dayData) => {
+            return sum + (dayData.products?.[type] || 0);
+        }, 0);
+        
+        const tag = document.createElement('span');
+        tag.className = `product-tag tag-${type}`;
+        tag.textContent = `${getProductName(type)}: ${currentCount}`;
+        container.appendChild(tag);
+    });
 }
 
 // 🆕 ENCONTRAR PRÓXIMA CÉLULA EDITÁVEL
