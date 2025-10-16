@@ -511,18 +511,14 @@ function getVisibleProducts() {
     const visibleProducts = {};
     
     // Só incluir produtos que:
-    // 1. Têm valor numérico válido no Notion (incluindo 0, mas não vazio/null)
+    // 1. Têm o campo definido no Notion (mesmo que seja 0) - SEMPRE APARECEM
     // OU  
     // 2. Estão sendo usados na distribuição atual (foram editados pelo usuário)
     Object.entries(allProducts).forEach(([productType, currentCount]) => {
-        // 🆕 VERIFICAR SE TEM VALOR NUMÉRICO VÁLIDO NO NOTION
-        const notionValue = campaignData[productType];
-        const hasValidValue = (
-            notionValue !== undefined && 
-            notionValue !== null && 
-            notionValue !== '' &&
-            !isNaN(Number(notionValue))
-        );
+        // 🆕 VERIFICAR SE O CAMPO EXISTE NO NOTION (mesmo que seja 0)
+        const fieldExistsInNotion = campaignData.hasOwnProperty(productType) && 
+                                   campaignData[productType] !== undefined && 
+                                   campaignData[productType] !== null;
         
         // Verificar se está sendo usado na distribuição atual
         const currentUsage = Object.values(currentDistribution).reduce((sum, dayData) => {
@@ -530,15 +526,15 @@ function getVisibleProducts() {
         }, 0);
         const isCurrentlyUsed = currentUsage > 0;
         
-        // 🆕 MOSTRAR SE TEM VALOR VÁLIDO NO NOTION OU ESTÁ SENDO USADO
-        if (hasValidValue || isCurrentlyUsed) {
+        // 🆕 MOSTRAR SE O CAMPO EXISTE NO NOTION OU ESTÁ SENDO USADO
+        if (fieldExistsInNotion || isCurrentlyUsed) {
             visibleProducts[productType] = currentCount;
-            const status = hasValidValue ? 
-                `valor no Notion: ${notionValue}` : 
+            const status = fieldExistsInNotion ? 
+                `campo no Notion: ${campaignData[productType]}` : 
                 'apenas uso atual';
             console.log(`👁️ ${productType}: ${status}, uso=${currentUsage} → VISÍVEL`);
         } else {
-            console.log(`🚫 ${productType}: valor vazio/inválido (${notionValue}), uso=${currentUsage} → OCULTO`);
+            console.log(`🚫 ${productType}: campo ausente, uso=${currentUsage} → OCULTO`);
         }
     });
     
