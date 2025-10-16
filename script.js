@@ -8,7 +8,6 @@ let totalSpots = 0;
 let notionId = null;
 let isDragging = false;
 let dragStartCell = null;
-let originalActiveProducts = {}; // 🆕 MANTER PRODUTOS ORIGINALMENTE ATIVOS
 
 // INICIALIZAÇÃO
 document.addEventListener('DOMContentLoaded', async () => {
@@ -227,19 +226,17 @@ async function saveToNotion(dataToSave) {
         if (dataToSave.updateProductQuantities) {
             const newQuantities = calculateProductQuantitiesFromDistribution();
             
-            // 🆕 SÓ ATUALIZAR PRODUTOS QUE REALMENTE TÊMM INSERÇÕES
-            // Se um produto fica com 0, não enviamos o campo (mantém valor original no Notion)
+            // 🆕 ATUALIZAR TODOS OS PRODUTOS QUE EXISTEM NO NOTION
+            // Isso garante que campos zerados continuem como 0 (não ficam vazios)
             Object.keys(newQuantities).forEach(key => {
                 const value = newQuantities[key];
                 if (typeof value !== 'number' || isNaN(value) || value < 0) {
-                    console.warn(`⚠️ Valor inválido para ${key}:`, value, 'removendo do envio');
-                    // Não incluir no envio
-                } else if (value > 0) {
-                    // Só incluir se > 0 (preserva valores originais se editado para 0)
+                    console.warn(`⚠️ Valor inválido para ${key}:`, value, 'convertendo para 0');
+                    dataToSave[key] = 0;
+                } else {
+                    // Enviar todos os valores (incluindo 0)
                     dataToSave[key] = Math.floor(value);
                     console.log(`📊 ${key}: ${value} (será enviado)`);
-                } else {
-                    console.log(`🚫 ${key}: ${value} (não enviado, mantém valor original)`);
                 }
             });
             
@@ -419,12 +416,6 @@ function renderInterface() {
     const selectedWeekdays = parseWeekdays(campaignData.dias);
     const activeProducts = getActiveProducts(); // Manter para cálculos internos
     
-    // 🆕 SALVAR PRODUTOS ORIGINALMENTE ATIVOS (NÃO MUDA DEPOIS)
-    if (Object.keys(originalActiveProducts).length === 0) {
-        originalActiveProducts = JSON.parse(JSON.stringify(activeProducts));
-        console.log('💾 Produtos originalmente ativos salvos:', originalActiveProducts);
-    }
-    
     totalSpots = Object.values(activeProducts).reduce((sum, count) => sum + count, 0);
     validDays = getValidDays(startDate, endDate, selectedWeekdays);
     
@@ -520,12 +511,14 @@ function getVisibleProducts() {
     const visibleProducts = {};
     
     // Só incluir produtos que:
-    // 1. Estavam originalmente ativos (> 0 na proposta inicial) - NUNCA SOMEM
-    // OU
+    // 1. Têm o campo definido no Notion (mesmo que seja 0) - SEMPRE APARECEM
+    // OU  
     // 2. Estão sendo usados na distribuição atual (foram editados pelo usuário)
     Object.entries(allProducts).forEach(([productType, currentCount]) => {
-        // 🆕 USAR PRODUTOS ORIGINALMENTE ATIVOS PARA DETERMINAR VISIBILIDADE
-        const wasOriginallyActive = (originalActiveProducts[productType] || 0) > 0;
+        // 🆕 VERIFICAR SE O CAMPO EXISTE NO NOTION (mesmo que seja 0)
+        const fieldExistsInNotion = campaignData.hasOwnProperty(productType) && 
+                                   campaignData[productType] !== undefined && 
+                                   campaignData[productType] !== null;
         
         // Verificar se está sendo usado na distribuição atual
         const currentUsage = Object.values(currentDistribution).reduce((sum, dayData) => {
@@ -533,12 +526,15 @@ function getVisibleProducts() {
         }, 0);
         const isCurrentlyUsed = currentUsage > 0;
         
-        // 🆕 MOSTRAR SE ERA ORIGINALMENTE ATIVO OU ESTÁ SENDO USADO ATUALMENTE
-        if (wasOriginallyActive || isCurrentlyUsed) {
+        // 🆕 MOSTRAR SE O CAMPO EXISTE NO NOTION OU ESTÁ SENDO USADO
+        if (fieldExistsInNotion || isCurrentlyUsed) {
             visibleProducts[productType] = currentCount;
-            console.log(`👁️ ${productType}: originalmente=${originalActiveProducts[productType] || 0}, atual=${currentCount}, uso=${currentUsage} → VISÍVEL`);
+            const status = fieldExistsInNotion ? 
+                `campo no Notion: ${campaignData[productType]}` : 
+                'apenas uso atual';
+            console.log(`👁️ ${productType}: ${status}, uso=${currentUsage} → VISÍVEL`);
         } else {
-            console.log(`🚫 ${productType}: originalmente=${originalActiveProducts[productType] || 0}, atual=${currentCount}, uso=${currentUsage} → OCULTO`);
+            console.log(`🚫 ${productType}: campo ausente, uso=${currentUsage} → OCULTO`);
         }
     });
     
@@ -1400,17 +1396,10 @@ async function saveEdit() {
         originalDistribution = JSON.parse(JSON.stringify(currentDistribution));
         campaignData.customDistributionData = currentDistribution;
         
-        // 🆕 ATUALIZAR APENAS QUANTIDADES > 0 LOCALMENTE TAMBÉM
+        // 🆕 ATUALIZAR TODAS AS QUANTIDADES LOCALMENTE
         const newQuantities = calculateProductQuantitiesFromDistribution();
-        console.log('🔄 Atualizando quantidades locais...');
-        Object.entries(newQuantities).forEach(([key, value]) => {
-            if (value > 0) {
-                campaignData[key] = value;
-                console.log(`✅ ${key}: ${value} (atualizado localmente)`);
-            } else {
-                console.log(`🚫 ${key}: ${value} (mantido valor original: ${campaignData[key]})`);
-            }
-        });
+        console.log('🔄 Atualizando quantidades locais:', newQuantities);
+        Object.assign(campaignData, newQuantities);
         
         exitEditMode();
 
